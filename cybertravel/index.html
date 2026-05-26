@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>骑行网红模拟器 - MVP</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --panel: #12121a;
+    --accent: #00f0ff;
+    --accent2: #ff0055;
+    --text: #e0e0e0;
+    --muted: #888;
+    --border: #222;
+    --danger: #ff3333;
+    --success: #00ff88;
+    --warn: #ffaa00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 12px;
+  }
+  #game {
+    width: 100%;
+    max-width: 520px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 90vh;
+  }
+  header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-size: 16px;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+  header .meta {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  #stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .stat {
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+  }
+  .stat label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .stat .val {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  .stat .bar {
+    height: 4px;
+    background: #222;
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+  }
+  .stat .bar > div {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  #phase-indicator {
+    padding: 8px 16px;
+    font-size: 12px;
+    color: var(--accent2);
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+  #main {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    min-height: 0;
+  }
+  #log {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .log-item {
+    padding: 10px 12px;
+    background: #0d0d14;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 14px;
+    line-height: 1.6;
+    animation: fadeIn 0.3s ease;
+  }
+  .log-item.danger { border-left-color: var(--danger); }
+  .log-item.success { border-left-color: var(--success); }
+  .log-item.warn { border-left-color: var(--warn); }
+  .log-item.muted { border-left-color: var(--muted); color: var(--muted); }
+  .log-item.info { border-left-color: var(--accent); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  #actions {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  button {
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    background: #1a1a24;
+    color: var(--text);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+    text-align: left;
+    font-family: inherit;
+  }
+  button:hover {
+    border-color: var(--accent);
+    background: #1e1e2e;
+  }
+  button.primary {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  button.danger {
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+  button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .identity-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .identity-card:hover {
+    border-color: var(--accent);
+    background: #151520;
+  }
+  .identity-card h3 {
+    font-size: 15px;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .identity-card .attrs {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .identity-card .desc {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .platform-tag {
+    display: inline-block;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    background: #1a1a24;
+    border: 1px solid var(--border);
+    margin-right: 6px;
+    margin-top: 4px;
+  }
+  .time-bar {
+    width: 100%;
+    height: 6px;
+    background: #222;
+    border-radius: 3px;
+    margin: 8px 0;
+    overflow: hidden;
+  }
+  .time-bar > div {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.5s;
+  }
+  .ending-screen {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .ending-screen h2 {
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+  .ending-screen p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .ending-screen.good h2 { color: var(--success); }
+  .ending-screen.bad h2 { color: var(--danger); }
+  .ending-screen.neutral h2 { color: var(--warn); }
+</style>
+</head>
+<body>
+<div id="game">
+  <header>
+    <h1>骑行网红模拟器</h1>
+    <div class="meta"><span id="day-num">0</span>天 | <span id="time-num">09:00</span> | <span id="km-num">0</span>km</div>
+  </header>
+  <div id="phase-indicator">选择你的开局人设</div>
+  <div id="stats" style="display:none">
+    <div class="stat"><label>体力</label><div class="val" id="con-val">0</div><div class="bar"><div id="con-bar" style="width:0%;background:var(--success)"></div></div></div>
+    <div class="stat"><label>精力</label><div class="val" id="energy-val">0</div><div class="bar"><div id="energy-bar" style="width:0%;background:var(--accent)"></div></div></div>
+    <div class="stat"><label>资金</label><div class="val" id="cny-val">0</div><div class="bar"><div id="cny-bar" style="width:0%;background:var(--warn)"></div></div></div>
+    <div class="stat"><label>精神</label><div class="val" id="san-val">0</div><div class="bar"><div id="san-bar" style="width:0%;background:#aa66ff"></div></div></div>
+    <div class="stat"><label>黑红</label><div class="val" id="sin-val">0</div><div class="bar"><div id="sin-bar" style="width:0%;background:var(--danger)"></div></div></div>
+    <div class="stat"><label>粉丝</label><div class="val" id="fans-val">0</div><div class="bar"><div id="fans-bar" style="width:0%;background:var(--accent2)"></div></div></div>
+  </div>
+  <div id="main"><div id="log"></div></div>
+  <div id="actions"></div>
+</div>
+
+<script>
+// ===================== T01: 游戏状态机 =====================
+class GameState {
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    this.day = 1;
+    this.time = 9;
+    this.km = 0;
+    this.nodeIndex = 0;
+
+    this.stats = { con: 35, int: 85, art: 40, hrt: 30, luk: 50 };
+    this.energy = 80;
+    this.maxEnergy = 100;
+    this.san = 100;
+    this.cny = 25000;
+    this.sin = 0;
+
+    this.fans = { bilibili: 500, douyin: 0, xiaohongshu: 0 };
+    this.materials = 0;
+
+    this.phase = 'SELECT';
+    this.flags = new Set();
+    this.gameOver = false;
+    this.ending = null;
+
+    // 负重系统
+    this.inventory = [];
+    this.weight = 0;
+    this.maxWeight = 15;
+  }
+
+  get totalFans() {
+    return this.fans.bilibili + this.fans.douyin + this.fans.xiaohongshu;
+  }
+
+  get currentNode() {
+    return ROUTE[this.nodeIndex] || null;
+  }
+
+  modifyStat(key, delta) {
+    if (key in this.stats) {
+      this.stats[key] = clamp(this.stats[key] + delta, 0, 100);
+    } else if (key === 'energy') {
+      this.energy = clamp(this.energy + delta, 0, this.maxEnergy);
+    } else if (key === 'san') {
+      this.san = clamp(this.san + delta, 0, 100);
+    } else if (key === 'cny') {
+      this.cny = Math.max(0, this.cny + delta);
+    } else if (key === 'sin') {
+      this.sin = clamp(this.sin + delta, 0, 100);
+    } else if (key === 'materials') {
+      this.materials = Math.max(0, this.materials + delta);
+    }
+  }
+
+  // 负重系统
+  addItem(itemId, count = 1) {
+    const item = ITEMS[itemId];
+    if (!item) return false;
+    const newWeight = this.weight + item.weight * count;
+    if (newWeight > this.maxWeight * 1.5) return false; // 最大超载50%
+    this.inventory.push({ id: itemId, count });
+    this.weight = newWeight;
+    return true;
+  }
+
+  checkOverload() {
+    if (this.weight > this.maxWeight) {
+      const overload = this.weight - this.maxWeight;
+      this.stats.con -= overload * 2;
+      return { overloaded: true, penalty: overload * 2 };
+    }
+    return { overloaded: false };
+  }
+}
+
+// ===================== T02: 配置数据 =====================
+const ROUTES = {
+  short: [
+    { id: 'chengdu', name: '成都', type: 'city', km: 0, desc: '天府之国，西行起点。' },
+    { id: 'yaan', name: '雅安', type: 'city', km: 140, desc: '雨城，川藏线的门户。' },
+    { id: 'luding', name: '泸定', type: 'city', km: 220, desc: '大渡河畔，红军飞夺泸定桥之地。' },
+    { id: 'kangding', name: '康定', type: 'city', km: 325, desc: '跑马溜溜的山上，海拔2560米。' },
+  ],
+  long: [
+    { id: 'chengdu', name: '成都', type: 'city', km: 0, desc: '天府之国，西行起点。' },
+    { id: 'yaan', name: '雅安', type: 'city', km: 140, desc: '雨城，川藏线的门户。' },
+    { id: 'luding', name: '泸定', type: 'city', km: 220, desc: '大渡河畔，红军飞夺泸定桥之地。' },
+    { id: 'kangding', name: '康定', type: 'city', km: 325, desc: '跑马溜溜的山上，海拔2560米。' },
+    { id: 'xinduqiao', name: '新都桥', type: 'wild', km: 420, desc: '摄影天堂，光与影的世界。' },
+    { id: 'litang', name: '理塘', type: 'city', km: 550, desc: '世界高城，海拔4014米。' },
+    { id: 'batang', name: '巴塘', type: 'city', km: 680, desc: '弦子之乡，进入西藏前的最后一站。' },
+    { id: 'lhasa', name: '拉萨', type: 'city', km: 2100, desc: '圣城拉萨，布达拉宫在阳光下闪耀。' },
+  ],
+};
+
+let ROUTE = ROUTES.short; // 默认短线，开局选择
+
+const TRAVEL_MODES = {
+  normal: { name: '正常骑行', speed: 20, energyCost: 10, conCost: 5, time: 3 },
+  rush: { name: '拼命赶路', speed: 35, energyCost: 20, conCost: 10, time: 3 },
+};
+
+const ITEMS = {
+  repairKit: { name: '修车工具', weight: 2 },
+  food: { name: '口粮', weight: 1 },
+  tent: { name: '帐篷', weight: 3 },
+};
+
+const STARTING_ITEMS = {
+  coder: [{ item: 'repairKit', count: 1 }, { item: 'food', count: 5 }],
+  tough: [{ item: 'repairKit', count: 1 }, { item: 'food', count: 3 }],
+};
+
+const EVENTS = [
+  // ========== 大事件（8个） ==========
+  {
+    id: 'flat_tire',
+    phase: 'DAY',
+    weight: 10,
+    text: '爆胎了！轮胎被路上的碎石扎破，你被迫停在路边。',
+    choices: [
+      { text: '自己修理（需修车工具，智力判定）', effects: [{ key: 'int_check', delta: 0.7 }, { key: 'materials', delta: 2 }, { key: 'time', delta: 2 }] },
+      { text: '推车前进（体力-20，推进15km）', effects: [{ key: 'con', delta: -20 }, { key: 'km', delta: 15 }, { key: 'time', delta: 3 }] },
+      { text: '打电话叫拖车（资金-500，时间+1h）', effects: [{ key: 'cny', delta: -500 }, { key: 'time', delta: 1 }, { key: 'km', delta: 40 }] },
+    ]
+  },
+  {
+    id: 'stranger_meet',
+    phase: 'DAY',
+    weight: 8,
+    text: '路上遇到一位骑行老手，他看起来经验丰富。',
+    choices: [
+      { text: '请教经验（智力+3，时间+0.5h）', effects: [{ key: 'int', delta: 3 }, { key: 'time', delta: 0.5 }] },
+      { text: '一起合影发视频（素材+5，B站粉丝+30）', effects: [{ key: 'materials', delta: 5 }, { key: 'fans_bilibili', delta: 30 }, { key: 'time', delta: 0.5 }] },
+    ]
+  },
+  {
+    id: 'fake_script',
+    phase: 'NIGHT',
+    weight: 6,
+    text: '今晚的内容没什么爆点。一个MCN朋友私信你："编个剧本吧，假装在无人区遇到狼群，流量直接起飞。"',
+    choices: [
+      { text: '拒绝，坚持真实', effects: [{ key: 'san', delta: 5 }, { key: 'msg', delta: 0, msg: '你拒绝了。虽然流量一般，但心安理得。' }] },
+      { text: '接受，编造剧本（Sin+15，抖音粉丝+200）', effects: [{ key: 'sin', delta: 15 }, { key: 'fans_douyin', delta: 200 }, { key: 'msg', delta: 0, msg: '视频爆了！但评论区开始有人质疑...' }] },
+    ]
+  },
+  {
+    id: 'high_altitude_sickness',
+    phase: 'DAY',
+    weight: 7,
+    text: '海拔超过3500米，你开始感到头痛、恶心——高原反应来了。',
+    choices: [
+      { text: '吸氧休息（体力-5，精力-10，时间+2h）', effects: [{ key: 'con', delta: -5 }, { key: 'energy', delta: -10 }, { key: 'time', delta: 2 }, { key: 'san', delta: 3 }] },
+      { text: '硬撑赶路（体力-15，精神-10）', effects: [{ key: 'con', delta: -15 }, { key: 'san', delta: -10 }, { key: 'km', delta: 25 }] },
+      { text: '掉头返回低海拔（放弃当前节点）', effects: [{ key: 'node', delta: -1 }, { key: 'km', delta: -30 }, { key: 'san', delta: 5 }] },
+    ]
+  },
+  {
+    id: 'landslide',
+    phase: 'DAY',
+    weight: 5,
+    text: '前方路段发生塌方，碎石堵住了去路。',
+    choices: [
+      { text: '等待清理（时间+3h）', effects: [{ key: 'time', delta: 3 }] },
+      { text: '冒险绕行（体力-10，推进20km）', effects: [{ key: 'con', delta: -10 }, { key: 'km', delta: 20 }, { key: 'time', delta: 2 }] },
+      { text: '拍摄塌方现场发视频（素材+8，Sin+5）', effects: [{ key: 'materials', delta: 8 }, { key: 'sin', delta: 5 }, { key: 'fans_douyin', delta: 50 }, { key: 'time', delta: 1 }] },
+    ]
+  },
+  {
+    id: 'lost_wallet',
+    phase: 'DAY',
+    weight: 6,
+    text: '你发现自己的钱包不见了！可能是掉在上一站了。',
+    choices: [
+      { text: '原路返回寻找（时间+2h，资金-200）', effects: [{ key: 'time', delta: 2 }, { key: 'cny', delta: -200 }] },
+      { text: '算了，继续赶路（资金-1000）', effects: [{ key: 'cny', delta: -1000 }, { key: 'san', delta: -5 }] },
+      { text: '发求助视频（素材+3，可能获得打赏）', effects: [{ key: 'materials', delta: 3 }, { key: 'fans_bilibili', delta: 20 }, { key: 'msg', delta: 0, msg: '粉丝们纷纷安慰你，有人打赏了¥50。' }, { key: 'cny', delta: 50 }] },
+    ]
+  },
+  {
+    id: 'wild_animal',
+    phase: 'DAY',
+    weight: 4,
+    text: '路边突然出现一只野狗，对着你狂吠！',
+    choices: [
+      { text: '慢慢后退（安全，时间+0.5h）', effects: [{ key: 'time', delta: 0.5 }] },
+      { text: '扔食物引开（口粮-1）', effects: [{ key: 'msg', delta: 0, msg: '你扔出口粮，野狗追着食物跑了。' }] },
+      { text: '拍下来发视频（素材+5，有风险）', effects: [{ key: 'materials', delta: 5 }, { key: 'fans_douyin', delta: 80 }, { key: 'con', delta: -5 }, { key: 'msg', delta: 0, msg: '野狗突然冲过来，你赶紧骑车逃跑，受了点轻伤。' }] },
+    ]
+  },
+  {
+    id: 'local_festival',
+    phase: 'DAY',
+    weight: 5,
+    text: '路过一个小镇，正好赶上当地的赛马节，热闹非凡。',
+    choices: [
+      { text: '参与拍摄（素材+10，时间+2h）', effects: [{ key: 'materials', delta: 10 }, { key: 'time', delta: 2 }, { key: 'san', delta: 10 }] },
+      { text: '安静路过（时间+0）', effects: [{ key: 'time', delta: 0 }] },
+      { text: '直播赛马节（精力-15，抖音粉丝+100）', effects: [{ key: 'energy', delta: -15 }, { key: 'fans_douyin', delta: 100 }, { key: 'time', delta: 2 }] },
+    ]
+  },
+  // ========== 小事件（10个） ==========
+  {
+    id: 'good_weather',
+    phase: 'DAY',
+    weight: 15,
+    text: '天气晴朗，风景绝佳，骑行心情大好。',
+    choices: [
+      { text: '享受骑行（精神+5，素材+2）', effects: [{ key: 'san', delta: 5 }, { key: 'materials', delta: 2 }] },
+    ]
+  },
+  {
+    id: 'rain',
+    phase: 'DAY',
+    weight: 12,
+    text: '突然下起大雨，路面湿滑，视线模糊。',
+    choices: [
+      { text: '冒雨前进（体力-8，精神-3）', effects: [{ key: 'con', delta: -8 }, { key: 'san', delta: -3 }, { key: 'km', delta: 15 }] },
+      { text: '找地方避雨（时间+1h）', effects: [{ key: 'time', delta: 1 }] },
+    ]
+  },
+  {
+    id: 'tailwind',
+    phase: 'DAY',
+    weight: 10,
+    text: '顺风！风从背后推着你，骑行格外轻松。',
+    choices: [
+      { text: '加速前进（推进+10km，体力-3）', effects: [{ key: 'km', delta: 10 }, { key: 'con', delta: -3 }] },
+    ]
+  },
+  {
+    id: 'headwind',
+    phase: 'DAY',
+    weight: 10,
+    text: '逆风骑行，每踩一圈都像在对抗整个世界。',
+    choices: [
+      { text: '咬牙坚持（体力-10，推进正常）', effects: [{ key: 'con', delta: -10 }, { key: 'km', delta: 20 }] },
+    ]
+  },
+  {
+    id: 'beautiful_sunset',
+    phase: 'EVENING',
+    weight: 8,
+    text: '夕阳西下，金色的光芒洒满山谷，美得让人窒息。',
+    choices: [
+      { text: '拍摄延时（素材+8，时间+0.5h）', effects: [{ key: 'materials', delta: 8 }, { key: 'time', delta: 0.5 }] },
+      { text: '静静欣赏（精神+8）', effects: [{ key: 'san', delta: 8 }] },
+    ]
+  },
+  {
+    id: 'flat_road',
+    phase: 'DAY',
+    weight: 14,
+    text: '一段平坦的柏油路，骑行轻松愉快。',
+    choices: [
+      { text: '正常骑行（推进25km）', effects: [{ key: 'km', delta: 25 }] },
+    ]
+  },
+  {
+    id: 'steep_climb',
+    phase: 'DAY',
+    weight: 12,
+    text: '连续上坡，档位已经降到最低，腿像灌了铅。',
+    choices: [
+      { text: '推车上去（体力-12，推进10km）', effects: [{ key: 'con', delta: -12 }, { key: 'km', delta: 10 }] },
+      { text: '咬牙骑上去（体力-20，推进15km）', effects: [{ key: 'con', delta: -20 }, { key: 'km', delta: 15 }] },
+    ]
+  },
+  {
+    id: 'downhill',
+    phase: 'DAY',
+    weight: 10,
+    text: '长下坡！风在耳边呼啸，速度飞快。',
+    choices: [
+      { text: '享受速度（推进30km，体力-2）', effects: [{ key: 'km', delta: 30 }, { key: 'con', delta: -2 }] },
+      { text: '控制速度（推进20km，安全）', effects: [{ key: 'km', delta: 20 }] },
+    ]
+  },
+  {
+    id: 'starving',
+    phase: 'DAY',
+    weight: 8,
+    text: '肚子咕咕叫，附近没有餐馆。',
+    choices: [
+      { text: '吃干粮（口粮-1，体力+5）', effects: [{ key: 'msg', delta: 0, msg: '你吃了点干粮，勉强填饱肚子。' }] },
+      { text: '忍到下一站（体力-5，精神-3）', effects: [{ key: 'con', delta: -5 }, { key: 'san', delta: -3 }] },
+    ]
+  },
+  {
+    id: 'network_signal',
+    phase: 'NIGHT',
+    weight: 7,
+    text: '晚上发现手机信号极差，上传视频可能要花很长时间。',
+    choices: [
+      { text: '等信号恢复（时间+1h）', effects: [{ key: 'time', delta: 1 }] },
+      { text: '用流量硬传（资金-20）', effects: [{ key: 'cny', delta: -20 }] },
+    ]
+  },
+];
+
+const NODE_EVENTS = {
+  chengdu: { text: '你从成都出发，踏上了西行之路。背包里装着简单的装备和满腔热血。', effects: [{ key: 'msg', delta: 0, msg: '旅程开始！' }] },
+  yaan: { text: '到达雅安，雨城的气息扑面而来。青衣江静静流淌，你可以在这里休整补给。', effects: [{ key: 'san', delta: 5 }, { key: 'cny', delta: -30, msg: '买了一份雅鱼，花费¥30' }] },
+  luding: { text: '到达泸定，大渡河波涛汹涌。铁索桥在风中微微晃动，让人想起那段历史。', effects: [{ key: 'san', delta: 3 }, { key: 'materials', delta: 3 }] },
+  kangding: { text: '到达康定，海拔2560米，空气开始稀薄。远处传来溜溜的情歌。', effects: [{ key: 'con', delta: -5 }, { key: 'materials', delta: 5 }] },
+  xinduqiao: { text: '到达新都桥，摄影天堂。光与影在草原上交织，每一帧都是大片。', effects: [{ key: 'materials', delta: 10 }, { key: 'san', delta: 5 }] },
+  litang: { text: '到达理塘，世界高城，海拔4014米。天空低得仿佛伸手可触。', effects: [{ key: 'con', delta: -10 }, { key: 'san', delta: -3 }] },
+  batang: { text: '到达巴塘，弦子之乡。金沙江在这里拐了一个大弯，进入西藏前的最后一站。', effects: [{ key: 'san', delta: 5 }, { key: 'cny', delta: -50, msg: '补充了氧气和药品，花费¥50' }] },
+  lhasa: { text: '到达拉萨！圣城就在眼前！布达拉宫在阳光下闪耀，你的骑行之旅画上了句号。', effects: [{ key: 'san', delta: 20 }, { key: 'materials', delta: 15 }] },
+};
+
+const CONTENT_TYPES = {
+  photo: { name: '📷 摄影图文', time: 1, energy: 10, stat: 'art' },
+  video: { name: '🎬 剪视频', time: 4, energy: 30, stat: 'int' },
+  live: { name: '🔴 做直播', time: 2, energy: 25, stat: 'hrt' },
+};
+
+const PLATFORM_MULTIPLIERS = {
+  photo: { bilibili: 0.5, douyin: 0.3, xiaohongshu: 2.0 },
+  video: { bilibili: 2.0, douyin: 1.0, xiaohongshu: 0.5 },
+  live: { bilibili: 0.8, douyin: 2.5, xiaohongshu: 0.2 },
+};
+
+const ENDINGS = {
+  dead: { title: '《横死路边》', desc: '你的体力在荒野中耗尽，倒在了通往拉萨的路上。风卷着沙尘覆盖了你的自行车。', type: 'bad', priority: 100 },
+  insane: { title: '《精神崩溃》', desc: '长期的数据焦虑和网暴彻底击垮了你。你删掉了所有视频，消失在网络的另一端。', type: 'bad', priority: 90 },
+  broke: { title: '《破产流浪》', desc: '资金耗尽，粉丝寥寥。你被迫在街头卖艺维生，偶尔有人认出你："这不是那个骑行网红吗？"', type: 'bad', priority: 80 },
+  arrived: { title: '《抵达圣城》', desc: '经过漫长的跋涉，你终于看到了布达拉宫的轮廓。没有爆红，但也没有迷失。', type: 'neutral', priority: 50 },
+  famous: { title: '《中国骑行第一人》', desc: '硬核的内容、真实的记录让你收获了千万粉丝。你证明了：真实，才是最大的流量密码。', type: 'good', priority: 60 },
+  blackred: { title: '《黑红之王》', desc: '你成了全网最有争议的人。流量爆炸，但每一个评论区都是战场。这真的是你想要的吗？', type: 'neutral', priority: 55 },
+};
+
+// ===================== Sin弱信号系统 =====================
+class SinSystem {
+  static SOURCES = {
+    fakeScript: { name: '编造剧本', signal: '评论区出现质疑声...' },
+    fakeAd: { name: '虚假宣传', signal: '粉丝增长突然放缓...' },
+    destroyEnv: { name: '破坏环境', signal: '有人私信批评你的行为...' },
+    exploitTragedy: { name: '消费悲剧', signal: '媒体报道了你的"表演"...' },
+  };
+
+  // 添加Sin并可能发送弱信号
+  static addSin(state, amount, sourceId) {
+    state.sin = clamp(state.sin + amount, 0, 100);
+    const source = this.SOURCES[sourceId];
+    if (source && Math.random() < 0.4) {
+      return { triggered: true, signal: source.signal, source: source.name };
+    }
+    return { triggered: false };
+  }
+
+  // 检查Sin相关结局
+  static checkSinEnding(state) {
+    if (state.sin >= 80) {
+      return 'blackred';
+    }
+    return null;
+  }
+
+  // 获取当前Sin状态的描述
+  static getSinDescription(sin) {
+    if (sin >= 80) return { level: 'danger', text: '⚠️ 你的黑红指数极高，随时可能被全网封杀' };
+    if (sin >= 50) return { level: 'warn', text: '⚡ 争议越来越大，评论区开始失控' };
+    if (sin >= 30) return { level: 'info', text: '💭 有人开始质疑你的内容真实性' };
+    if (sin >= 10) return { level: 'muted', text: '🌫️ 隐约感觉有些不对劲...' };
+    return null;
+  }
+}
+
+// ===================== T03: 时间驱动器 =====================
+class TimeEngine {
+  constructor(state) {
+    this.state = state;
+  }
+
+  advance(hours) {
+    this.state.time += hours;
+    if (this.state.time >= 24) {
+      this.endDay();
+    }
+  }
+
+  endDay() {
+    this.state.day++;
+    this.state.time = 9;
+    this.state.phase = 'MORNING';
+    // 精力恢复（不会补满）
+    const recovery = 20 + this.state.stats.con * 0.3;
+    this.state.energy = Math.min(this.state.maxEnergy, this.state.energy + recovery);
+    // 清空素材
+    this.state.materials = 0;
+    // 超载惩罚
+    const overload = this.state.checkOverload();
+    if (overload.overloaded) {
+      // 惩罚在checkOverload中已应用
+    }
+  }
+
+  getPhase() {
+    const t = this.state.time;
+    if (t < 9) return 'MORNING';
+    if (t < 12) return 'DAY_MORNING';
+    if (t < 14) return 'DAY_NOON';
+    if (t < 18) return 'DAY_AFTERNOON';
+    if (t < 19) return 'EVENING';
+    return 'NIGHT';
+  }
+
+  formatTime() {
+    const h = Math.floor(this.state.time);
+    const m = Math.floor((this.state.time - h) * 60);
+    return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  }
+}
+
+// ===================== T04: 事件引擎 =====================
+class EventEngine {
+  rollEvent(phase) {
+    const candidates = EVENTS.filter(e => e.phase === phase);
+    if (candidates.length === 0) return null;
+    const totalWeight = candidates.reduce((sum, e) => sum + (e.weight || 1), 0);
+    let roll = Math.random() * totalWeight;
+    for (const event of candidates) {
+      roll -= (event.weight || 1);
+      if (roll <= 0) return event;
+    }
+    return null;
+  }
+
+  executeChoice(choice, state) {
+    if (!choice || !choice.effects) return;
+    for (const eff of choice.effects) {
+      if (eff.key === 'time') {
+        state.time += eff.delta;
+      } else if (eff.key === 'km') {
+        state.km += eff.delta;
+      } else if (eff.key === 'node') {
+        state.nodeIndex = Math.max(0, state.nodeIndex + eff.delta);
+        const node = ROUTE[state.nodeIndex];
+        if (node) state.km = node.km;
+      } else if (eff.key.startsWith('fans_')) {
+        const platform = eff.key.replace('fans_', '');
+        state.fans[platform] = (state.fans[platform] || 0) + eff.delta;
+      } else if (eff.key === 'msg') {
+        // msg效果只用于显示，不修改状态
+        if (eff.msg && window.game && game.renderer) {
+          game.renderer.log(eff.msg, 'info');
+        }
+      } else if (eff.key === 'sin') {
+        // Sin系统：添加sin并可能触发弱信号
+        const result = SinSystem.addSin(state, eff.delta, 'fakeScript');
+        if (result.triggered && window.game && game.renderer) {
+          game.renderer.log(`💀 ${result.signal}`, 'warn');
+        }
+      } else if (eff.key === 'int_check') {
+        // 智力判定
+        const roll = Math.random();
+        const success = roll < (state.stats.int / 100) * eff.delta;
+        if (window.game && game.renderer) {
+          game.renderer.log(`智力判定：${success ? '成功！' : '失败...'}`, success ? 'success' : 'warn');
+        }
+        if (!success) {
+          state.modifyStat('con', -10);
+          state.time += 1;
+        }
+      } else {
+        state.modifyStat(eff.key, eff.delta);
+      }
+    }
+  }
+}
+
+// ===================== T05: 内容产出系统 =====================
+class ContentSystem {
+  // 自由组合内容产出
+  static produceCombo(state, types) {
+    let totalTime = 0;
+    let totalEnergy = 0;
+    const gains = { bilibili: 0, douyin: 0, xiaohongshu: 0 };
+
+    for (const type of types) {
+      const config = CONTENT_TYPES[type];
+      totalTime += config.time;
+      totalEnergy += config.energy;
+
+      const typeGains = PlatformAlgorithm.calculate(type, state);
+      for (const [platform, amount] of Object.entries(typeGains)) {
+        gains[platform] += amount;
+      }
+    }
+
+    state.time += totalTime;
+    state.energy -= totalEnergy;
+
+    return { gains, totalTime, totalEnergy };
+  }
+}
+
+// ===================== T06: 平台算法（含变现解锁） =====================
+class PlatformAlgorithm {
+  static calculate(type, state) {
+    const config = CONTENT_TYPES[type];
+    const baseQuality = 50 + state.stats[config.stat];
+    const materialBonus = Math.min(state.materials * 2, 50);
+    const quality = baseQuality + materialBonus;
+
+    const result = {};
+    for (const platform of ['bilibili', 'douyin', 'xiaohongshu']) {
+      const mult = PLATFORM_MULTIPLIERS[type][platform];
+      const statBonus = state.stats[config.stat] * 0.5;
+      const rawGain = Math.floor((quality + statBonus) * mult * 0.1);
+
+      // 变现解锁加成
+      const fans = state.fans[platform];
+      let monetizationBonus = 1.0;
+      if (fans >= 100000) monetizationBonus = 2.0;
+      else if (fans >= 10000) monetizationBonus = 1.5;
+      else if (fans >= 1000) monetizationBonus = 1.2;
+
+      result[platform] = Math.floor(rawGain * monetizationBonus);
+    }
+    return result;
+  }
+
+  // 检查是否解锁高门槛变现事件
+  static checkMonetizationEvents(state) {
+    const events = [];
+    if (state.fans.bilibili >= 10000 && !state.flags.has('bilibili_partner')) {
+      events.push({
+        platform: 'bilibili',
+        name: '创作激励开通',
+        desc: '你的B站粉丝突破1万，创作激励已开通！',
+      });
+    }
+    if (state.fans.douyin >= 5000 && !state.flags.has('douyin_live')) {
+      events.push({
+        platform: 'douyin',
+        name: '直播带货资格',
+        desc: '你的抖音粉丝突破5000，获得直播带货资格！',
+      });
+    }
+    return events;
+  }
+}
+
+// ===================== T07: UI 渲染器 =====================
+class Renderer {
+  constructor() {
+    this.els = {
+      day: document.getElementById('day-num'),
+      time: document.getElementById('time-num'),
+      km: document.getElementById('km-num'),
+      phase: document.getElementById('phase-indicator'),
+      stats: document.getElementById('stats'),
+      log: document.getElementById('log'),
+      actions: document.getElementById('actions'),
+      conVal: document.getElementById('con-val'),
+      energyVal: document.getElementById('energy-val'),
+      cnyVal: document.getElementById('cny-val'),
+      sanVal: document.getElementById('san-val'),
+      sinVal: document.getElementById('sin-val'),
+      fansVal: document.getElementById('fans-val'),
+      conBar: document.getElementById('con-bar'),
+      energyBar: document.getElementById('energy-bar'),
+      cnyBar: document.getElementById('cny-bar'),
+      sanBar: document.getElementById('san-bar'),
+      sinBar: document.getElementById('sin-bar'),
+      fansBar: document.getElementById('fans-bar'),
+    };
+  }
+
+  showStats() {
+    this.els.stats.style.display = 'grid';
+  }
+
+  updateStats(state) {
+    this.els.day.textContent = state.day;
+    this.els.time.textContent = game.timeEngine.formatTime();
+    this.els.km.textContent = Math.floor(state.km);
+
+    this.els.conVal.textContent = Math.round(state.stats.con);
+    this.els.energyVal.textContent = Math.round(state.energy);
+    this.els.cnyVal.textContent = '¥' + Math.round(state.cny);
+    this.els.sanVal.textContent = Math.round(state.san);
+    this.els.sinVal.textContent = Math.round(state.sin);
+    this.els.fansVal.textContent = state.totalFans > 10000 ? (state.totalFans / 10000).toFixed(1) + 'w' : state.totalFans;
+
+    this.els.conBar.style.width = clamp(state.stats.con, 0, 100) + '%';
+    this.els.energyBar.style.width = clamp((state.energy / state.maxEnergy) * 100, 0, 100) + '%';
+    const maxMoney = Math.max(state.cny, 25000);
+    this.els.cnyBar.style.width = clamp((state.cny / maxMoney) * 100, 0, 100) + '%';
+    this.els.sanBar.style.width = clamp(state.san, 0, 100) + '%';
+    this.els.sinBar.style.width = clamp(state.sin, 0, 100) + '%';
+    const maxFans = Math.max(state.totalFans, 100000);
+    this.els.fansBar.style.width = clamp((state.totalFans / maxFans) * 100, 0, 100) + '%';
+  }
+
+  setPhase(label) {
+    this.els.phase.textContent = label;
+  }
+
+  log(text, type = 'info') {
+    const div = document.createElement('div');
+    div.className = 'log-item ' + type;
+    div.textContent = text;
+    this.els.log.appendChild(div);
+    this.els.log.parentElement.scrollTop = this.els.log.parentElement.scrollHeight;
+  }
+
+  clearLog() {
+    this.els.log.innerHTML = '';
+  }
+
+  showChoices(choices) {
+    this.els.actions.innerHTML = '';
+    for (const c of choices) {
+      const btn = document.createElement('button');
+      btn.textContent = c.text;
+      if (c.className) btn.className = c.className;
+      if (c.disabled) btn.disabled = true;
+      btn.onclick = c.onClick;
+      this.els.actions.appendChild(btn);
+    }
+  }
+
+  showEnding(ending) {
+    this.clearLog();
+    const div = document.createElement('div');
+    div.className = 'ending-screen ' + ending.type;
+
+    // 根据结局类型设置不同的视觉风格
+    const typeEmoji = ending.type === 'good' ? '🏆' : ending.type === 'bad' ? '💀' : '⚖️';
+    const typeColor = ending.type === 'good' ? 'var(--success)' : ending.type === 'bad' ? 'var(--danger)' : 'var(--warn)';
+
+    div.innerHTML = `
+      <div style="font-size:48px;margin-bottom:16px">${typeEmoji}</div>
+      <h2 style="color:${typeColor}">${ending.title}</h2>
+      <p>${ending.desc}</p>
+      <div style="background:#0d0d14;border:1px solid var(--border);border-radius:8px;padding:12px;margin:16px 0;text-align:left">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">旅程统计</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+          <div>📅 天数：<span style="color:var(--text)">${game.state.day}</span></div>
+          <div>🚴 里程：<span style="color:var(--text)">${Math.floor(game.state.km)}km</span></div>
+          <div>👥 粉丝：<span style="color:var(--text)">${game.state.totalFans}</span></div>
+          <div>💰 资金：<span style="color:var(--text)">¥${Math.round(game.state.cny)}</span></div>
+          <div>😈 黑红值：<span style="color:${game.state.sin > 50 ? 'var(--danger)' : 'var(--muted)'}">${game.state.sin}</span></div>
+          <div>📍 终点：<span style="color:var(--text)">${game.state.currentNode ? game.state.currentNode.name : '未知'}</span></div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:var(--muted)">${ending.type === 'good' ? '你找到了属于自己的路。' : ending.type === 'bad' ? '也许下一次，会有不同的选择。' : '这就是旅程的意义。'}</p>
+    `;
+    this.els.log.appendChild(div);
+
+    this.els.actions.innerHTML = '';
+    const btn = document.createElement('button');
+    btn.textContent = '🔄 重新开始';
+    btn.className = 'primary';
+    btn.onclick = () => game.restart();
+    this.els.actions.appendChild(btn);
+  }
+}
+
+// ===================== T08: 存档系统 =====================
+class SaveSystem {
+  static KEY = 'cybertravel_save_v1';
+
+  static save(state) {
+    const data = {
+      schemaVersion: 2,
+      routeType: ROUTE === ROUTES.short ? 'short' : 'long',
+      day: state.day,
+      time: state.time,
+      km: state.km,
+      nodeIndex: state.nodeIndex,
+      stats: state.stats,
+      energy: state.energy,
+      maxEnergy: state.maxEnergy,
+      san: state.san,
+      cny: state.cny,
+      sin: state.sin,
+      fans: state.fans,
+      materials: state.materials,
+      inventory: state.inventory,
+      weight: state.weight,
+      maxWeight: state.maxWeight,
+      phase: state.phase,
+      flags: Array.from(state.flags),
+      gameOver: state.gameOver,
+      ending: state.ending,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(this.KEY, JSON.stringify(data));
+  }
+
+  static load() {
+    const raw = localStorage.getItem(this.KEY);
+    if (!raw) return null;
+    try {
+      const data = JSON.parse(raw);
+      // 版本迁移：v1 -> v2
+      if (data.schemaVersion === 1) {
+        data.sin = data.sin || 0;
+        data.schemaVersion = 2;
+      }
+      return data;
+    } catch {
+      return null;
+    }
+  }
+
+  static exists() {
+    return localStorage.getItem(this.KEY) !== null;
+  }
+
+  static clear() {
+    localStorage.removeItem(this.KEY);
+  }
+}
+
+// ===================== 工具函数 =====================
+function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+
+// ===================== 游戏主控 =====================
+class Game {
+  constructor() {
+    this.state = new GameState();
+    this.timeEngine = new TimeEngine(this.state);
+    this.eventEngine = new EventEngine();
+    this.renderer = new Renderer();
+  }
+
+  restart() {
+    this.state.reset();
+    SaveSystem.clear();
+    this.showStartScreen();
+  }
+
+  showStartScreen() {
+    this.renderer.setPhase('选择你的开局人设');
+    this.renderer.clearLog();
+    this.renderer.els.stats.style.display = 'none';
+
+    this.renderer.log('欢迎来到骑行网红模拟器！', 'success');
+    this.renderer.log('选择路线：', 'info');
+
+    // 路线选择
+    const routeChoices = [
+      { id: 'short', name: '短线（新手模式）', desc: '成都→康定，4个节点，约10-15分钟', nodes: 4 },
+      { id: 'long', name: '长线（标准模式）', desc: '成都→拉萨，8个节点，约30-60分钟', nodes: 8 },
+    ];
+
+    for (const rc of routeChoices) {
+      const card = document.createElement('div');
+      card.className = 'identity-card';
+      card.innerHTML = `
+        <h3>${rc.name}</h3>
+        <div class="desc">${rc.desc}</div>
+      `;
+      card.onclick = () => {
+        ROUTE = ROUTES[rc.id];
+        this.renderer.log(`选择了${rc.name}`, 'success');
+        this.showIdentitySelect();
+      };
+      this.renderer.els.log.appendChild(card);
+    }
+
+    this.renderer.showChoices([]);
+  }
+
+  showIdentitySelect() {
+    this.renderer.clearLog();
+    this.renderer.log('选择角色：', 'info');
+
+    const identities = [
+      { id: 'coder', name: '前互联网大厂程序员', emoji: '💻', con: 35, int: 85, hrt: 30, art: 40, luk: 50, money: 25000, fans: { bilibili: 500, douyin: 0, xiaohongshu: 0 }, desc: '懂算法但体能堪忧，视频爆款率+30%。' },
+      { id: 'tough', name: '民间狠活老铁', emoji: '🛠️', con: 90, int: 30, hrt: 80, art: 10, luk: 40, money: 500, fans: { bilibili: 0, douyin: 800, xiaohongshu: 0 }, desc: '体能爆表，黑红Sin减半，短视频流量翻倍。' },
+    ];
+
+    for (const idt of identities) {
+      const card = document.createElement('div');
+      card.className = 'identity-card';
+      card.innerHTML = `
+        <h3>${idt.emoji} ${idt.name}</h3>
+        <div class="attrs">体力${idt.con} | 智力${idt.int} | 情商${idt.hrt} | 审美${idt.art} | 运气${idt.luk}</div>
+        <div class="desc">${idt.desc}</div>
+        <div style="margin-top:6px;font-size:12px;color:var(--muted)">资金：¥${idt.money}</div>
+        <div style="margin-top:4px">
+          ${Object.entries(idt.fans).filter(([_,v])=>v>0).map(([k,v])=>`<span class="platform-tag">${k === 'bilibili' ? 'B站' : k === 'douyin' ? '抖音' : '小红书'} ${v}</span>`).join('')}
+        </div>
+      `;
+      card.onclick = () => this.selectIdentity(idt);
+      this.renderer.els.log.appendChild(card);
+    }
+
+    this.renderer.showChoices([]);
+  }
+
+  selectIdentity(idt) {
+    this.state.stats = { con: idt.con, int: idt.int, hrt: idt.hrt, art: idt.art, luk: idt.luk };
+    this.state.cny = idt.money;
+    this.state.fans = { ...idt.fans };
+    this.state.energy = 80;
+    this.state.maxEnergy = 100;
+
+    // 初始化负重
+    this.state.inventory = [];
+    this.state.weight = 0;
+    const starting = STARTING_ITEMS[idt.id] || [];
+    for (const si of starting) {
+      this.state.addItem(si.item, si.count);
+    }
+
+    this.renderer.showStats();
+    this.renderer.updateStats(this.state);
+    this.renderer.log(`你选择了【${idt.emoji} ${idt.name}】，准备从成都出发！`, 'success');
+    this.renderer.log(`背包负重：${this.state.weight}/${this.state.maxWeight}kg`, 'info');
+
+    this.phaseMorning();
+  }
+
+  // ---- 晨间阶段 ----
+  phaseMorning() {
+    this.state.phase = 'MORNING';
+    this.state.time = 9;
+    this.renderer.setPhase(`第${this.state.day}天 晨间整备`);
+    this.renderer.clearLog();
+
+    const node = this.state.currentNode;
+    if (!node) {
+      this.triggerEnding('arrived');
+      return;
+    }
+
+    // 节点到达事件
+    if (this.state.km >= node.km && NODE_EVENTS[node.id]) {
+      const evt = NODE_EVENTS[node.id];
+      this.renderer.log(evt.text, 'info');
+      for (const eff of evt.effects) {
+        this.state.modifyStat(eff.key, eff.delta);
+      }
+    }
+
+    this.renderer.log(`你在${node.name}。${node.desc}`, 'muted');
+    this.renderer.log(`今日目标：推进到下一个节点。`, 'info');
+
+    this.renderer.showChoices([
+      { text: '🚴 出发前进', className: 'primary', onClick: () => this.phaseDay() },
+    ]);
+
+    this.renderer.updateStats(this.state);
+    SaveSystem.save(this.state);
+  }
+
+  // ---- 白天阶段 ----
+  phaseDay() {
+    this.state.phase = 'DAY';
+    this.renderer.setPhase('日间行进');
+
+    // 选择赶路模式
+    this.renderer.log('选择赶路模式：', 'info');
+    this.renderer.showChoices([
+      { text: `🚴 ${TRAVEL_MODES.normal.name}（速度${TRAVEL_MODES.normal.speed}km/h，消耗适中）`, onClick: () => this.doTravel('normal') },
+      { text: `🏃 ${TRAVEL_MODES.rush.name}（速度${TRAVEL_MODES.rush.speed}km/h，消耗较大）`, className: 'danger', onClick: () => this.doTravel('rush') },
+    ]);
+  }
+
+  doTravel(modeId) {
+    const mode = TRAVEL_MODES[modeId];
+    this.state.time += mode.time;
+    this.state.km += mode.speed;
+    this.state.energy -= mode.energyCost;
+    this.state.stats.con -= mode.conCost;
+
+    this.renderer.log(`你以【${mode.name}】推进了${mode.speed}km。`, 'info');
+
+    // 检查到达节点
+    const nextNode = ROUTE[this.state.nodeIndex + 1];
+    if (nextNode && this.state.km >= nextNode.km) {
+      this.state.nodeIndex++;
+      this.renderer.log(`到达${nextNode.name}！`, 'success');
+      this.renderer.log(nextNode.desc, 'info');
+    }
+
+    // 触发事件
+    const evt = this.eventEngine.rollEvent('DAY');
+    if (evt) {
+      this.renderer.log(`事件：${evt.text}`, 'warn');
+      const choices = evt.choices.map(c => ({
+        text: c.text,
+        onClick: () => {
+          this.eventEngine.executeChoice(c, this.state);
+          this.renderer.log(`你选择了：${c.text.split('（')[0]}`, 'success');
+          this.checkStatus(() => this.phaseNoon());
+        }
+      }));
+      this.renderer.showChoices(choices);
+    } else {
+      this.renderer.log('一路顺风。', 'muted');
+      this.checkStatus(() => this.phaseNoon());
+    }
+
+    this.renderer.updateStats(this.state);
+  }
+
+  // ---- 中午选择 ----
+  phaseNoon() {
+    if (this.state.time >= 18) {
+      this.phaseEvening();
+      return;
+    }
+
+    this.renderer.setPhase('中午');
+    this.renderer.log(`时间：${this.timeEngine.formatTime()}。你可以选择休息或继续赶路。`, 'info');
+
+    this.renderer.showChoices([
+      { text: '🍚 吃饭休息（精力+10，时间+1h）', onClick: () => {
+        this.state.time += 1;
+        this.state.energy += 10;
+        this.state.cny -= 30;
+        this.renderer.log('你吃了午饭，休息了一会儿。', 'success');
+        this.phaseAfternoon();
+      }},
+      { text: '🚴 继续赶路（时间+3h，推进20km）', className: 'primary', onClick: () => this.phaseAfternoon() },
+    ]);
+
+    this.renderer.updateStats(this.state);
+  }
+
+  // ---- 下午 ----
+  phaseAfternoon() {
+    if (this.state.time >= 18) {
+      this.phaseEvening();
+      return;
+    }
+
+    this.renderer.log('下午继续赶路...', 'info');
+    this.renderer.showChoices([
+      { text: `🚴 ${TRAVEL_MODES.normal.name}`, onClick: () => this.doAfternoonTravel('normal') },
+      { text: `🏃 ${TRAVEL_MODES.rush.name}`, className: 'danger', onClick: () => this.doAfternoonTravel('rush') },
+    ]);
+  }
+
+  doAfternoonTravel(modeId) {
+    const mode = TRAVEL_MODES[modeId];
+    this.state.time += mode.time;
+    this.state.km += mode.speed;
+    this.state.energy -= mode.energyCost;
+    this.state.stats.con -= mode.conCost;
+
+    this.renderer.log(`下午以【${mode.name}】推进了${mode.speed}km。`, 'info');
+
+    // 检查到达
+    const nextNode = ROUTE[this.state.nodeIndex + 1];
+    if (nextNode && this.state.km >= nextNode.km) {
+      this.state.nodeIndex++;
+      this.renderer.log(`到达${nextNode.name}！`, 'success');
+    }
+
+    this.checkStatus(() => this.phaseEvening());
+    this.renderer.updateStats(this.state);
+  }
+
+  // ---- 傍晚 ----
+  phaseEvening() {
+    this.state.phase = 'EVENING';
+    this.renderer.setPhase('傍晚');
+    this.renderer.log(`时间：${this.timeEngine.formatTime()}。天色渐暗。`, 'muted');
+
+    this.renderer.showChoices([
+      { text: '🏕️ 扎营休息（进入夜间）', onClick: () => this.phaseNight() },
+      { text: '🌙 继续赶路（效率降低，消耗增加）', onClick: () => {
+        this.state.time += 2;
+        this.state.km += 10;
+        this.state.energy -= 20;
+        this.state.stats.con -= 10;
+        this.renderer.log('你摸黑赶路，效率很低...', 'warn');
+        this.checkStatus(() => this.phaseNight());
+      }},
+    ]);
+
+    this.renderer.updateStats(this.state);
+  }
+
+  // ---- 夜间内容产出（自由组合） ----
+  phaseNight() {
+    this.state.phase = 'NIGHT';
+    this.renderer.setPhase('夜间内容产出（自由组合）');
+    this.renderer.clearLog();
+    this.renderer.log('夜幕降临，你可以选择多种内容形式组合产出。', 'info');
+    this.renderer.log(`当前素材积累：${this.state.materials} | 剩余时间：${24 - this.state.time}h | 精力：${Math.round(this.state.energy)}`, 'muted');
+
+    // 显示可选内容
+    const selected = [];
+    const refreshChoices = () => {
+      const remainingTime = 24 - this.state.time;
+      const remainingEnergy = this.state.energy;
+
+      const buttons = Object.entries(CONTENT_TYPES).map(([id, config]) => {
+        const canAfford = remainingEnergy >= config.energy && remainingTime >= config.time;
+        const isSelected = selected.includes(id);
+        return {
+          text: `${isSelected ? '✅ ' : ''}${config.name} 时间${config.time}h 精力${config.energy} | 依赖${config.stat.toUpperCase()}`,
+          disabled: !canAfford && !isSelected,
+          className: isSelected ? 'primary' : '',
+          onClick: () => {
+            if (isSelected) {
+              selected.splice(selected.indexOf(id), 1);
+            } else {
+              selected.push(id);
+            }
+            refreshChoices();
+          }
+        };
+      });
+
+      buttons.push({
+        text: selected.length > 0 ? `🚀 发布组合（${selected.length}项）` : '💤 直接睡觉（不产出）',
+        className: selected.length > 0 ? 'primary' : '',
+        onClick: () => {
+          if (selected.length > 0) {
+            this.doContentCombo(selected);
+          } else {
+            this.phaseSettle();
+          }
+        }
+      });
+
+      this.renderer.showChoices(buttons);
+    };
+
+    refreshChoices();
+    this.renderer.updateStats(this.state);
+  }
+
+  doContentCombo(types) {
+    const result = ContentSystem.produceCombo(this.state, types);
+
+    this.renderer.log(`你发布了${types.length}项内容组合！`, 'success');
+    this.renderer.log(`粉丝增长：B站+${result.gains.bilibili} 抖音+${result.gains.douyin} 小红书+${result.gains.xiaohongshu}`, 'info');
+
+    // 应用粉丝增长
+    for (const [platform, amount] of Object.entries(result.gains)) {
+      this.state.fans[platform] += amount;
+    }
+
+    // 打赏收入
+    const totalGain = result.gains.bilibili + result.gains.douyin + result.gains.xiaohongshu;
+    const reward = Math.floor(totalGain * 0.2);
+    this.state.cny += reward;
+    this.renderer.log(`打赏收入：¥${reward}`, 'success');
+
+    // 检查变现解锁
+    const monetizationEvents = PlatformAlgorithm.checkMonetizationEvents(this.state);
+    for (const evt of monetizationEvents) {
+      this.renderer.log(`🎉 ${evt.name}！${evt.desc}`, 'success');
+      this.state.flags.add(`${evt.platform}_partner`);
+    }
+
+    this.phaseSettle();
+  }
+
+  // ---- 夜间结算 ----
+  phaseSettle() {
+    this.state.phase = 'SETTLE';
+    this.renderer.setPhase('夜间结算');
+
+    // 食宿消耗
+    const foodCost = 50;
+    this.state.cny -= foodCost;
+    this.renderer.log(`每日食宿消耗：¥${foodCost}`, 'muted');
+
+    // 精力恢复
+    const recovery = 20 + this.state.stats.con * 0.3;
+    this.state.energy = Math.min(this.state.maxEnergy, this.state.energy + recovery);
+    this.renderer.log(`睡眠恢复精力：+${Math.floor(recovery)}`, 'success');
+
+    // 超载惩罚
+    const overload = this.state.checkOverload();
+    if (overload.overloaded) {
+      this.renderer.log(`⚠️ 背包超载！体力额外-${overload.penalty}`, 'danger');
+    }
+
+    // 素材清空
+    this.state.materials = 0;
+
+    this.renderer.log(`第${this.state.day}天结束。`, 'info');
+
+    // 检查结局
+    if (this.checkEnding()) return;
+
+    this.renderer.showChoices([
+      { text: '➡️ 进入下一天', className: 'primary', onClick: () => {
+        this.state.day++;
+        this.state.time = 9;
+        this.phaseMorning();
+      }}
+    ]);
+
+    this.renderer.updateStats(this.state);
+    SaveSystem.save(this.state);
+  }
+
+  // ---- 状态检查 ----
+  checkStatus(next) {
+    // Sin弱信号提示
+    const sinDesc = SinSystem.getSinDescription(this.state.sin);
+    if (sinDesc && !this.state.flags.has('sin_warned_' + Math.floor(this.state.sin / 10))) {
+      this.state.flags.add('sin_warned_' + Math.floor(this.state.sin / 10));
+      this.renderer.log(sinDesc.text, sinDesc.level);
+    }
+
+    if (this.state.stats.con <= 0) {
+      this.triggerEnding('dead');
+      return;
+    }
+    if (this.state.san <= 0) {
+      this.triggerEnding('insane');
+      return;
+    }
+    if (this.state.cny <= 0 && this.state.totalFans < 1000) {
+      this.triggerEnding('broke');
+      return;
+    }
+    // Sin过高提前检查
+    if (this.state.sin >= 80) {
+      this.triggerEnding('blackred');
+      return;
+    }
+    next();
+  }
+
+  // ---- 结局检查 ----
+  checkEnding() {
+    // 死亡结局
+    if (this.state.stats.con <= 0) { this.triggerEnding('dead'); return true; }
+    // 精神崩溃
+    if (this.state.san <= 0) { this.triggerEnding('insane'); return true; }
+    // 破产
+    if (this.state.cny <= 0 && this.state.totalFans < 1000) { this.triggerEnding('broke'); return true; }
+    // 黑红之王（Sin过高）
+    const sinEnding = SinSystem.checkSinEnding(this.state);
+    if (sinEnding) { this.triggerEnding(sinEnding); return true; }
+    // 抵达终点
+    if (this.state.nodeIndex >= ROUTE.length - 1) {
+      // 检查是否达成好结局
+      const totalFans = this.state.totalFans;
+      const sin = this.state.sin;
+      if (totalFans > 100000 && sin < 20) {
+        this.triggerEnding('famous');
+      } else if (sin >= 50) {
+        this.triggerEnding('blackred');
+      } else {
+        this.triggerEnding('arrived');
+      }
+      return true;
+    }
+    return false;
+  }
+
+  triggerEnding(id) {
+    this.state.gameOver = true;
+    this.state.ending = id;
+    const ending = ENDINGS[id];
+    this.renderer.showEnding(ending);
+    SaveSystem.clear();
+  }
+}
+
+// ===================== 启动 =====================
+const game = new Game();
+game.showStartScreen();
+</script>
+</body>
+</html>

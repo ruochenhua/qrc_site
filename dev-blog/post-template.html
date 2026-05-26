@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章标题 | QRC-Eye Log</title>
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #050a18; font-family: 'Inter', sans-serif; line-height: 1.8; color: rgba(255,255,255,0.8); }
+        .prose h2 { color: #fff; font-size: 2rem; font-weight: 800; margin-top: 3rem; letter-spacing: -0.05em; }
+        .prose p { margin-bottom: 1.5rem; font-size: 1.125rem; }
+        .glass-nav { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body>
+    <nav class="glass-nav fixed top-0 w-full py-4 px-8 flex justify-between items-center z-50">
+        <a href="/dev-blog/" class="text-xs font-bold text-white/50 hover:text-emerald-400 transition">← 返回列表</a>
+        <div class="text-sm font-black text-white">QRC<span class="text-emerald-400">.</span>EYE</div>
+    </nav>
+    <article class="max-w-2xl mx-auto pt-32 pb-24 px-6">
+        <header class="mb-16">
+            <h1 class="text-4xl md:text-6xl font-[900] text-white tracking-tighter leading-tight mb-6">这里是你的文章大标题</h1>
+            <div class="text-emerald-400 text-sm font-bold tracking-widest">PUBLISHED ON MARCH 4, 2024</div>
+        </header>
+        <div class="prose prose-invert">
+            <p>在这里开始书写你的故事。由于我们采用了最新的明亮交互设计，正文字体建议保持较大的行间距。</p>
+            <h2>设计即是灵魂</h2>
+            <p>我们认为 ToC 项目不应该只是功能的堆砌...</p>
+        </div>
+    </article>
+</body>
+</html>

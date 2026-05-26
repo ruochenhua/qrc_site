@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QRC-Eye | 极致移动交互设计</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <meta name="description" content="QRC-Eye 是一家专注于极致移动交互设计的设计工作室，通过对像素与动效的偏执，为您交付具备'生命力'的 ToC 移动体验。">
+    <meta name="keywords" content="移动交互设计,UI设计,UX设计,产品设计,原生开发,用户体验">
+    <meta name="author" content="QRC-Eye Design Lab">
+    <meta name="robots" content="index, follow">
+    <!-- Open Graph 标签 -->
+    <meta property="og:title" content="QRC-Eye | 极致移动交互设计">
+    <meta property="og:description" content="QRC-Eye 是一家专注于极致移动交互设计的设计工作室，通过对像素与动效的偏执，为您交付具备'生命力'的 ToC 移动体验。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.qrc-eye.com">
+    <meta property="og:image" content="https://www.qrc-eye.com/og-image.jpg">
+    <!-- Twitter Card 标签 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="QRC-Eye | 极致移动交互设计">
+    <meta name="twitter:description" content="QRC-Eye 是一家专注于极致移动交互设计的设计工作室，通过对像素与动效的偏执，为您交付具备'生命力'的 ToC 移动体验。">
+    <meta name="twitter:image" content="https://www.qrc-eye.com/twitter-image.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+
+        @keyframes fade-up { from { opacity: 0; transform: translateY(25px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes shine { from { left: -100%; } to { left: 100%; } }
+        @keyframes pulse-glow { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.8; } }
+        
+        .animate-fade-up { animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .animate-on-scroll.animated {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        body { 
+            background-color: #050a18; /* 稍微提亮底色 */
+            font-family: 'Inter', "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            -webkit-font-smoothing: antialiased;
+            letter-spacing: -0.02em; /* 现代设计的精髓：略微紧缩的字间距 */
+        }
+
+        /* 极具设计感的玻璃拟态：更亮、更透 */
+        .glass { 
+            background: rgba(255, 255, 255, 0.06); 
+            backdrop-filter: blur(25px); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 提亮卡片效果 */
+        .card-bright {
+            background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .card-bright:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+        .card-bright::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s ease;
+        }
+        .card-bright:hover::before {
+            left: 100%;
+        }
+
+        .text-gradient { 
+            background: linear-gradient(135deg, #5eead4 0%, #60a5fa 100%); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+        }
+        
+        .glow-bg {
+            position: absolute;
+            width: 100%;
+            height: 600px;
+            background: radial-gradient(circle at 50% 30%, rgba(16, 185, 129, 0.15) 0%, rgba(59, 130, 246, 0.05) 40%, transparent 70%);
+            z-index: -1;
+            animation: pulse-glow 8s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-slate-200 overflow-x-hidden">
+
+    <div class="glow-bg"></div>
+
+    <nav class="fixed top-0 w-full z-50 px-6 py-6 md:px-12" aria-label="主导航">
+        <div class="max-w-6xl mx-auto flex justify-between items-center glass rounded-[2.5rem] px-6 py-4 md:px-8">
+            <div class="text-2xl font-[900] tracking-tighter text-white cursor-pointer" onclick="showPage('home')" role="button" tabindex="0" aria-label="返回首页">
+                QRC<span class="text-emerald-400">.</span>EYE
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm font-bold">
+                <button onclick="showPage('home')" class="text-white/70 hover:text-white transition-colors" aria-label="首页">首页</button>
+                <a href="/dev-blog/" class="text-white/70 hover:text-white transition-colors" aria-label="开发者日志">日志</a>
+                <button onclick="showPage('about')" class="text-white/70 hover:text-white transition-colors" aria-label="关于我们">关于</button>
+                <button onclick="toggleModal()" class="bg-white text-black px-6 py-2 rounded-full font-black transition transform active:scale-95 shadow-xl hover:bg-emerald-400" aria-label="预约">
+                    预约
+                </button>
+            </div>
+            <button class="md:hidden text-white text-2xl" onclick="toggleMobileMenu()" aria-label="打开菜单" aria-expanded="false" id="menu-button">
+                ☰
+            </button>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden mt-4 max-w-6xl mx-auto glass rounded-[2.5rem] px-6 py-4" aria-hidden="true" aria-labelledby="menu-button">
+            <div class="flex flex-col gap-4 text-sm font-bold">
+                <button onclick="showPage('home'); toggleMobileMenu()" class="text-white/70 hover:text-white transition-colors py-2" aria-label="首页">首页</button>
+                <a href="/dev-blog/" class="text-white/70 hover:text-white transition-colors py-2" aria-label="开发者日志">日志</a>
+                <button onclick="showPage('about'); toggleMobileMenu()" class="text-white/70 hover:text-white transition-colors py-2" aria-label="关于我们">关于</button>
+                <button onclick="toggleModal(); toggleMobileMenu()" class="bg-white text-black px-6 py-2 rounded-full font-black transition transform active:scale-95 shadow-xl hover:bg-emerald-400 text-center" aria-label="预约">
+                    预约
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <section id="page-home" class="page-content relative pt-44 pb-24 px-6 min-h-screen">
+        <div class="max-w-5xl mx-auto text-center">
+            <div class="inline-block px-5 py-1.5 mb-10 text-[11px] font-black tracking-[0.4em] text-emerald-300 border border-emerald-500/30 rounded-full bg-emerald-500/5 uppercase animate-on-scroll">
+                Design Studio · 产品设计实验室
+            </div>
+            <h1 class="text-5xl md:text-8xl font-[900] tracking-tight mb-10 text-white leading-[1.05] animate-on-scroll">
+                重塑每一帧 <br>
+                <span class="text-gradient">交互感官</span>
+            </h1>
+            <p class="text-lg md:text-2xl text-white/60 max-w-2xl mx-auto mb-20 leading-relaxed font-light animate-on-scroll">
+                不只是 App。我们通过对像素与动效的偏执，<br class="hidden md:block">
+                为您交付具备“生命力”的 ToC 移动体验。
+            </p>
+
+            <div class="grid md:grid-cols-3 gap-8 mb-40">
+                <div class="card-bright p-10 rounded-[3rem] text-left group animate-on-scroll">
+                    <div class="w-full aspect-[4/5] rounded-[2rem] mb-8 flex flex-col items-center justify-center bg-white/5 border border-white/10 group-hover:bg-emerald-500/10 transition-colors overflow-hidden">
+                        <svg class="w-20 h-20 text-emerald-400 opacity-60 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="4" />
+                            <path d="M7 8h10M7 12h7" stroke-linecap="round" />
+                        </svg>
+                        <div class="mt-6 text-[10px] tracking-[0.5em] text-emerald-400 font-bold uppercase opacity-50">Smooth Flow</div>
+                    </div>
+                    <h3 class="text-white font-bold text-2xl mb-4">原生手感</h3>
+                    <p class="text-base text-white/50 leading-relaxed font-normal">
+                        追求 120Hz 级别的丝滑体验。每一条交互曲线都经过算法优化，回归物理直觉。
+                    </p>
+                </div>
+
+                <div class="card-bright p-10 rounded-[3rem] text-left group animate-on-scroll" style="transition-delay: 0.1s;">
+                    <div class="w-full aspect-[4/5] rounded-[2rem] mb-8 flex flex-col items-center justify-center bg-white/5 border border-white/10 group-hover:bg-blue-500/10 transition-colors overflow-hidden">
+                        <svg class="w-20 h-20 text-blue-400 opacity-60 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 7v10M7 12h10" stroke-linecap="round" />
+                        </svg>
+                        <div class="mt-6 text-[10px] tracking-[0.5em] text-blue-400 font-bold uppercase opacity-50">Pure Logic</div>
+                    </div>
+                    <h3 class="text-white font-bold text-2xl mb-4">直觉逻辑</h3>
+                    <p class="text-base text-white/50 leading-relaxed font-normal">
+                        拒绝冗余功能。我们通过深度减法，让复杂操作在一次点按与滑动间自然完成。
+                    </p>
+                </div>
+
+                <div class="card-bright p-10 rounded-[3rem] text-left group animate-on-scroll" style="transition-delay: 0.2s;">
+                    <div class="w-full aspect-[4/5] rounded-[2rem] mb-8 flex flex-col items-center justify-center bg-white/5 border border-white/10 group-hover:bg-purple-500/10 transition-colors overflow-hidden">
+                        <svg class="w-20 h-20 text-purple-400 opacity-60 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M12 3l9 16H3L12 3z" />
+                        </svg>
+                        <div class="mt-6 text-[10px] tracking-[0.5em] text-purple-400 font-bold uppercase opacity-50">Visual Soul</div>
+                    </div>
+                    <h3 class="text-white font-bold text-2xl mb-4">情感设计</h3>
+                    <p class="text-base text-white/50 leading-relaxed font-normal">
+                        UI 应该有温度。我们通过独特的光影语言，为您在屏幕方寸间打造专属的情绪空间。
+                    </p>
+                </div>
+            </div>
+
+            <div class="max-w-2xl mx-auto text-left py-24 border-t border-white/10 animate-on-scroll">
+                <h2 class="text-2xl font-black mb-16 text-white tracking-widest uppercase">产品轨迹</h2>
+                <div class="space-y-16">
+                    <div class="relative pl-12 border-l-2 border-emerald-500/50 animate-on-scroll">
+                        <div class="absolute -left-[9px] top-1 w-4 h-4 bg-emerald-400 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.8)]"></div>
+                        <h3 class="text-white font-bold text-2xl mb-3">原型定义 (已完成)</h3>
+                        <p class="text-white/40 text-lg">确立首款核心项目赛道，完成所有高保真交互场景打磨。</p>
+                    </div>
+                    <div class="relative pl-12 border-l-2 border-white/10 animate-on-scroll" style="transition-delay: 0.1s;">
+                        <div class="absolute -left-[9px] top-1 w-4 h-4 bg-white/20 rounded-full"></div>
+                        <h3 class="text-white/40 font-bold text-2xl mb-3 font-medium">内测招募</h3>
+                        <p class="text-white/20 text-lg">即将开启。名额仅限首批加入预约名单的体验官。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="page-about" class="page-content hidden relative pt-48 pb-24 px-6 min-h-screen">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-5xl font-black mb-12 text-white animate-on-scroll">关于我们</h2>
+            <div class="glass p-12 md:p-16 rounded-[4rem] animate-on-scroll">
+                <p class="text-3xl text-white font-black leading-tight mb-10 animate-on-scroll">
+                    两个独立开发者，<br>
+                    一套关于“好产品”的准则。
+                </p>
+                <div class="space-y-8 text-white/60 text-lg font-normal leading-relaxed text-justify">
+                    <p class="animate-on-scroll">我们坚信，在 ToC 领域，体验就是生命线。大厂追求数据的增长，而我们追求用户指尖划过屏幕时的那份惊喜。</p>
+                    <p class="animate-on-scroll" style="transition-delay: 0.1s;">作为“手艺人”，我们跳过所有的管理流程，将 100% 的热情投入到每一个像素的打磨中。这不仅是我们的项目，更是我们的审美表达。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center px-6" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+        <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-3xl" onclick="toggleModal()" aria-hidden="true"></div>
+        <div class="relative glass max-w-sm w-full p-12 rounded-[3.5rem] text-center shadow-2xl animate-fade-up" role="document">
+            <div class="text-6xl mb-8" aria-hidden="true">✨</div>
+            <h3 id="modal-title" class="text-3xl font-black text-white mb-4 italic">加入预约</h3>
+            <p class="text-white/50 text-base mb-10 leading-relaxed">
+                感谢您的眼光。首批内测名额非常珍贵，我们将通过邮件/微信分批发放邀请。
+            </p>
+            <button onclick="toggleModal()" class="w-full py-5 bg-emerald-400 text-black rounded-3xl font-black text-xl hover:bg-emerald-300 transition-all shadow-xl" aria-label="关闭模态框">
+                确 认
+            </button>
+        </div>
+    </div>
+
+    <footer class="py-16 border-t border-white/10 text-center px-6">
+        <p class="text-white/80 font-black text-xs tracking-[0.4em] uppercase mb-4">QRC-Eye Design Lab</p>
+        <a href="https://beian.miit.gov.cn/" target="_blank" class="text-white/30 hover:text-emerald-400 transition text-[11px] font-bold">
+            粤ICP备2024189519号-1
+        </a>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
