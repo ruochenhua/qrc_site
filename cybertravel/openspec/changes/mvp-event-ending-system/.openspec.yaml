@@ -1,0 +1,19 @@
+name: mvp-event-ending-system
+status: active
+schema: spec-driven
+
+adr-references:
+  required:
+    - ADR-001
+    - ADR-002
+  optional: []
+
+depends-on:
+  - mvp-core-loop-verification
+  - mvp-time-driven-system
+  - mvp-content-platform-system
+
+validation:
+  design-checklist:
+    - 已查阅所有 required ADR
+    - 前置 changes 已完成

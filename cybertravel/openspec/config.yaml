@@ -1,0 +1,51 @@
+schema: spec-driven
+
+# Project context
+context: |
+  项目名称: CyberTravelGame (骑行网红模拟器)
+  类型: 文字生存 / 经营模拟 / 硬核 Roguelike
+  MVP平台: 单文件 Web (HTML5/JS/CSS)
+  正式版目标: 微信原生小程序
+
+  技术栈:
+    - MVP: 纯原生 HTML5 + CSS3 + ES6+ (单文件)
+    - 正式版: 微信小程序 (WXML/WXSS/JS) + Vant Weapp
+    - 构建工具: 无 (MVP) / 微信开发者工具 (正式版)
+
+  开发模式:
+    - 配置驱动 (Configuration-Driven)
+    - 面向 AI 敏捷开发 (Vibe Coding)
+    - OpenSpec 驱动开发流程
+
+  核心机制:
+    - 回合制: 以"天"为基本回合
+    - 双轨博弈: 生存线 (体力/资金/精神) vs 流量线 (粉丝/打赏/内容产出)
+    - 原罪系统: 黑红暴富与正义打击的对冲机制
+    - 多平台算法: 弹幕网/短视频网/种草网 三平台差异化运营
+
+  代码规范:
+    - 单文件 MVP: index.html 包含所有 HTML/CSS/JS
+    - 状态管理: 纯 JS 对象，无外部框架
+    - 数据持久化: localStorage (MVP) / wx.storage (正式版)
+    - 命名: camelCase (JS), kebab-case (CSS 变量)
+
+  设计立意:
+    - 黑色幽默解构"流量时代"网红乱象
+    - 教育意义: 对自然与法律保持敬畏
+    - 社会讽刺: "黑红暴富" vs "正义通报"
+
+# Per-artifact rules
+rules:
+  proposal:
+    - 必须包含背景动机、范围边界、用户故事
+    - 明确 In Scope / Out of Scope
+    - 列出影响的游戏系统和数据模型
+  design:
+    - 必须包含架构概览、数据流、界面交互设计
+    - 核心模块需给出接口定义
+    - 关键决策需记录 rationale
+  tasks:
+    - 每个任务不超过 2 小时
+    - 必须包含精确文件路径
+    - 必须包含验收标准和验证步骤
+    - 必须包含测试要求

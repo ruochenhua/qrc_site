@@ -1,0 +1,18 @@
+name: mvp-core-loop-verification
+status: active
+schema: spec-driven
+
+adr-references:
+  required:
+    - ADR-001
+    - ADR-002
+    - ADR-003
+  optional: []
+
+depends-on: []
+
+validation:
+  design-checklist:
+    - 已查阅所有 required ADR
+    - design 中引用了相关 ADR 编号
+    - 无冲突，或冲突已在 design 中说明
