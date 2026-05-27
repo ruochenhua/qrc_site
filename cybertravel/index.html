@@ -600,7 +600,23 @@ const ROUTES = {
         { name: '碧峰峡熊猫基地', time: 1.5, effects: [{ key: 'materials', delta: 12 }, { key: 'san', delta: 8 }], desc: '近距离拍摄大熊猫，萌翻了！' },
       ]
     },
-    { id: 'luding', name: '泸定', type: 'city', km: 220, desc: '大渡河畔，红军飞夺泸定桥之地。',
+    { id: 'tianquan', name: '天全镇', type: 'city', km: 190, desc: '川藏线上的小驿站，麻雀虽小五脏俱全。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 22, weight: 1, desc: '恢复体力+5' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '路边客栈', price: 35, energyMult: 1.1, conMult: 1.0, sanBonus: 1 },
+      ],
+      attractions: [
+        { name: '二郎山脚下的茶园', time: 0.5, effects: [{ key: 'materials', delta: 4 }, { key: 'san', delta: 3 }], desc: '云雾茶园，空气清新。' },
+      ]
+    },
+    { id: 'erlangshan', name: '二郎山隧道口', type: 'wild_poi', km: 260, desc: '穿越二郎山，昔日天堑变通途。隧道口外云海翻涌。',
+      attractions: [
+        { name: '云海延时拍摄', time: 0.5, effects: [{ key: 'materials', delta: 10 }, { key: 'san', delta: 6 }], desc: '云海如潮水般涌动，震撼人心。' },
+      ]
+    },
+    { id: 'luding', name: '泸定', type: 'city', km: 340, desc: '大渡河畔，红军飞夺泸定桥之地。',
       shop: { items: [
         { id: 'food', name: '压缩口粮', price: 22, weight: 1, desc: '恢复体力+5' },
         { id: 'oxygen', name: '便携氧气瓶', price: 85, weight: 2, desc: '高海拔体力恢复+50%' },
@@ -613,7 +629,7 @@ const ROUTES = {
         { name: '泸定桥', time: 0.5, effects: [{ key: 'materials', delta: 6 }, { key: 'san', delta: 4 }], desc: '铁索寒光，历史的厚重感扑面而来。' },
       ]
     },
-    { id: 'kangding', name: '康定', type: 'city', km: 325, desc: '跑马溜溜的山上，海拔2560米。',
+    { id: 'kangding', name: '康定', type: 'city', km: 450, desc: '跑马溜溜的山上，海拔2560米。',
       shop: { items: [
         { id: 'food', name: '压缩口粮', price: 25, weight: 1, desc: '恢复体力+5' },
         { id: 'oxygen', name: '便携氧气瓶', price: 90, weight: 2, desc: '高海拔体力恢复+50%' },
@@ -661,12 +677,12 @@ const ROUTES = {
         { name: '碧峰峡熊猫基地', time: 1.5, effects: [{ key: 'materials', delta: 12 }, { key: 'san', delta: 8 }], desc: '近距离拍摄大熊猫，萌翻了！' },
       ]
     },
-    { id: 'siguniang', name: '四姑娘山观景台', type: 'wild_poi', km: 220, desc: '四座雪峰一字排开，被誉为东方阿尔卑斯。',
+    { id: 'siguniang', name: '四姑娘山观景台', type: 'wild_poi', km: 270, desc: '四座雪峰一字排开，被誉为东方阿尔卑斯。',
       attractions: [
         { name: '雪山全景拍摄', time: 1, effects: [{ key: 'materials', delta: 18 }, { key: 'san', delta: 12 }], desc: '云雾在峰间流转，美得令人窒息。' },
       ]
     },
-    { id: 'luding', name: '泸定', type: 'city', km: 240, desc: '大渡河畔，红军飞夺泸定桥之地。',
+    { id: 'luding', name: '泸定', type: 'city', km: 350, desc: '大渡河畔，红军飞夺泸定桥之地。',
       shop: { items: [
         { id: 'food', name: '压缩口粮', price: 22, weight: 1, desc: '恢复体力+5' },
         { id: 'oxygen', name: '便携氧气瓶', price: 85, weight: 2, desc: '高海拔体力恢复+50%' },
@@ -679,7 +695,7 @@ const ROUTES = {
         { name: '泸定桥', time: 0.5, effects: [{ key: 'materials', delta: 6 }, { key: 'san', delta: 4 }], desc: '铁索寒光，历史的厚重感扑面而来。' },
       ]
     },
-    { id: 'kangding', name: '康定', type: 'city', km: 325, desc: '跑马溜溜的山上，海拔2560米。',
+    { id: 'kangding', name: '康定', type: 'city', km: 450, desc: '跑马溜溜的山上，海拔2560米。',
       shop: { items: [
         { id: 'food', name: '压缩口粮', price: 25, weight: 1, desc: '恢复体力+5' },
         { id: 'oxygen', name: '便携氧气瓶', price: 90, weight: 2, desc: '高海拔体力恢复+50%' },
@@ -695,12 +711,25 @@ const ROUTES = {
         { name: '康定情歌广场', time: 1, effects: [{ key: 'materials', delta: 8 }, { key: 'san', delta: 5 }], desc: '当地人跳锅庄舞，氛围热烈。' },
       ]
     },
-    { id: 'xinduqiao', name: '新都桥', type: 'wild_poi', km: 420, desc: '摄影天堂，光与影的世界。',
+    { id: 'xinduqiao', name: '新都桥', type: 'wild_poi', km: 560, desc: '摄影天堂，光与影的世界。',
       attractions: [
         { name: '摄影天堂', time: 1.5, effects: [{ key: 'materials', delta: 20 }, { key: 'san', delta: 10 }], desc: '每一帧都是大片，光线完美。' },
       ]
     },
-    { id: 'litang', name: '理塘', type: 'city', km: 550, desc: '世界高城，海拔4014米。',
+    { id: 'yajiang', name: '雅江县城', type: 'city', km: 640, desc: '雅砻江畔的小城，松茸之乡。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 28, weight: 1, desc: '恢复体力+5' },
+        { id: 'oxygen', name: '便携氧气瓶', price: 95, weight: 2, desc: '高海拔体力恢复+50%' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '藏民家庭旅馆', price: 40, energyMult: 1.1, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '江边客栈', price: 100, energyMult: 1.4, conMult: 1.2, sanBonus: 4 },
+      ],
+      attractions: [
+        { name: '雅砻江大峡谷', time: 1, effects: [{ key: 'materials', delta: 10 }, { key: 'san', delta: 6 }], desc: '峡谷深邃，江水奔流。' },
+      ]
+    },
+    { id: 'litang', name: '理塘', type: 'city', km: 760, desc: '世界高城，海拔4014米。',
       shop: { items: [
         { id: 'food', name: '压缩口粮', price: 30, weight: 1, desc: '恢复体力+5' },
         { id: 'oxygen', name: '便携氧气瓶', price: 100, weight: 2, desc: '高海拔体力恢复+50%' },
@@ -714,12 +743,12 @@ const ROUTES = {
         { name: '勒通古镇', time: 0.5, effects: [{ key: 'materials', delta: 5 }, { key: 'san', delta: 3 }], desc: '千户藏寨，丁真的家乡。' },
       ]
     },
-    { id: 'haizishan', name: '海子山', type: 'wild_poi', km: 620, desc: '1145个海子星罗棋布，宛如外星地貌。',
+    { id: 'haizishan', name: '海子山', type: 'wild_poi', km: 860, desc: '1145个海子星罗棋布，宛如外星地貌。',
       attractions: [
         { name: '姊妹湖航拍', time: 1, effects: [{ key: 'materials', delta: 16 }, { key: 'san', delta: 10 }], desc: '两颗蓝宝石镶嵌在荒原上。' },
       ]
     },
-    { id: 'batang', name: '巴塘', type: 'city', km: 680, desc: '弦子之乡，进入西藏前的最后一站。',
+    { id: 'batang', name: '巴塘', type: 'city', km: 980, desc: '弦子之乡，进入西藏前的最后一站。',
       shop: { items: [
         { id: 'food', name: '压缩口粮', price: 28, weight: 1, desc: '恢复体力+5' },
         { id: 'oxygen', name: '便携氧气瓶', price: 95, weight: 2, desc: '高海拔体力恢复+50%' },
@@ -732,6 +761,19 @@ const ROUTES = {
       ],
       attractions: [
         { name: '金沙江大拐弯', time: 1, effects: [{ key: 'materials', delta: 10 }, { key: 'san', delta: 6 }], desc: '金沙江在这里拐了一个大弯。' },
+      ]
+    },
+    { id: 'mangkang', name: '芒康县', type: 'city', km: 1100, desc: '川藏滇三省交汇，进藏后的第一个县城。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 30, weight: 1, desc: '恢复体力+5' },
+        { id: 'oxygen', name: '便携氧气瓶', price: 100, weight: 2, desc: '高海拔体力恢复+50%' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '路边招待所', price: 45, energyMult: 1.1, conMult: 1.0, sanBonus: 1 },
+        { id: 'standard', name: '县城宾馆', price: 120, energyMult: 1.4, conMult: 1.2, sanBonus: 4 },
+      ],
+      attractions: [
+        { name: '盐井古盐田', time: 1, effects: [{ key: 'materials', delta: 8 }, { key: 'san', delta: 5 }], desc: '千年古盐田，阳光下晶莹剔透。' },
       ]
     },
     { id: 'lhasa', name: '拉萨', type: 'city', km: 2100, desc: '圣城拉萨，布达拉宫在阳光下闪耀。',
@@ -981,11 +1023,16 @@ function rollCampEvent() {
 const NODE_EVENTS = {
   chengdu: { text: '你从成都出发，踏上了西行之路。背包里装着简单的装备和满腔热血。', effects: [{ key: 'msg', delta: 0, msg: '旅程开始！' }] },
   yaan: { text: '到达雅安，雨城的气息扑面而来。青衣江静静流淌，你可以在这里休整补给。', effects: [{ key: 'san', delta: 5 }, { key: 'con', delta: 3 }, { key: 'cny', delta: -30, msg: '买了一份雅鱼，花费¥30' }] },
+  tianquan: { text: '到达天全镇，川藏线上的小驿站。路边有几家小饭馆和杂货铺。', effects: [{ key: 'san', delta: 2 }, { key: 'cny', delta: -15, msg: '吃了碗热气腾腾的面条，花费¥15' }] },
+  erlangshan: { text: '穿过二郎山隧道，豁然开朗！云海在脚下翻涌，仿佛置身仙境。', effects: [{ key: 'san', delta: 8 }, { key: 'materials', delta: 5 }] },
   luding: { text: '到达泸定，大渡河波涛汹涌。铁索桥在风中微微晃动，让人想起那段历史。', effects: [{ key: 'san', delta: 3 }, { key: 'con', delta: 3 }, { key: 'materials', delta: 3 }] },
   kangding: { text: '到达康定，海拔2560米，空气开始稀薄。远处传来溜溜的情歌。', effects: [{ key: 'con', delta: -2 }, { key: 'materials', delta: 5 }] },
   xinduqiao: { text: '到达新都桥，摄影天堂。光与影在草原上交织，每一帧都是大片。', effects: [{ key: 'materials', delta: 10 }, { key: 'san', delta: 5 }, { key: 'con', delta: 2 }] },
+  yajiang: { text: '到达雅江，雅砻江穿城而过。这里是中国最大的松茸产地，空气中都是森林的气息。', effects: [{ key: 'san', delta: 4 }, { key: 'cny', delta: -25, msg: '品尝了松茸炖鸡，花费¥25' }] },
   litang: { text: '到达理塘，世界高城，海拔4014米。天空低得仿佛伸手可触。', effects: [{ key: 'con', delta: -5 }, { key: 'san', delta: -3 }] },
+  haizishan: { text: '海子山荒原上，1145个湖泊如星辰散落。这里像是外星球。', effects: [{ key: 'san', delta: 6 }, { key: 'materials', delta: 8 }] },
   batang: { text: '到达巴塘，弦子之乡。金沙江在这里拐了一个大弯，进入西藏前的最后一站。', effects: [{ key: 'san', delta: 5 }, { key: 'con', delta: 5 }, { key: 'cny', delta: -50, msg: '补充了氧气和药品，花费¥50' }] },
+  mangkang: { text: '到达芒康，川藏滇三省交汇处。藏式民居和纳西族风情在这里交融。', effects: [{ key: 'san', delta: 3 }, { key: 'cny', delta: -20, msg: '买了些糌粑和酥油茶，花费¥20' }] },
   lhasa: { text: '到达拉萨！圣城就在眼前！布达拉宫在阳光下闪耀，你的骑行之旅画上了句号。', effects: [{ key: 'san', delta: 20 }, { key: 'materials', delta: 15 }] },
 };
 
@@ -1816,8 +1863,14 @@ class Game {
     const nextNode = ROUTE[this.state.nodeIndex + 1];
     if (nextNode && this.state.km >= nextNode.km) {
       this.state.nodeIndex++;
+      this.state.visitedPois.add(nextNode.id);
       this.renderer.log(`到达${nextNode.name}！`, 'success');
       this.renderer.log(nextNode.desc, 'info');
+      // 路过野外景点自动获得少量素材
+      if (nextNode.type === 'wild_poi') {
+        this.state.materials += 3;
+        this.renderer.log(`路过${nextNode.name}，顺手拍了几张照片，素材+3。`, 'info');
+      }
     }
 
     // 触发事件
@@ -1852,15 +1905,22 @@ class Game {
     this.renderer.log(`时间：${this.timeEngine.formatTime()}。你可以选择休息或继续赶路。`, 'info');
 
     this.renderer.showChoices([
-      { text: '🍚 吃饭休息（精力+10，体力+5，时间+1h）', onClick: () => {
+      { text: '🍚 吃饭休息（精力+10，体力+8，时间+1h，资金-30）', onClick: () => {
         this.state.time += 1;
         this.state.energy += 10;
-        this.state.stats.con = Math.min(100, this.state.stats.con + 5);
+        this.state.stats.con = Math.min(100, this.state.stats.con + 8);
         this.state.cny -= 30;
-        this.renderer.log('你吃了午饭，休息了一会儿，体力有所恢复。', 'success');
+        this.renderer.log('你吃了午饭，休息了一会儿，体力恢复了不少。', 'success');
         this.phaseAfternoon();
       }},
-      { text: '🚴 继续赶路（时间+3h，推进20km）', className: 'primary', onClick: () => this.phaseAfternoon() },
+      { text: '😴 停下休息（精力+5，体力+5，时间+1.5h）', onClick: () => {
+        this.state.time += 1.5;
+        this.state.energy += 5;
+        this.state.stats.con = Math.min(100, this.state.stats.con + 5);
+        this.renderer.log('你在路边找了块平地躺下休息，体力恢复了一些。', 'success');
+        this.phaseAfternoon();
+      }},
+      { text: '🚴 继续赶路（跳过休息）', className: 'primary', onClick: () => this.phaseAfternoon() },
     ]);
 
     this.renderer.updateStats(this.state);
@@ -1893,7 +1953,12 @@ class Game {
     const nextNode = ROUTE[this.state.nodeIndex + 1];
     if (nextNode && this.state.km >= nextNode.km) {
       this.state.nodeIndex++;
+      this.state.visitedPois.add(nextNode.id);
       this.renderer.log(`到达${nextNode.name}！`, 'success');
+      if (nextNode.type === 'wild_poi') {
+        this.state.materials += 3;
+        this.renderer.log(`路过${nextNode.name}，顺手拍了几张照片，素材+3。`, 'info');
+      }
     }
 
     this.checkStatus(() => this.phaseEvening());
@@ -2065,22 +2130,22 @@ class Game {
         sanBonus = hotel.sanBonus;
       }
     } else {
-      energyMult = 0.6;
-      conMult = 0.6;
+      energyMult = 0.75;
+      conMult = 0.75;
     }
 
-    const baseRecovery = 20 + this.state.stats.con * 0.3;
+    const baseRecovery = 22 + this.state.stats.con * 0.32;
     const energyRecovery = Math.floor(baseRecovery * energyMult);
     this.state.energy = Math.min(this.state.maxEnergy, this.state.energy + energyRecovery);
-    this.renderer.log(`睡眠恢复精力：+${energyRecovery}${isCamp ? '（野外露营恢复较差）' : ''}`, 'success');
+    this.renderer.log(`睡眠恢复精力：+${energyRecovery}${isCamp ? '（野外露营恢复一般）' : ''}`, 'success');
 
     // 体力恢复
     const currentNode = this.state.currentNode;
-    const altitude = currentNode && currentNode.km > 400 ? 0.5 : 1.0;
-    const baseConRecovery = Math.max(2, Math.floor((4 + this.state.stats.con * 0.05) * altitude));
+    const altitude = currentNode && currentNode.km > 400 ? 0.6 : 1.0;
+    const baseConRecovery = Math.max(3, Math.floor((5 + this.state.stats.con * 0.08) * altitude));
     const conRecovery = Math.floor(baseConRecovery * conMult);
     this.state.stats.con = Math.min(100, this.state.stats.con + conRecovery);
-    this.renderer.log(`睡眠恢复体力：+${conRecovery}${altitude < 1 ? '（高海拔恢复减缓）' : ''}${isCamp ? '（野外露营恢复较差）' : ''}`, 'success');
+    this.renderer.log(`睡眠恢复体力：+${conRecovery}${altitude < 1 ? '（高海拔恢复减缓）' : ''}${isCamp ? '（野外露营恢复一般）' : ''}`, 'success');
 
     // 精神恢复（住宿奖励）
     if (sanBonus > 0) {
