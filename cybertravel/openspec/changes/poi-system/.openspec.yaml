@@ -1,0 +1,21 @@
+name: poi-system
+status: active
+schema: spec-driven
+
+adr-references:
+  required:
+    - ADR-001
+    - ADR-002
+  optional:
+    - ADR-003
+
+depends-on:
+  - archive/2026-05-27-mvp-core-loop-verification
+  - archive/2026-05-27-mvp-time-driven-system
+  - archive/2026-05-27-mvp-event-ending-system
+
+validation:
+  design-checklist:
+    - 已查阅所有 required ADR
+    - design 中引用了相关 ADR 编号
+    - 与现有时间系统、事件系统、结算系统无冲突
