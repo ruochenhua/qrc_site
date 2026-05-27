@@ -1,5 +1,5 @@
 name: mvp-content-platform-system
-status: active
+status: completed
 schema: spec-driven
 
 adr-references:

@@ -1,5 +1,5 @@
 name: mvp-event-ending-system
-status: active
+status: completed
 schema: spec-driven
 
 adr-references:

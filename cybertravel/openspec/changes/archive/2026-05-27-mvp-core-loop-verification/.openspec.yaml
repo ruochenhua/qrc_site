@@ -1,5 +1,5 @@
-name: mvp-time-driven-system
-status: active
+name: mvp-core-loop-verification
+status: completed
 schema: spec-driven
 
 adr-references:
@@ -9,10 +9,10 @@ adr-references:
     - ADR-003
   optional: []
 
-depends-on:
-  - mvp-core-loop-verification
+depends-on: []
 
 validation:
   design-checklist:
     - 已查阅所有 required ADR
-    - 前置 change mvp-core-loop-verification 已完成
+    - design 中引用了相关 ADR 编号
+    - 无冲突，或冲突已在 design 中说明
