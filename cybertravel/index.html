@@ -231,6 +231,216 @@
   .ending-screen.good h2 { color: var(--success); }
   .ending-screen.bad h2 { color: var(--danger); }
   .ending-screen.neutral h2 { color: var(--warn); }
+
+  /* ===== 兴趣点系统样式 ===== */
+  #poi-bar {
+    padding: 8px 16px;
+    background: #0d0d14;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .poi-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .poi-dist {
+    color: var(--accent);
+    cursor: pointer;
+  }
+  .poi-dist:hover {
+    text-decoration: underline;
+  }
+  #map-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    background: #1a1a24;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    cursor: pointer;
+  }
+  #map-btn:hover {
+    border-color: var(--accent);
+  }
+
+  /* 地图弹窗 */
+  #map-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-hidden { display: none !important; }
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+  }
+  .modal-content {
+    position: relative;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-header h3 {
+    font-size: 15px;
+    color: var(--text);
+    margin: 0;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+  }
+  .modal-close:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text);
+  }
+  .map-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  .map-node {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .map-node:hover {
+    background: rgba(255,255,255,0.05);
+  }
+  .map-node.current {
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid var(--accent);
+  }
+  .map-node.visited {
+    opacity: 0.7;
+  }
+  .map-node-name {
+    flex: 1;
+    color: var(--text);
+  }
+  .map-node-km {
+    color: var(--muted);
+    font-size: 11px;
+  }
+  .map-connector {
+    padding-left: 28px;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .map-legend {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .map-detail {
+    padding: 10px;
+    background: #0d0d14;
+    border-radius: 8px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .map-detail-title {
+    color: var(--accent);
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  /* 城市菜单 */
+  .city-menu-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .city-menu-tab {
+    flex: 1;
+    padding: 8px;
+    font-size: 13px;
+    text-align: center;
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .city-menu-tab.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,240,255,0.05);
+  }
+  .shop-item, .hotel-item, .attraction-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  .shop-item-info, .hotel-info {
+    flex: 1;
+  }
+  .shop-item-name, .hotel-name, .attraction-name {
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .shop-item-desc, .hotel-desc, .attraction-desc {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .shop-item-price, .hotel-price {
+    font-size: 13px;
+    color: var(--warn);
+    white-space: nowrap;
+  }
+  .attraction-time {
+    font-size: 11px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
 </style>
 </head>
 <body>
@@ -240,6 +450,13 @@
     <div class="meta"><span id="day-num">0</span>天 | <span id="time-num">09:00</span> | <span id="km-num">0</span>km</div>
   </header>
   <div id="phase-indicator">选择你的开局人设</div>
+  <div id="poi-bar" style="display:none">
+    <div class="poi-info">
+      <span id="current-poi">🛣️ 路段中</span>
+      <span id="next-poi-dist" class="poi-dist">📍 距离下一个兴趣点：--</span>
+      <button id="map-btn" onclick="game.toggleMap()">🗺️ 地图</button>
+    </div>
+  </div>
   <div id="stats" style="display:none">
     <div class="stat"><label>体力</label><div class="val" id="con-val">0</div><div class="bar"><div id="con-bar" style="width:0%;background:var(--success)"></div></div></div>
     <div class="stat"><label>精力</label><div class="val" id="energy-val">0</div><div class="bar"><div id="energy-bar" style="width:0%;background:var(--accent)"></div></div></div>
@@ -250,6 +467,21 @@
   </div>
   <div id="main"><div id="log"></div></div>
   <div id="actions"></div>
+
+  <!-- 全程地图弹窗 -->
+  <div id="map-modal" class="modal-hidden">
+    <div class="modal-overlay" onclick="game.toggleMap()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>🗺️ 全程路线地图</h3>
+        <button class="modal-close" onclick="game.toggleMap()">✕</button>
+      </div>
+      <div id="map-body" class="map-body"></div>
+      <div class="map-legend">
+        <span>🏙️ 城市</span> <span>🏔️ 野外景点</span> <span>✅ 已到达</span> <span>📍 当前位置</span> <span>⬜ 未到达</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -284,6 +516,10 @@ class GameState {
     this.inventory = [];
     this.weight = 0;
     this.maxWeight = 15;
+
+    // 兴趣点系统
+    this.visitedPois = new Set();
+    this.accommodationChoice = null;
   }
 
   get totalFans() {
@@ -334,20 +570,185 @@ class GameState {
 // ===================== T02: 配置数据 =====================
 const ROUTES = {
   short: [
-    { id: 'chengdu', name: '成都', type: 'city', km: 0, desc: '天府之国，西行起点。' },
-    { id: 'yaan', name: '雅安', type: 'city', km: 140, desc: '雨城，川藏线的门户。' },
-    { id: 'luding', name: '泸定', type: 'city', km: 220, desc: '大渡河畔，红军飞夺泸定桥之地。' },
-    { id: 'kangding', name: '康定', type: 'city', km: 325, desc: '跑马溜溜的山上，海拔2560米。' },
+    { id: 'chengdu', name: '成都', type: 'city', km: 0, desc: '天府之国，西行起点。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 20, weight: 1, desc: '恢复体力+5' },
+        { id: 'repairKit', name: '修车工具', price: 100, weight: 2, desc: '爆胎时自行修理' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '青年旅舍', price: 50, energyMult: 1.2, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '商务宾馆', price: 120, energyMult: 1.5, conMult: 1.3, sanBonus: 5 },
+        { id: 'luxury', name: '温泉酒店', price: 280, energyMult: 2.0, conMult: 1.8, sanBonus: 10 },
+      ],
+      attractions: [
+        { name: '宽窄巷子', time: 0.5, effects: [{ key: 'materials', delta: 3 }, { key: 'san', delta: 2 }], desc: '老成都的烟火气，素材不错。' },
+      ]
+    },
+    { id: 'yaan', name: '雅安', type: 'city', km: 140, desc: '雨城，川藏线的门户。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 20, weight: 1, desc: '恢复体力+5' },
+        { id: 'oxygen', name: '便携氧气瓶', price: 80, weight: 2, desc: '高海拔体力恢复+50%' },
+        { id: 'repairKit', name: '修车工具', price: 100, weight: 2, desc: '爆胎时自行修理' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '青年旅舍', price: 50, energyMult: 1.2, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '商务宾馆', price: 120, energyMult: 1.5, conMult: 1.3, sanBonus: 5 },
+        { id: 'luxury', name: '温泉酒店', price: 260, energyMult: 2.0, conMult: 1.8, sanBonus: 10 },
+      ],
+      attractions: [
+        { name: '青衣江漫步', time: 0.5, effects: [{ key: 'materials', delta: 5 }, { key: 'san', delta: 3 }], desc: '江边晨雾缭绕，如同水墨画。' },
+        { name: '碧峰峡熊猫基地', time: 1.5, effects: [{ key: 'materials', delta: 12 }, { key: 'san', delta: 8 }], desc: '近距离拍摄大熊猫，萌翻了！' },
+      ]
+    },
+    { id: 'luding', name: '泸定', type: 'city', km: 220, desc: '大渡河畔，红军飞夺泸定桥之地。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 22, weight: 1, desc: '恢复体力+5' },
+        { id: 'oxygen', name: '便携氧气瓶', price: 85, weight: 2, desc: '高海拔体力恢复+50%' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '青年旅舍', price: 45, energyMult: 1.2, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '商务宾馆', price: 100, energyMult: 1.5, conMult: 1.3, sanBonus: 5 },
+      ],
+      attractions: [
+        { name: '泸定桥', time: 0.5, effects: [{ key: 'materials', delta: 6 }, { key: 'san', delta: 4 }], desc: '铁索寒光，历史的厚重感扑面而来。' },
+      ]
+    },
+    { id: 'kangding', name: '康定', type: 'city', km: 325, desc: '跑马溜溜的山上，海拔2560米。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 25, weight: 1, desc: '恢复体力+5' },
+        { id: 'oxygen', name: '便携氧气瓶', price: 90, weight: 2, desc: '高海拔体力恢复+50%' },
+        { id: 'repairKit', name: '修车工具', price: 110, weight: 2, desc: '爆胎时自行修理' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '青年旅舍', price: 55, energyMult: 1.2, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '商务宾馆', price: 130, energyMult: 1.5, conMult: 1.3, sanBonus: 5 },
+        { id: 'luxury', name: '藏式温泉酒店', price: 300, energyMult: 2.0, conMult: 1.8, sanBonus: 10 },
+      ],
+      attractions: [
+        { name: '跑马山观景台', time: 0.5, effects: [{ key: 'materials', delta: 5 }, { key: 'san', delta: 3 }], desc: '俯瞰康定城，雪山为背景。' },
+        { name: '康定情歌广场', time: 1, effects: [{ key: 'materials', delta: 8 }, { key: 'san', delta: 5 }], desc: '当地人跳锅庄舞，氛围热烈。' },
+      ]
+    },
   ],
   long: [
-    { id: 'chengdu', name: '成都', type: 'city', km: 0, desc: '天府之国，西行起点。' },
-    { id: 'yaan', name: '雅安', type: 'city', km: 140, desc: '雨城，川藏线的门户。' },
-    { id: 'luding', name: '泸定', type: 'city', km: 220, desc: '大渡河畔，红军飞夺泸定桥之地。' },
-    { id: 'kangding', name: '康定', type: 'city', km: 325, desc: '跑马溜溜的山上，海拔2560米。' },
-    { id: 'xinduqiao', name: '新都桥', type: 'wild', km: 420, desc: '摄影天堂，光与影的世界。' },
-    { id: 'litang', name: '理塘', type: 'city', km: 550, desc: '世界高城，海拔4014米。' },
-    { id: 'batang', name: '巴塘', type: 'city', km: 680, desc: '弦子之乡，进入西藏前的最后一站。' },
-    { id: 'lhasa', name: '拉萨', type: 'city', km: 2100, desc: '圣城拉萨，布达拉宫在阳光下闪耀。' },
+    { id: 'chengdu', name: '成都', type: 'city', km: 0, desc: '天府之国，西行起点。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 20, weight: 1, desc: '恢复体力+5' },
+        { id: 'repairKit', name: '修车工具', price: 100, weight: 2, desc: '爆胎时自行修理' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '青年旅舍', price: 50, energyMult: 1.2, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '商务宾馆', price: 120, energyMult: 1.5, conMult: 1.3, sanBonus: 5 },
+        { id: 'luxury', name: '温泉酒店', price: 280, energyMult: 2.0, conMult: 1.8, sanBonus: 10 },
+      ],
+      attractions: [
+        { name: '宽窄巷子', time: 0.5, effects: [{ key: 'materials', delta: 3 }, { key: 'san', delta: 2 }], desc: '老成都的烟火气，素材不错。' },
+      ]
+    },
+    { id: 'yaan', name: '雅安', type: 'city', km: 140, desc: '雨城，川藏线的门户。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 20, weight: 1, desc: '恢复体力+5' },
+        { id: 'oxygen', name: '便携氧气瓶', price: 80, weight: 2, desc: '高海拔体力恢复+50%' },
+        { id: 'repairKit', name: '修车工具', price: 100, weight: 2, desc: '爆胎时自行修理' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '青年旅舍', price: 50, energyMult: 1.2, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '商务宾馆', price: 120, energyMult: 1.5, conMult: 1.3, sanBonus: 5 },
+        { id: 'luxury', name: '温泉酒店', price: 260, energyMult: 2.0, conMult: 1.8, sanBonus: 10 },
+      ],
+      attractions: [
+        { name: '青衣江漫步', time: 0.5, effects: [{ key: 'materials', delta: 5 }, { key: 'san', delta: 3 }], desc: '江边晨雾缭绕，如同水墨画。' },
+        { name: '碧峰峡熊猫基地', time: 1.5, effects: [{ key: 'materials', delta: 12 }, { key: 'san', delta: 8 }], desc: '近距离拍摄大熊猫，萌翻了！' },
+      ]
+    },
+    { id: 'siguniang', name: '四姑娘山观景台', type: 'wild_poi', km: 220, desc: '四座雪峰一字排开，被誉为东方阿尔卑斯。',
+      attractions: [
+        { name: '雪山全景拍摄', time: 1, effects: [{ key: 'materials', delta: 18 }, { key: 'san', delta: 12 }], desc: '云雾在峰间流转，美得令人窒息。' },
+      ]
+    },
+    { id: 'luding', name: '泸定', type: 'city', km: 240, desc: '大渡河畔，红军飞夺泸定桥之地。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 22, weight: 1, desc: '恢复体力+5' },
+        { id: 'oxygen', name: '便携氧气瓶', price: 85, weight: 2, desc: '高海拔体力恢复+50%' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '青年旅舍', price: 45, energyMult: 1.2, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '商务宾馆', price: 100, energyMult: 1.5, conMult: 1.3, sanBonus: 5 },
+      ],
+      attractions: [
+        { name: '泸定桥', time: 0.5, effects: [{ key: 'materials', delta: 6 }, { key: 'san', delta: 4 }], desc: '铁索寒光，历史的厚重感扑面而来。' },
+      ]
+    },
+    { id: 'kangding', name: '康定', type: 'city', km: 325, desc: '跑马溜溜的山上，海拔2560米。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 25, weight: 1, desc: '恢复体力+5' },
+        { id: 'oxygen', name: '便携氧气瓶', price: 90, weight: 2, desc: '高海拔体力恢复+50%' },
+        { id: 'repairKit', name: '修车工具', price: 110, weight: 2, desc: '爆胎时自行修理' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '青年旅舍', price: 55, energyMult: 1.2, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '商务宾馆', price: 130, energyMult: 1.5, conMult: 1.3, sanBonus: 5 },
+        { id: 'luxury', name: '藏式温泉酒店', price: 300, energyMult: 2.0, conMult: 1.8, sanBonus: 10 },
+      ],
+      attractions: [
+        { name: '跑马山观景台', time: 0.5, effects: [{ key: 'materials', delta: 5 }, { key: 'san', delta: 3 }], desc: '俯瞰康定城，雪山为背景。' },
+        { name: '康定情歌广场', time: 1, effects: [{ key: 'materials', delta: 8 }, { key: 'san', delta: 5 }], desc: '当地人跳锅庄舞，氛围热烈。' },
+      ]
+    },
+    { id: 'xinduqiao', name: '新都桥', type: 'wild_poi', km: 420, desc: '摄影天堂，光与影的世界。',
+      attractions: [
+        { name: '摄影天堂', time: 1.5, effects: [{ key: 'materials', delta: 20 }, { key: 'san', delta: 10 }], desc: '每一帧都是大片，光线完美。' },
+      ]
+    },
+    { id: 'litang', name: '理塘', type: 'city', km: 550, desc: '世界高城，海拔4014米。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 30, weight: 1, desc: '恢复体力+5' },
+        { id: 'oxygen', name: '便携氧气瓶', price: 100, weight: 2, desc: '高海拔体力恢复+50%' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '青年旅舍', price: 60, energyMult: 1.2, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '供氧宾馆', price: 180, energyMult: 1.5, conMult: 1.3, sanBonus: 8 },
+      ],
+      attractions: [
+        { name: '长青春科尔寺', time: 1, effects: [{ key: 'materials', delta: 8 }, { key: 'san', delta: 6 }], desc: '藏传佛教圣地，心灵宁静。' },
+        { name: '勒通古镇', time: 0.5, effects: [{ key: 'materials', delta: 5 }, { key: 'san', delta: 3 }], desc: '千户藏寨，丁真的家乡。' },
+      ]
+    },
+    { id: 'haizishan', name: '海子山', type: 'wild_poi', km: 620, desc: '1145个海子星罗棋布，宛如外星地貌。',
+      attractions: [
+        { name: '姊妹湖航拍', time: 1, effects: [{ key: 'materials', delta: 16 }, { key: 'san', delta: 10 }], desc: '两颗蓝宝石镶嵌在荒原上。' },
+      ]
+    },
+    { id: 'batang', name: '巴塘', type: 'city', km: 680, desc: '弦子之乡，进入西藏前的最后一站。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 28, weight: 1, desc: '恢复体力+5' },
+        { id: 'oxygen', name: '便携氧气瓶', price: 95, weight: 2, desc: '高海拔体力恢复+50%' },
+        { id: 'repairKit', name: '修车工具', price: 120, weight: 2, desc: '爆胎时自行修理' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '青年旅舍', price: 50, energyMult: 1.2, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '商务宾馆', price: 140, energyMult: 1.5, conMult: 1.3, sanBonus: 5 },
+        { id: 'luxury', name: '江景度假酒店', price: 320, energyMult: 2.0, conMult: 1.8, sanBonus: 10 },
+      ],
+      attractions: [
+        { name: '金沙江大拐弯', time: 1, effects: [{ key: 'materials', delta: 10 }, { key: 'san', delta: 6 }], desc: '金沙江在这里拐了一个大弯。' },
+      ]
+    },
+    { id: 'lhasa', name: '拉萨', type: 'city', km: 2100, desc: '圣城拉萨，布达拉宫在阳光下闪耀。',
+      shop: { items: [
+        { id: 'food', name: '压缩口粮', price: 35, weight: 1, desc: '恢复体力+5' },
+        { id: 'oxygen', name: '便携氧气瓶', price: 110, weight: 2, desc: '高海拔体力恢复+50%' },
+      ]},
+      accommodations: [
+        { id: 'budget', name: '青年旅舍', price: 70, energyMult: 1.2, conMult: 1.0, sanBonus: 2 },
+        { id: 'standard', name: '藏式客栈', price: 200, energyMult: 1.5, conMult: 1.3, sanBonus: 8 },
+        { id: 'luxury', name: '布达拉宫景观酒店', price: 500, energyMult: 2.0, conMult: 1.8, sanBonus: 15 },
+      ],
+      attractions: [
+        { name: '布达拉宫', time: 2, effects: [{ key: 'materials', delta: 15 }, { key: 'san', delta: 20 }], desc: '终点！雪域圣殿，信仰的力量。' },
+        { name: '八廓街转经', time: 1, effects: [{ key: 'materials', delta: 8 }, { key: 'san', delta: 10 }], desc: '跟随朝圣者的脚步，心灵洗涤。' },
+      ]
+    },
   ],
 };
 
@@ -555,6 +956,27 @@ const EVENTS = [
     ]
   },
 ];
+
+// ===================== 野外露营事件 =====================
+const CAMP_EVENTS = [
+  { id: 'wolf_howl', text: '🐺 半夜听到狼嚎声，你一夜没睡好...', effects: [{ key: 'energy', delta: -15 }, { key: 'san', delta: -5 }], weight: 3 },
+  { id: 'meteor', text: '🌠 流星雨！你爬起来拍到了绝美星空延时！', effects: [{ key: 'materials', delta: 15 }, { key: 'san', delta: 10 }], weight: 2 },
+  { id: 'rain_camp', text: '⛺ 帐篷漏雨了，你用身体护住设备...', effects: [{ key: 'energy', delta: -10 }, { key: 'san', delta: -3 }], weight: 4 },
+  { id: 'bonfire_chat', text: '🔥 隔壁帐篷的驴友过来聊天，分享了一壶酥油茶。', effects: [{ key: 'san', delta: 8 }, { key: 'energy', delta: 5 }], weight: 3 },
+  { id: 'peaceful_night', text: '🌌 星空璀璨，万籁俱寂，你睡了一个好觉。', effects: [{ key: 'san', delta: 5 }], weight: 5 },
+  { id: 'theft_scare', text: '👤 半夜听到帐篷外有脚步声，原来是牦牛路过...虚惊一场。', effects: [{ key: 'san', delta: -3 }], weight: 3 },
+];
+
+function rollCampEvent() {
+  if (Math.random() >= 0.2) return null;
+  const totalWeight = CAMP_EVENTS.reduce((sum, e) => sum + (e.weight || 1), 0);
+  let roll = Math.random() * totalWeight;
+  for (const event of CAMP_EVENTS) {
+    roll -= (event.weight || 1);
+    if (roll <= 0) return event;
+  }
+  return null;
+}
 
 const NODE_EVENTS = {
   chengdu: { text: '你从成都出发，踏上了西行之路。背包里装着简单的装备和满腔热血。', effects: [{ key: 'msg', delta: 0, msg: '旅程开始！' }] },
@@ -824,11 +1246,211 @@ class Renderer {
       sanBar: document.getElementById('san-bar'),
       sinBar: document.getElementById('sin-bar'),
       fansBar: document.getElementById('fans-bar'),
+      poiBar: document.getElementById('poi-bar'),
+      currentPoi: document.getElementById('current-poi'),
+      nextPoiDist: document.getElementById('next-poi-dist'),
+      mapModal: document.getElementById('map-modal'),
+      mapBody: document.getElementById('map-body'),
     };
   }
 
   showStats() {
     this.els.stats.style.display = 'grid';
+    this.els.poiBar.style.display = 'block';
+  }
+
+  updatePoiBar(state) {
+    const node = state.currentNode;
+    const typeIcon = node ? (node.type === 'city' ? '🏙️' : node.type === 'wild_poi' ? '🏔️' : '🛣️') : '🛣️';
+    this.els.currentPoi.textContent = `${typeIcon} ${node ? node.name : '路段中'}`;
+
+    const dist = getDistanceToNextPoi(state);
+    if (dist > 0) {
+      this.els.nextPoiDist.textContent = `📍 距离下一个兴趣点：${formatDistance(dist)}`;
+      this.els.nextPoiDist.style.display = 'inline';
+    } else {
+      this.els.nextPoiDist.style.display = 'none';
+    }
+  }
+
+  toggleMap() {
+    this.els.mapModal.classList.toggle('modal-hidden');
+    if (!this.els.mapModal.classList.contains('modal-hidden')) {
+      this.renderMap(game.state);
+    }
+  }
+
+  renderMap(state) {
+    const container = this.els.mapBody;
+    container.innerHTML = '';
+
+    for (let i = 0; i < ROUTE.length; i++) {
+      const node = ROUTE[i];
+      if (node.type === 'road') continue;
+
+      const isCurrent = i === state.nodeIndex;
+      const isVisited = state.visitedPois.has(node.id);
+      const isPast = i < state.nodeIndex;
+      const typeIcon = node.type === 'city' ? '🏙️' : '🏔️';
+      const statusIcon = isCurrent ? '📍' : (isVisited || isPast) ? '✅' : '⬜';
+
+      const div = document.createElement('div');
+      div.className = `map-node ${isCurrent ? 'current' : ''} ${isVisited || isPast ? 'visited' : ''}`;
+      div.innerHTML = `
+        <span>${statusIcon}</span>
+        <span class="map-node-name">${typeIcon} ${node.name}</span>
+        <span class="map-node-km">${node.km}km</span>
+      `;
+      div.onclick = () => this.showMapNodeDetail(node);
+      container.appendChild(div);
+
+      // 显示到下一节点的距离
+      if (i < ROUTE.length - 1) {
+        const nextNode = ROUTE.slice(i + 1).find(n => n.type !== 'road');
+        if (nextNode) {
+          const gap = nextNode.km - node.km;
+          const gapDiv = document.createElement('div');
+          gapDiv.className = 'map-connector';
+          gapDiv.textContent = `↓ ${formatDistance(gap)}`;
+          container.appendChild(gapDiv);
+        }
+      }
+    }
+  }
+
+  showMapNodeDetail(node) {
+    // 在地图底部显示节点详情
+    let detailHtml = '';
+    if (node.shop && node.shop.items) {
+      detailHtml += '<div class="map-detail"><div class="map-detail-title">🛒 商店</div>';
+      node.shop.items.forEach(item => {
+        detailHtml += `<div>${item.name} ¥${item.price} (${item.desc})</div>`;
+      });
+      detailHtml += '</div>';
+    }
+    if (node.attractions) {
+      detailHtml += '<div class="map-detail"><div class="map-detail-title">📷 景点</div>';
+      node.attractions.forEach(a => {
+        detailHtml += `<div>${a.name} (${a.time}h)</div>`;
+      });
+      detailHtml += '</div>';
+    }
+
+    // 简单用 alert 或创建一个临时详情面板
+    // 这里简化处理：在地图底部插入详情
+    const existing = this.els.mapBody.querySelector('.map-detail-panel');
+    if (existing) existing.remove();
+
+    const panel = document.createElement('div');
+    panel.className = 'map-detail-panel';
+    panel.style.cssText = 'margin-top:10px;padding:10px;background:#0d0d14;border-radius:8px;border:1px solid var(--border);';
+    panel.innerHTML = `<div style="color:var(--accent);font-weight:bold;margin-bottom:6px;">${node.name} 详情</div>${detailHtml || '<div style="color:var(--muted);font-size:12px;">此节点无特殊设施</div>'}`;
+    this.els.mapBody.appendChild(panel);
+  }
+
+  renderCityMenu(node, onAction) {
+    this.clearLog();
+    this.setPhase(`🏙️ ${node.name} · 城市菜单`);
+
+    const tabs = ['商店', '住宿', '景点', '离开'];
+    // 使用 game 上存储的当前标签页，支持外部切换
+    if (!game._cityMenuTab) game._cityMenuTab = '商店';
+    let currentTab = game._cityMenuTab;
+
+    const refresh = () => {
+      currentTab = game._cityMenuTab || '商店';
+      let contentHtml = '';
+
+      if (currentTab === '商店' && node.shop) {
+        node.shop.items.forEach(item => {
+          const canAfford = game.state.cny >= item.price;
+          const wouldOverload = game.state.weight + item.weight > game.state.maxWeight * 1.5;
+          const disabled = !canAfford || wouldOverload;
+          contentHtml += `
+            <div class="shop-item">
+              <div class="shop-item-info">
+                <div class="shop-item-name">${item.name}</div>
+                <div class="shop-item-desc">${item.desc} | 重量 ${item.weight}kg</div>
+              </div>
+              <div class="shop-item-price">¥${item.price}</div>
+              <button ${disabled ? 'disabled' : ''} onclick="game.buyItem('${item.id}')">购买</button>
+            </div>`;
+        });
+      } else if (currentTab === '住宿' && node.accommodations) {
+        node.accommodations.forEach(acc => {
+          const canAfford = game.state.cny >= acc.price;
+          contentHtml += `
+            <div class="hotel-item">
+              <div class="hotel-info">
+                <div class="hotel-name">${acc.name}</div>
+                <div class="hotel-desc">精力恢复 ×${acc.energyMult} | 体力恢复 ×${acc.conMult} | 精神 +${acc.sanBonus}</div>
+              </div>
+              <div class="hotel-price">¥${acc.price}</div>
+              <button ${!canAfford ? 'disabled' : ''} onclick="game.selectAccommodation('${acc.id}')">入住</button>
+            </div>`;
+        });
+      } else if (currentTab === '景点' && node.attractions) {
+        node.attractions.forEach(attr => {
+          const hasTime = 24 - game.state.time >= attr.time;
+          contentHtml += `
+            <div class="attraction-item">
+              <div style="flex:1;">
+                <div class="attraction-name">${attr.name}</div>
+                <div class="attraction-desc">${attr.desc}</div>
+              </div>
+              <div class="attraction-time">${attr.time}h</div>
+              <button ${!hasTime ? 'disabled' : ''} onclick="game.visitAttraction('${attr.name}')">参观</button>
+            </div>`;
+        });
+      } else if (currentTab === '离开') {
+        contentHtml = '<div style="text-align:center;padding:20px;color:var(--muted);">准备继续上路？</div>';
+      }
+
+      const tabButtons = tabs.map(t => `
+        <div class="city-menu-tab ${t === currentTab ? 'active' : ''}" onclick="game.switchCityTab('${t}')">${t}</div>
+      `).join('');
+
+      this.els.log.innerHTML = `
+        <div class="city-menu-tabs">${tabButtons}</div>
+        <div>${contentHtml}</div>
+      `;
+
+      // 离开按钮单独放在 actions 区
+      if (currentTab === '离开') {
+        this.showChoices([
+          { text: '🚴 离开城市，继续前进', className: 'primary', onClick: () => onAction('leave') },
+        ]);
+      } else {
+        this.showChoices([
+          { text: '⬅️ 返回', onClick: () => { game._cityMenuTab = '离开'; refresh(); } },
+        ]);
+      }
+    };
+
+    // 把 refresh 挂在 game 上供 tab 切换使用
+    game._cityMenuRefresh = refresh;
+    game._currentCityNode = node;
+    refresh();
+  }
+
+  renderWildPoi(node, onAction) {
+    this.clearLog();
+    this.setPhase(`🏔️ ${node.name}`);
+    this.log(node.desc, 'info');
+
+    const attr = node.attractions && node.attractions[0];
+    if (attr) {
+      this.log(`你可以在这里停留拍摄：${attr.name}`, 'info');
+      this.showChoices([
+        { text: `📷 ${attr.name}（${attr.time}h | 素材+${attr.effects.find(e=>e.key==='materials')?.delta || '?'} 精神+${attr.effects.find(e=>e.key==='san')?.delta || '?'})`, className: 'primary', onClick: () => onAction('shoot') },
+        { text: '🚴 路过，不停留', onClick: () => onAction('pass') },
+      ]);
+    } else {
+      this.log('这里风景不错，但没有什么特别的拍摄点。', 'muted');
+      this.showChoices([
+        { text: '🚴 继续前进', className: 'primary', onClick: () => onAction('pass') },
+      ]);
+    }
   }
 
   updateStats(state) {
@@ -851,6 +1473,8 @@ class Renderer {
     this.els.sinBar.style.width = clamp(state.sin, 0, 100) + '%';
     const maxFans = Math.max(state.totalFans, 100000);
     this.els.fansBar.style.width = clamp((state.totalFans / maxFans) * 100, 0, 100) + '%';
+
+    this.updatePoiBar(state);
   }
 
   setPhase(label) {
@@ -924,7 +1548,7 @@ class SaveSystem {
 
   static save(state) {
     const data = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       routeType: ROUTE === ROUTES.short ? 'short' : 'long',
       day: state.day,
       time: state.time,
@@ -943,6 +1567,8 @@ class SaveSystem {
       maxWeight: state.maxWeight,
       phase: state.phase,
       flags: Array.from(state.flags),
+      visitedPois: Array.from(state.visitedPois || []),
+      accommodationChoice: state.accommodationChoice,
       gameOver: state.gameOver,
       ending: state.ending,
       timestamp: Date.now(),
@@ -960,6 +1586,12 @@ class SaveSystem {
         data.sin = data.sin || 0;
         data.schemaVersion = 2;
       }
+      // 版本迁移：v2 -> v3（兴趣点系统）
+      if (data.schemaVersion === 2) {
+        data.visitedPois = data.visitedPois || [];
+        data.accommodationChoice = data.accommodationChoice || null;
+        data.schemaVersion = 3;
+      }
       return data;
     } catch {
       return null;
@@ -973,6 +1605,27 @@ class SaveSystem {
   static clear() {
     localStorage.removeItem(this.KEY);
   }
+}
+
+// ===================== 兴趣点工具函数 =====================
+function getNextPoi(state) {
+  for (let i = state.nodeIndex + 1; i < ROUTE.length; i++) {
+    if (ROUTE[i].type !== 'road') {
+      return ROUTE[i];
+    }
+  }
+  return null;
+}
+
+function getDistanceToNextPoi(state) {
+  const next = getNextPoi(state);
+  if (!next) return 0;
+  return next.km - state.km;
+}
+
+function formatDistance(km) {
+  if (km >= 1000) return (km / 1000).toFixed(1) + 'km';
+  return Math.round(km) + 'km';
 }
 
 // ===================== 工具函数 =====================
@@ -1089,6 +1742,9 @@ class Game {
       return;
     }
 
+    // 记录已访问的兴趣点
+    this.state.visitedPois.add(node.id);
+
     // 节点到达事件
     if (this.state.km >= node.km && NODE_EVENTS[node.id]) {
       const evt = NODE_EVENTS[node.id];
@@ -1099,11 +1755,36 @@ class Game {
     }
 
     this.renderer.log(`你在${node.name}。${node.desc}`, 'muted');
-    this.renderer.log(`今日目标：推进到下一个节点。`, 'info');
 
-    this.renderer.showChoices([
-      { text: '🚴 出发前进', className: 'primary', onClick: () => this.phaseDay() },
-    ]);
+    // 根据节点类型显示不同交互
+    if (node.type === 'city') {
+      this.renderer.log(`这是一个城市，你可以补给、住宿、观光。`, 'info');
+      this.renderer.showChoices([
+        { text: '🏙️ 进入城市', className: 'primary', onClick: () => this.enterCity(node) },
+        { text: '🚴 直接出发', onClick: () => this.phaseDay() },
+      ]);
+    } else if (node.type === 'wild_poi') {
+      this.renderer.renderWildPoi(node, (action) => {
+        if (action === 'shoot') {
+          const attr = node.attractions[0];
+          this.state.time += attr.time;
+          for (const eff of attr.effects) {
+            this.state.modifyStat(eff.key, eff.delta);
+          }
+          this.renderer.log(`你在${attr.name}拍摄了大量素材！`, 'success');
+          this.renderer.updateStats(this.state);
+          this.phaseDay();
+        } else {
+          this.phaseDay();
+        }
+      });
+      return; // renderWildPoi 已处理 UI
+    } else {
+      this.renderer.log(`今日目标：推进到下一个兴趣点。`, 'info');
+      this.renderer.showChoices([
+        { text: '🚴 出发前进', className: 'primary', onClick: () => this.phaseDay() },
+      ]);
+    }
 
     this.renderer.updateStats(this.state);
     SaveSystem.save(this.state);
@@ -1225,17 +1906,45 @@ class Game {
     this.renderer.setPhase('傍晚');
     this.renderer.log(`时间：${this.timeEngine.formatTime()}。天色渐暗。`, 'muted');
 
-    this.renderer.showChoices([
-      { text: '🏕️ 扎营休息（进入夜间）', onClick: () => this.phaseNight() },
-      { text: '🌙 继续赶路（效率降低，消耗增加）', onClick: () => {
-        this.state.time += 2;
-        this.state.km += 10;
-        this.state.energy -= 20;
-        this.state.stats.con -= 10;
-        this.renderer.log('你摸黑赶路，效率很低...', 'warn');
-        this.checkStatus(() => this.phaseNight());
-      }},
-    ]);
+    const currentNode = this.state.currentNode;
+    const isCity = currentNode && currentNode.type === 'city';
+
+    if (isCity) {
+      this.renderer.log(`你现在在${currentNode.name}，可以选择在城市过夜。`, 'info');
+      this.renderer.showChoices([
+        { text: '🏨 进入城市过夜（住宿/补给）', className: 'primary', onClick: () => this.enterCity(currentNode, true) },
+        { text: '⛺ 在城市边缘露营（省钱但恢复差）', onClick: () => {
+          this.state.accommodationChoice = 'camp';
+          this.renderer.log('你决定在城市边缘找个角落露营。', 'muted');
+          this.phaseNight();
+        }},
+        { text: '🌙 继续赶路', onClick: () => {
+          this.state.time += 2;
+          this.state.km += 10;
+          this.state.energy -= 20;
+          this.state.stats.con -= 10;
+          this.renderer.log('你摸黑赶路，效率很低...', 'warn');
+          this.checkStatus(() => this.phaseNight());
+        }},
+      ]);
+    } else {
+      this.renderer.log('附近没有城市，你只能在野外扎营。', 'warn');
+      this.renderer.showChoices([
+        { text: '⛺ 野外扎营（恢复-40%，可能有突发事件）', onClick: () => {
+          this.state.accommodationChoice = 'camp';
+          this.renderer.log('你在荒野中搭起帐篷，四周一片寂静...', 'muted');
+          this.phaseNight();
+        }},
+        { text: '🌙 继续赶路', onClick: () => {
+          this.state.time += 2;
+          this.state.km += 10;
+          this.state.energy -= 20;
+          this.state.stats.con -= 10;
+          this.renderer.log('你摸黑赶路，效率很低...', 'warn');
+          this.checkStatus(() => this.phaseNight());
+        }},
+      ]);
+    }
 
     this.renderer.updateStats(this.state);
   }
@@ -1323,22 +2032,61 @@ class Game {
     this.state.phase = 'SETTLE';
     this.renderer.setPhase('夜间结算');
 
+    // 住宿类型判断
+    const acc = this.state.accommodationChoice;
+    const isCamp = !acc || acc === 'camp';
+
     // 食宿消耗
-    const foodCost = 50;
+    let foodCost = 50;
+    if (acc && acc !== 'camp') {
+      const node = this.state.currentNode;
+      const hotel = node && node.accommodations ? node.accommodations.find(a => a.id === acc) : null;
+      if (hotel) {
+        foodCost += hotel.price;
+        this.renderer.log(`🏨 住宿 ${hotel.name}：¥${hotel.price}`, 'info');
+      }
+    } else {
+      this.renderer.log(`⛺ 野外扎营，无住宿费用`, 'muted');
+    }
     this.state.cny -= foodCost;
     this.renderer.log(`每日食宿消耗：¥${foodCost}`, 'muted');
 
-    // 精力恢复
-    const recovery = 20 + this.state.stats.con * 0.3;
-    this.state.energy = Math.min(this.state.maxEnergy, this.state.energy + recovery);
-    this.renderer.log(`睡眠恢复精力：+${Math.floor(recovery)}`, 'success');
+    // 精力恢复（加入住宿系数）
+    let energyMult = 1.0;
+    let conMult = 1.0;
+    let sanBonus = 0;
 
-    // 体力恢复（轻度恢复，高海拔恢复减少）
+    if (acc && acc !== 'camp') {
+      const node = this.state.currentNode;
+      const hotel = node && node.accommodations ? node.accommodations.find(a => a.id === acc) : null;
+      if (hotel) {
+        energyMult = hotel.energyMult;
+        conMult = hotel.conMult;
+        sanBonus = hotel.sanBonus;
+      }
+    } else {
+      energyMult = 0.6;
+      conMult = 0.6;
+    }
+
+    const baseRecovery = 20 + this.state.stats.con * 0.3;
+    const energyRecovery = Math.floor(baseRecovery * energyMult);
+    this.state.energy = Math.min(this.state.maxEnergy, this.state.energy + energyRecovery);
+    this.renderer.log(`睡眠恢复精力：+${energyRecovery}${isCamp ? '（野外露营恢复较差）' : ''}`, 'success');
+
+    // 体力恢复
     const currentNode = this.state.currentNode;
     const altitude = currentNode && currentNode.km > 400 ? 0.5 : 1.0;
-    const conRecovery = Math.max(2, Math.floor((4 + this.state.stats.con * 0.05) * altitude));
+    const baseConRecovery = Math.max(2, Math.floor((4 + this.state.stats.con * 0.05) * altitude));
+    const conRecovery = Math.floor(baseConRecovery * conMult);
     this.state.stats.con = Math.min(100, this.state.stats.con + conRecovery);
-    this.renderer.log(`睡眠恢复体力：+${conRecovery}${altitude < 1 ? '（高海拔恢复减缓）' : ''}`, 'success');
+    this.renderer.log(`睡眠恢复体力：+${conRecovery}${altitude < 1 ? '（高海拔恢复减缓）' : ''}${isCamp ? '（野外露营恢复较差）' : ''}`, 'success');
+
+    // 精神恢复（住宿奖励）
+    if (sanBonus > 0) {
+      this.state.san = Math.min(100, this.state.san + sanBonus);
+      this.renderer.log(`住宿环境舒适，精神恢复：+${sanBonus}`, 'success');
+    }
 
     // 超载惩罚
     const overload = this.state.checkOverload();
@@ -1349,7 +2097,22 @@ class Game {
     // 素材清空
     this.state.materials = 0;
 
+    // 野外露营事件
+    if (isCamp) {
+      const campEvent = rollCampEvent();
+      if (campEvent) {
+        this.renderer.log(`---`, 'muted');
+        this.renderer.log(`${campEvent.text}`, 'warn');
+        for (const eff of campEvent.effects) {
+          this.state.modifyStat(eff.key, eff.delta);
+        }
+      }
+    }
+
     this.renderer.log(`第${this.state.day}天结束。`, 'info');
+
+    // 重置住宿选择
+    this.state.accommodationChoice = null;
 
     // 检查结局
     if (this.checkEnding()) return;
@@ -1429,6 +2192,97 @@ class Game {
     const ending = ENDINGS[id];
     this.renderer.showEnding(ending);
     SaveSystem.clear();
+  }
+
+  // ---- 兴趣点系统方法 ----
+  toggleMap() {
+    this.renderer.toggleMap();
+  }
+
+  enterCity(node, isEvening = false) {
+    this.renderer.renderCityMenu(node, (action) => {
+      if (action === 'leave') {
+        if (isEvening) {
+          this.phaseNight();
+        } else {
+          this.phaseDay();
+        }
+      }
+    });
+  }
+
+  switchCityTab(tab) {
+    this._cityMenuTab = tab;
+    if (this._cityMenuRefresh) {
+      this._cityMenuRefresh();
+    }
+  }
+
+  buyItem(itemId) {
+    const node = this._currentCityNode;
+    const item = node.shop.items.find(i => i.id === itemId);
+    if (!item) return;
+    if (this.state.cny < item.price) {
+      this.renderer.log('资金不足！', 'warn');
+      return;
+    }
+    const newWeight = this.state.weight + item.weight;
+    if (newWeight > this.state.maxWeight * 1.5) {
+      this.renderer.log('背包超重，无法携带！', 'warn');
+      return;
+    }
+    this.state.cny -= item.price;
+    this.state.addItem(itemId, 1);
+    this.renderer.log(`购买成功：${item.name} (-¥${item.price})`, 'success');
+    this.renderer.updateStats(this.state);
+    // 刷新城市菜单，保持在商店标签
+    this._cityMenuTab = '商店';
+    this.renderer.renderCityMenu(node, (action) => {
+      if (action === 'leave') this.phaseDay();
+    });
+  }
+
+  selectAccommodation(accId) {
+    const node = this._currentCityNode;
+    const acc = node.accommodations.find(a => a.id === accId);
+    if (!acc) return;
+    if (this.state.cny < acc.price) {
+      this.renderer.log('资金不足！', 'warn');
+      return;
+    }
+    this.state.accommodationChoice = accId;
+    this.renderer.log(`已预订 ${acc.name}，今晚将在这里休息。`, 'success');
+    // 如果是傍晚进入城市，直接进入夜间
+    if (this.state.phase === 'EVENING') {
+      this.phaseNight();
+    } else {
+      // 白天进入城市，选择完住宿后可以继续观光或离开
+      this._cityMenuTab = '商店';
+      this.renderer.renderCityMenu(node, (action) => {
+        if (action === 'leave') this.phaseDay();
+      });
+    }
+  }
+
+  visitAttraction(attrName) {
+    const node = this._currentCityNode;
+    const attr = node.attractions.find(a => a.name === attrName);
+    if (!attr) return;
+    if (24 - this.state.time < attr.time) {
+      this.renderer.log('时间不够了！', 'warn');
+      return;
+    }
+    this.state.time += attr.time;
+    for (const eff of attr.effects) {
+      this.state.modifyStat(eff.key, eff.delta);
+    }
+    this.renderer.log(`你参观了${attr.name}：${attr.desc}`, 'success');
+    this.renderer.updateStats(this.state);
+    // 刷新城市菜单，保持在景点标签
+    this._cityMenuTab = '景点';
+    this.renderer.renderCityMenu(node, (action) => {
+      if (action === 'leave') this.phaseDay();
+    });
   }
 }
 
