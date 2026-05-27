@@ -540,7 +540,7 @@ const EVENTS = [
     weight: 8,
     text: '肚子咕咕叫，附近没有餐馆。',
     choices: [
-      { text: '吃干粮（口粮-1，体力+5）', effects: [{ key: 'msg', delta: 0, msg: '你吃了点干粮，勉强填饱肚子。' }] },
+      { text: '吃干粮（口粮-1，体力+5）', effects: [{ key: 'con', delta: 5 }, { key: 'msg', delta: 0, msg: '你吃了点干粮，勉强填饱肚子，体力恢复了一些。' }] },
       { text: '忍到下一站（体力-5，精神-3）', effects: [{ key: 'con', delta: -5 }, { key: 'san', delta: -3 }] },
     ]
   },
@@ -558,12 +558,12 @@ const EVENTS = [
 
 const NODE_EVENTS = {
   chengdu: { text: '你从成都出发，踏上了西行之路。背包里装着简单的装备和满腔热血。', effects: [{ key: 'msg', delta: 0, msg: '旅程开始！' }] },
-  yaan: { text: '到达雅安，雨城的气息扑面而来。青衣江静静流淌，你可以在这里休整补给。', effects: [{ key: 'san', delta: 5 }, { key: 'cny', delta: -30, msg: '买了一份雅鱼，花费¥30' }] },
-  luding: { text: '到达泸定，大渡河波涛汹涌。铁索桥在风中微微晃动，让人想起那段历史。', effects: [{ key: 'san', delta: 3 }, { key: 'materials', delta: 3 }] },
-  kangding: { text: '到达康定，海拔2560米，空气开始稀薄。远处传来溜溜的情歌。', effects: [{ key: 'con', delta: -5 }, { key: 'materials', delta: 5 }] },
-  xinduqiao: { text: '到达新都桥，摄影天堂。光与影在草原上交织，每一帧都是大片。', effects: [{ key: 'materials', delta: 10 }, { key: 'san', delta: 5 }] },
-  litang: { text: '到达理塘，世界高城，海拔4014米。天空低得仿佛伸手可触。', effects: [{ key: 'con', delta: -10 }, { key: 'san', delta: -3 }] },
-  batang: { text: '到达巴塘，弦子之乡。金沙江在这里拐了一个大弯，进入西藏前的最后一站。', effects: [{ key: 'san', delta: 5 }, { key: 'cny', delta: -50, msg: '补充了氧气和药品，花费¥50' }] },
+  yaan: { text: '到达雅安，雨城的气息扑面而来。青衣江静静流淌，你可以在这里休整补给。', effects: [{ key: 'san', delta: 5 }, { key: 'con', delta: 3 }, { key: 'cny', delta: -30, msg: '买了一份雅鱼，花费¥30' }] },
+  luding: { text: '到达泸定，大渡河波涛汹涌。铁索桥在风中微微晃动，让人想起那段历史。', effects: [{ key: 'san', delta: 3 }, { key: 'con', delta: 3 }, { key: 'materials', delta: 3 }] },
+  kangding: { text: '到达康定，海拔2560米，空气开始稀薄。远处传来溜溜的情歌。', effects: [{ key: 'con', delta: -2 }, { key: 'materials', delta: 5 }] },
+  xinduqiao: { text: '到达新都桥，摄影天堂。光与影在草原上交织，每一帧都是大片。', effects: [{ key: 'materials', delta: 10 }, { key: 'san', delta: 5 }, { key: 'con', delta: 2 }] },
+  litang: { text: '到达理塘，世界高城，海拔4014米。天空低得仿佛伸手可触。', effects: [{ key: 'con', delta: -5 }, { key: 'san', delta: -3 }] },
+  batang: { text: '到达巴塘，弦子之乡。金沙江在这里拐了一个大弯，进入西藏前的最后一站。', effects: [{ key: 'san', delta: 5 }, { key: 'con', delta: 5 }, { key: 'cny', delta: -50, msg: '补充了氧气和药品，花费¥50' }] },
   lhasa: { text: '到达拉萨！圣城就在眼前！布达拉宫在阳光下闪耀，你的骑行之旅画上了句号。', effects: [{ key: 'san', delta: 20 }, { key: 'materials', delta: 15 }] },
 };
 
@@ -1171,11 +1171,12 @@ class Game {
     this.renderer.log(`时间：${this.timeEngine.formatTime()}。你可以选择休息或继续赶路。`, 'info');
 
     this.renderer.showChoices([
-      { text: '🍚 吃饭休息（精力+10，时间+1h）', onClick: () => {
+      { text: '🍚 吃饭休息（精力+10，体力+5，时间+1h）', onClick: () => {
         this.state.time += 1;
         this.state.energy += 10;
+        this.state.stats.con = Math.min(100, this.state.stats.con + 5);
         this.state.cny -= 30;
-        this.renderer.log('你吃了午饭，休息了一会儿。', 'success');
+        this.renderer.log('你吃了午饭，休息了一会儿，体力有所恢复。', 'success');
         this.phaseAfternoon();
       }},
       { text: '🚴 继续赶路（时间+3h，推进20km）', className: 'primary', onClick: () => this.phaseAfternoon() },
@@ -1331,6 +1332,13 @@ class Game {
     const recovery = 20 + this.state.stats.con * 0.3;
     this.state.energy = Math.min(this.state.maxEnergy, this.state.energy + recovery);
     this.renderer.log(`睡眠恢复精力：+${Math.floor(recovery)}`, 'success');
+
+    // 体力恢复（轻度恢复，高海拔恢复减少）
+    const currentNode = this.state.currentNode;
+    const altitude = currentNode && currentNode.km > 400 ? 0.5 : 1.0;
+    const conRecovery = Math.max(2, Math.floor((4 + this.state.stats.con * 0.05) * altitude));
+    this.state.stats.con = Math.min(100, this.state.stats.con + conRecovery);
+    this.renderer.log(`睡眠恢复体力：+${conRecovery}${altitude < 1 ? '（高海拔恢复减缓）' : ''}`, 'success');
 
     // 超载惩罚
     const overload = this.state.checkOverload();
