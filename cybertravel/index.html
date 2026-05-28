@@ -1911,6 +1911,7 @@ class Game {
         this.state.stats.con = Math.min(100, this.state.stats.con + 8);
         this.state.cny -= 30;
         this.renderer.log('你吃了午饭，休息了一会儿，体力恢复了不少。', 'success');
+        this.renderer.updateStats(this.state);
         this.phaseAfternoon();
       }},
       { text: '😴 停下休息（精力+5，体力+5，时间+1.5h）', onClick: () => {
@@ -1918,6 +1919,7 @@ class Game {
         this.state.energy += 5;
         this.state.stats.con = Math.min(100, this.state.stats.con + 5);
         this.renderer.log('你在路边找了块平地躺下休息，体力恢复了一些。', 'success');
+        this.renderer.updateStats(this.state);
         this.phaseAfternoon();
       }},
       { text: '🚴 继续赶路（跳过休息）', className: 'primary', onClick: () => this.phaseAfternoon() },
