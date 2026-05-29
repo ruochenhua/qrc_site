@@ -1,7 +1,7 @@
 # ADR-001: 单文件 MVP 架构
 
 ## 状态
-accepted
+superseded by [ADR-006: 模块化 ESM 重构](./ADR-006-modular-esm-refactor.md)
 
 ## 背景
 CyberTravelGame 需要快速验证核心玩法。选择单文件架构可以降低开发门槛、便于分享、无需构建工具。

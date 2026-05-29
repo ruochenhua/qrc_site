@@ -1,22 +1,22 @@
-# Issue Tracker
+# Issue tracker: GitHub
 
-This repo uses **GitHub Issues**.
+Issues and PRDs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
 
-## Creating issues
+## Conventions
 
-Use the `gh` CLI:
+- **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
+- **Read an issue**: `gh issue view <number> --comments`, filtering comments by `jq` and also fetching labels.
+- **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
+- **Comment on an issue**: `gh issue comment <number> --body "..."`
+- **Apply / remove labels**: `gh issue edit <number> --add-label "..."` / `--remove-label "..."`
+- **Close**: `gh issue close <number> --comment "..."`
 
-```bash
-gh issue create --title "TITLE" --body "BODY" --label "LABEL"
-```
+Infer the repo from `git remote -v` — `gh` does this automatically when run inside a clone.
 
-## Reading issues
+## When a skill says "publish to the issue tracker"
 
-```bash
-gh issue list --label "needs-triage"
-gh issue view NUMBER
-```
+Create a GitHub issue.
 
-## Repository
+## When a skill says "fetch the relevant ticket"
 
-https://github.com/ruochenhua/qrc_site
+Run `gh issue view <number> --comments`.
