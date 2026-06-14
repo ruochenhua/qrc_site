@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>烟花大师 - Firework Master</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game">
+  <div id="view-start" class="view active">
+    <div class="start-screen">
+      <h1>🎆 烟花大师</h1>
+      <p class="subtitle">从无名学徒到烟花大师的成名之路</p>
+      <div class="actions">
+        <button id="new-game-btn" class="btn primary large">新游戏</button>
+        <button id="continue-btn" class="btn large">继续游戏</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-hub" class="view">
+    <header class="hub-header">
+      <h2>🎆 烟花大师</h2>
+      <div class="status-bar">
+        <span class="pill">等级：<span id="hub-rank">学徒</span></span>
+        <span class="pill">资金：<span id="hub-funds">¥0</span></span>
+        <span class="pill">名气：<span id="hub-fame">0</span></span>
+        <span class="pill">下级所需：<span id="hub-next">--</span></span>
+      </div>
+    </header>
+    <div class="hub-actions">
+      <button id="hub-events" class="btn primary large">🎪 赛事列表</button>
+      <button id="hub-lab" class="btn large">🧪 配方实验室</button>
+      <button id="hub-rankup" class="btn success large" style="display:none">⬆️ 晋升等级</button>
+      <button id="hub-settings" class="btn danger large">🗑️ 重置存档</button>
+    </div>
+  </div>
+
+  <div id="view-events" class="view">
+    <header><h2>🎪 赛事列表</h2></header>
+    <div id="event-list" class="card-list"></div>
+    <button id="events-back" class="btn">← 返回 Hub</button>
+  </div>
+
+  <div id="view-build" class="view">
+    <header>
+      <h2>组建节目单</h2>
+      <div class="build-meta">
+        <span>赛事：<span id="build-title">--</span></span>
+        <span>预算：<span id="build-budget">--</span></span>
+        <span>弹数：<span id="build-min">--</span> ~ <span id="build-max">--</span></span>
+        <span>奖励：<span id="build-rewards">--</span></span>
+        <button id="event-detail-btn" class="btn small">详情</button>
+      </div>
+      <div class="build-hint" id="build-hint">--</div>
+    </header>
+    <div class="build-layout">
+      <div class="panel assembly-panel">
+        <h3>组装台</h3>
+        <div class="assembly-tabs" id="assembly-tabs">
+          <button class="tab-btn active" data-tab="gunpowder">火药</button>
+          <button class="tab-btn" data-tab="fuse">引线</button>
+          <button class="tab-btn" data-tab="casing">壳体</button>
+          <button class="tab-btn" data-tab="colorant">颜色剂</button>
+          <button class="tab-btn" data-tab="effect">特效剂</button>
+          <button class="tab-btn" data-tab="secondary-colorant" id="tab-secondary-colorant" style="display:none">二层颜色剂</button>
+          <button class="tab-btn" data-tab="secondary-effect" id="tab-secondary-effect" style="display:none">二层特效剂</button>
+        </div>
+        <div id="assembly-categories" class="assembly-categories"></div>
+        <div class="capacity-row">
+          <span class="capacity-label">主层容量</span>
+          <div class="capacity-track">
+            <div id="primary-capacity-fill" class="capacity-fill"></div>
+          </div>
+          <span id="primary-capacity-text" class="capacity-text">0/0</span>
+        </div>
+        <div id="secondary-capacity-row" class="capacity-row" style="display:none">
+          <span class="capacity-label">二层容量</span>
+          <div class="capacity-track">
+            <div id="secondary-capacity-fill" class="capacity-fill secondary-fill"></div>
+          </div>
+          <span id="secondary-capacity-text" class="capacity-text">0/0</span>
+        </div>
+        <div id="assembly-validation" class="validation-msg"></div>
+        <button id="assembly-add" class="btn primary small" disabled>加入节目单</button>
+      </div>
+
+      <div class="panel preview-panel">
+        <h3>实时预览</h3>
+        <div id="preview-toast" class="preview-toast" style="display:none"></div>
+        <canvas id="preview-canvas" width="640" height="360"></canvas>
+        <div id="preview-attrs" class="preview-attrs">
+          <div class="attr-row"><span>高度</span><span id="attr-height">--</span></div>
+          <div class="attr-row"><span>规模</span><span id="attr-scale">--</span></div>
+          <div class="attr-row"><span>密度</span><span id="attr-density">--</span></div>
+          <div class="attr-row"><span>持续时间</span><span id="attr-duration">--</span></div>
+          <div class="attr-row"><span>主色</span><span id="attr-color">--</span></div>
+          <div class="attr-row"><span>特效</span><span id="attr-effects">--</span></div>
+        </div>
+        <div class="current-loadout">
+          <h4>已选配料</h4>
+          <div id="loadout-list" class="loadout-list"></div>
+        </div>
+      </div>
+
+      <div class="panel library-panel">
+        <div class="library-tabs">
+          <button class="tab-btn active" data-tab="recipes">系统示例</button>
+          <button class="tab-btn" data-tab="blueprints">我的蓝图</button>
+        </div>
+        <div id="library-recipes" class="library-list active"></div>
+        <div id="library-blueprints" class="library-list" style="display:none">
+          <div class="blueprint-actions">
+            <button id="blueprint-save" class="btn small">保存当前组装</button>
+            <button id="blueprint-expand" class="btn small">扩展槽位</button>
+          </div>
+          <div id="blueprint-slots" class="slots-info"></div>
+          <div id="blueprint-list" class="library-list"></div>
+        </div>
+
+        <div class="show-panel">
+          <h3>当前节目单</h3>
+          <div id="build-show" class="show-list"></div>
+          <div class="build-summary">
+            <span>总成本：<span id="build-cost">¥0</span></span>
+            <span>弹数：<span id="build-count">0</span></span>
+          </div>
+          <div id="build-validation" class="validation-msg"></div>
+          <div class="build-actions">
+            <button id="build-clear" class="btn">清空</button>
+            <button id="build-back" class="btn">返回</button>
+            <button id="build-confirm" class="btn primary" disabled>确认表演</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-perform" class="view">
+    <canvas id="perform-canvas"></canvas>
+    <div id="perform-status">准备中...</div>
+    <button id="perform-skip" class="btn">跳过表演</button>
+  </div>
+
+  <div id="view-result" class="view">
+    <div class="result-screen">
+      <h2>评分结算</h2>
+      <div class="score-display">
+        <div class="score-num" id="result-score">0</div>
+        <div class="score-grade" id="result-grade">D</div>
+      </div>
+      <div id="result-breakdown" class="breakdown"></div>
+      <div class="reward-row">
+        <span>资金：<span id="result-funds">+¥0</span></span>
+        <span>名气：<span id="result-fame">+0</span></span>
+      </div>
+      <div id="result-extra"></div>
+      <button id="result-continue" class="btn primary large">返回 Hub</button>
+    </div>
+  </div>
+
+  <div id="view-lab" class="view">
+    <header><h2>🧪 配方实验室</h2></header>
+    <div id="lab-owned" class="card-list"></div>
+    <button id="lab-back" class="btn">← 返回 Hub</button>
+  </div>
+
+  <div id="event-detail-modal" class="modal" style="display:none">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <h3 id="detail-name">--</h3>
+      <div id="detail-body" class="detail-body"></div>
+      <div class="modal-actions">
+        <button id="detail-close" class="btn primary">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="blueprint-save-modal" class="modal" style="display:none">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <h3>保存蓝图</h3>
+      <div class="detail-body">
+        <label for="blueprint-name-input" class="input-label">给这套组装起个名字</label>
+        <input type="text" id="blueprint-name-input" class="text-input" placeholder="例如：红牡丹开场" maxlength="20">
+      </div>
+      <div class="modal-actions">
+        <button id="blueprint-save-cancel" class="btn">取消</button>
+        <button id="blueprint-save-confirm" class="btn primary">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="view-ending" class="view">
+    <div class="ending-screen">
+      <h1>🏆 通关！</h1>
+      <p>你已成为万众瞩目的「烟花大师」。</p>
+      <p>资金：<span id="ending-funds">--</span> | 名气：<span id="ending-fame">--</span></p>
+      <button id="ending-back" class="btn primary large">返回 Hub</button>
+    </div>
+  </div>
+
+  <div id="file-protocol-warning" style="display:none;padding:20px;text-align:center">
+    <div style="font-size:32px;margin-bottom:12px">⚠️</div>
+    <div style="color:#ff6b6b;font-size:16px;margin-bottom:12px">无法通过 file:// 协议加载 ES Module</div>
+    <div style="color:#aaa;font-size:13px;line-height:1.8">
+      请使用本地服务器打开本页面：<br>
+      <code style="background:#0d0d14;padding:4px 8px;border-radius:4px">npx serve</code>
+      或
+      <code style="background:#0d0d14;padding:4px 8px;border-radius:4px">python -m http.server 8000</code>
+    </div>
+  </div>
+</div>
+
+<script>
+  if (location.protocol === 'file:') {
+    document.getElementById('file-protocol-warning').style.display = 'block';
+  }
+</script>
+<script type="module" src="js/game.js"></script>
+</body>
+</html>
