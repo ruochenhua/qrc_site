@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { GameState } from '../js/state.js';
-import { validateShow, settleEvent } from '../js/systems.js';
+import { validateShow, startCompetition, settleCompetitionRound } from '../js/systems.js';
 import { EVENTS } from '../js/config.js';
 
 function makeShell(overrides = {}) {
@@ -64,14 +64,15 @@ describe('Event min/max shell constraints', () => {
     assert.equal(result.reason, 'too_few_shells');
   });
 
-  test('settleEvent with enough shells for technician main succeeds', () => {
+  test('competition round with enough shells for technician main succeeds', () => {
     const state = new GameState();
     state.rank = 'technician';
     state.completeMainEvent('e001');
     state.completeMainEvent('e004');
     state.funds = 1000;
     const show = Array(4).fill(null).map((_, i) => makeShell({ id: `s${i}` }));
-    const result = settleEvent(state, 'e007', show);
+    startCompetition(state, 'e007');
+    const result = settleCompetitionRound(state, show);
     assert.equal(result.success, true);
   });
 });

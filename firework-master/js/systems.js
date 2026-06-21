@@ -11,6 +11,60 @@ import {
   MAX_DURATION_VALUE,
 } from './config.js';
 
+/**
+ * @typedef {import('./config.js').Event} Event
+ * @typedef {import('./config.js').Recipe} Recipe
+ */
+
+/**
+ * @typedef {Object} Shell
+ * @property {string} id
+ * @property {string|null} name
+ * @property {string} shape
+ * @property {number} height
+ * @property {number} scale
+ * @property {number} density
+ * @property {number} duration
+ * @property {Object} color
+ * @property {Object} effects
+ * @property {number} cost
+ * @property {Object} components
+ * @property {string|null} recipeId
+ * @property {string|null} blueprintId
+ * @property {boolean} hasSecondary
+ * @property {Object} secondary
+ * @property {Object|null} secondaryAttr
+ */
+
+/**
+ * @typedef {Object} ScoreResult
+ * @property {number} score
+ * @property {number} baseScore
+ * @property {number} complexityBonus
+ * @property {number} comboBonus
+ * @property {number} repeatPenalty
+ * @property {string[]} combos
+ * @property {{hits: number, total: number}} preferenceHits
+ */
+
+/**
+ * @typedef {Object} SettlementResult
+ * @property {boolean} success
+ * @property {ScoreResult} [score]
+ * @property {Object} [rewards]
+ * @property {number} [cost]
+ * @property {boolean} [isFirstClear]
+ * @property {boolean} [rankedUp]
+ * @property {string} [reason]
+ */
+
+/**
+ * @typedef {Object} ValidationResult
+ * @property {boolean} valid
+ * @property {string} [reason]
+ * @property {number} [cost]
+ */
+
 export function getRankIndex(rankId) {
   return RANK_ORDER.indexOf(rankId);
 }
@@ -47,6 +101,10 @@ export function isComponentUnlocked(state, componentId) {
   return state.fame >= comp.unlockFame;
 }
 
+export function isComponentOwned(state, componentId) {
+  return state.ownedComponents.has(componentId);
+}
+
 export function getUnlockedComponents(state) {
   const result = {};
   for (const category of COMPONENT_CATEGORIES) {
@@ -60,11 +118,24 @@ export function getUnlockedComponents(state) {
   return result;
 }
 
+export function getOwnedComponents(state) {
+  const result = {};
+  for (const category of COMPONENT_CATEGORIES) {
+    result[category] = {};
+    for (const [id, comp] of Object.entries(COMPONENTS[category])) {
+      if (state.ownedComponents.has(id)) {
+        result[category][id] = comp;
+      }
+    }
+  }
+  return result;
+}
+
 function isQuantityMapAccessible(map, category, state) {
   for (const [id, qty] of Object.entries(map || {})) {
     if (!qty) continue;
     const comp = getComponentById(category, id);
-    if (!comp || state.fame < comp.unlockFame) return false;
+    if (!comp || !state.ownedComponents.has(id)) return false;
   }
   return true;
 }
@@ -77,7 +148,7 @@ export function areComponentsAccessible(components, state) {
     } else if (category === 'casing' || category === 'fuse') {
       if (!selected) return false;
       const comp = getComponentById(category, selected);
-      if (!comp || state.fame < comp.unlockFame) return false;
+      if (!comp || !state.ownedComponents.has(selected)) return false;
     }
   }
   const secondary = components.secondary || {};
@@ -129,6 +200,11 @@ export function isExactRecipeMatch(assembly, recipeId) {
   return assembliesEqual(assembly, recipe.components);
 }
 
+/**
+ * Validate an assembly definition before building a shell.
+ * @param {Object} components
+ * @returns {ValidationResult}
+ */
 export function validateShellComponents(components) {
   for (const category of COMPONENT_CATEGORIES) {
     if (components[category] === undefined) {
@@ -189,6 +265,12 @@ function sumQuantities(map, idFilter = null) {
   return Object.values(map).reduce((sum, n) => sum + (Number(n) || 0), 0);
 }
 
+/**
+ * Build a Shell from a quantity-based component definition.
+ * @param {Object} components
+ * @param {Recipe|null} [recipe]
+ * @returns {Shell}
+ */
 export function assembleShell(components, recipe = null) {
   const validation = validateShellComponents(components);
   if (!validation.valid) {
@@ -314,30 +396,76 @@ function normalize(value, max) {
   return Math.max(0, Math.min(1, value / max));
 }
 
+/**
+ * @param {import('./state.js').GameState} state
+ * @returns {Event[]}
+ */
 export function getAvailableEvents(state) {
   return Object.values(EVENTS).filter(event => isEventAvailable(state, event.id));
 }
 
+/**
+ * @param {import('./state.js').GameState} state
+ * @param {string} eventId
+ * @returns {boolean}
+ */
 export function isEventAvailable(state, eventId) {
+  return getEventStatus(state, eventId) === 'available';
+}
+
+/**
+ * @param {import('./state.js').GameState} state
+ * @param {string} eventId
+ * @returns {'completed'|'available'|'locked'}
+ */
+export function getEventStatus(state, eventId) {
   const event = getEventById(eventId);
-  if (!event) return false;
+  if (!event) return 'locked';
 
   const currentIndex = getRankIndex(state.rank);
   const eventRankIndex = getRankIndex(event.rank);
-  if (eventRankIndex > currentIndex) return false;
+  if (eventRankIndex > currentIndex) return 'locked';
 
-  if (event.isMain && state.isMainEventCompleted(event.id)) return false;
+  if (event.isMain && state.isMainEventCompleted(event.id)) return 'completed';
 
-  // Competitions require all main events of lower/equal rank to be completed in order.
   if (event.isMain) {
     const previousMainIds = getMainEventIdsUpToRank(state.rank);
     for (const id of previousMainIds) {
       if (id === event.id) break;
-      if (!state.isMainEventCompleted(id)) return false;
+      if (!state.isMainEventCompleted(id)) return 'locked';
     }
   }
 
-  return true;
+  return 'available';
+}
+
+/**
+ * @param {import('./state.js').GameState} state
+ * @param {string} eventId
+ * @returns {string}
+ */
+export function getEventLockReason(state, eventId) {
+  const event = getEventById(eventId);
+  if (!event) return '赛事不存在';
+
+  const currentIndex = getRankIndex(state.rank);
+  const eventRankIndex = getRankIndex(event.rank);
+  if (eventRankIndex > currentIndex) {
+    return `需要等级：${RANKS[event.rank].name}`;
+  }
+
+  if (event.isMain) {
+    const previousMainIds = getMainEventIdsUpToRank(state.rank);
+    for (const id of previousMainIds) {
+      if (id === event.id) break;
+      if (!state.isMainEventCompleted(id)) {
+        const prev = getEventById(id);
+        return prev ? `需先完成：${prev.name}` : '需先完成前置主线赛事';
+      }
+    }
+  }
+
+  return '暂不可用';
 }
 
 export function getMainEventIdsUpToRank(rankId) {
@@ -358,6 +486,10 @@ export function getCurrentRankMainEvents(state) {
   return Object.values(EVENTS).filter(e => e.rank === state.rank && e.isMain);
 }
 
+/**
+ * @param {import('./state.js').GameState} state
+ * @returns {boolean}
+ */
 export function canRankUp(state) {
   const rankInfo = RANKS[state.rank];
   if (!rankInfo || rankInfo.nextThreshold === null) return false;
@@ -370,6 +502,10 @@ export function canRankUp(state) {
   return true;
 }
 
+/**
+ * @param {import('./state.js').GameState} state
+ * @returns {boolean}
+ */
 export function rankUp(state) {
   if (!canRankUp(state)) return false;
   const currentIndex = getRankIndex(state.rank);
@@ -382,6 +518,10 @@ export function rankUp(state) {
   return true;
 }
 
+/**
+ * @param {import('./state.js').GameState} state
+ * @returns {void}
+ */
 export function updateUnlocks(state) {
   for (const recipe of Object.values(RECIPES)) {
     if (state.fame >= recipe.unlockFame) {
@@ -398,6 +538,11 @@ export function getOwnableRecipes(state) {
   return Object.values(RECIPES).filter(r => state.unlockedRecipes.has(r.id) && !state.ownedRecipes.has(r.id));
 }
 
+/**
+ * @param {import('./state.js').GameState} state
+ * @param {string} recipeId
+ * @returns {{success: boolean, reason?: string}}
+ */
 export function researchRecipe(state, recipeId) {
   const recipe = getRecipeById(recipeId);
   if (!recipe) return { success: false, reason: 'recipe_not_found' };
@@ -407,6 +552,25 @@ export function researchRecipe(state, recipeId) {
 
   state.addFunds(-recipe.researchCost);
   state.ownRecipe(recipeId);
+  return { success: true };
+}
+
+/**
+ * Purchase permanent ownership of a component.
+ * @param {import('./state.js').GameState} state
+ * @param {string} category
+ * @param {string} componentId
+ * @returns {{success: boolean, reason?: string}}
+ */
+export function researchComponent(state, category, componentId) {
+  const comp = getComponentById(category, componentId);
+  if (!comp) return { success: false, reason: 'component_not_found' };
+  if (state.fame < comp.unlockFame) return { success: false, reason: 'not_unlocked' };
+  if (state.ownedComponents.has(componentId)) return { success: false, reason: 'already_owned' };
+  if (state.funds < comp.researchCost) return { success: false, reason: 'insufficient_funds' };
+
+  state.addFunds(-comp.researchCost);
+  state.ownComponent(componentId);
   return { success: true };
 }
 
@@ -422,6 +586,12 @@ export function getShowCost(show) {
   }, 0);
 }
 
+/**
+ * @param {import('./state.js').GameState} state
+ * @param {string} eventId
+ * @param {(Shell|string)[]} show
+ * @returns {ValidationResult}
+ */
 export function validateShow(state, eventId, show) {
   const event = getEventById(eventId);
   if (!event) return { valid: false, reason: 'event_not_found' };
@@ -449,8 +619,13 @@ export function validateShow(state, eventId, show) {
     }
   }
 
+  let budget = event.budget;
+  if (state.competition && state.competition.eventId === event.id) {
+    budget = event.roundBudget ?? event.budget;
+  }
+
   const cost = getShowCost(show) + (event.entryFee || 0);
-  if (event.budget !== null && cost > event.budget) {
+  if (budget !== null && cost > budget) {
     return { valid: false, reason: 'over_budget' };
   }
 
@@ -461,12 +636,23 @@ export function validateShow(state, eventId, show) {
   return { valid: true, cost };
 }
 
-export function calculateScore(eventId, show) {
-  const event = getEventById(eventId);
-  if (!event || show.length === 0) return { score: 0, baseScore: 0, complexityBonus: 0, repeatPenalty: 0, combos: [] };
+/**
+ * @param {string} eventId
+ * @param {(Shell|string)[]} show
+ * @returns {ScoreResult}
+ */
+export function calculateScore(eventIdOrPrefs, show) {
+  let prefs = null;
+  if (typeof eventIdOrPrefs === 'string') {
+    const event = getEventById(eventIdOrPrefs);
+    if (!event || show.length === 0) return { score: 0, baseScore: 0, complexityBonus: 0, repeatPenalty: 0, combos: [] };
+    prefs = event.preferences;
+  } else {
+    prefs = eventIdOrPrefs;
+    if (!prefs || show.length === 0) return { score: 0, baseScore: 0, complexityBonus: 0, repeatPenalty: 0, combos: [] };
+  }
 
   const shells = show.map(item => isShellObject(item) ? item : getRecipeById(item)).filter(Boolean);
-  const prefs = event.preferences;
 
   let totalMatch = 0;
   let totalComplexity = 0;
@@ -483,6 +669,7 @@ export function calculateScore(eventId, show) {
   const repeatPenalty = calculateRepeatPenalty(shells);
 
   const score = baseScore * (1 + complexityBonus + comboBonus) * (1 - repeatPenalty);
+  const preferenceHits = preferenceHitCount(prefs, shells);
   return {
     score: Math.min(100, Math.round(score)),
     baseScore: Math.round(baseScore * 10) / 10,
@@ -490,6 +677,7 @@ export function calculateScore(eventId, show) {
     comboBonus,
     repeatPenalty,
     combos,
+    preferenceHits,
   };
 }
 
@@ -524,6 +712,61 @@ function vectorSimilarity(a, b) {
     dot += (a[key] || 0) * (b[key] || 0);
   }
   return dot;
+}
+
+function averageVector(vectors) {
+  const result = {};
+  let count = 0;
+  for (const v of vectors) {
+    if (!v) continue;
+    count += 1;
+    for (const [key, val] of Object.entries(v)) {
+      result[key] = (result[key] || 0) + val;
+    }
+  }
+  if (count === 0) return result;
+  for (const key of Object.keys(result)) {
+    result[key] /= count;
+  }
+  return result;
+}
+
+function preferenceHitCount(prefs, shells) {
+  prefs = prefs || {};
+  const dims = [];
+  const addScalar = (key, target, getter) => {
+    if (target !== undefined && target !== null) {
+      dims.push({ target, getter, vector: false });
+    }
+  };
+
+  addScalar('height', prefs.height, s => s.height);
+  addScalar('scale', prefs.scale, s => s.scale);
+  addScalar('density', prefs.density, s => s.density);
+  addScalar('duration', prefs.duration, s => s.duration);
+  addScalar('complexity', prefs.complexity, s => shellComplexity(s));
+
+  if (prefs.color && Object.keys(prefs.color).length > 0) {
+    dims.push({ target: prefs.color, getter: s => s.color || {}, vector: true });
+  }
+  if (prefs.effects && Object.keys(prefs.effects).length > 0) {
+    dims.push({ target: prefs.effects, getter: s => s.effects || {}, vector: true });
+  }
+
+  let hits = 0;
+  for (const dim of dims) {
+    let match;
+    if (dim.vector) {
+      const avg = averageVector(shells.map(dim.getter));
+      match = vectorSimilarity(avg, dim.target);
+    } else {
+      const avg = shells.map(dim.getter).reduce((a, b) => a + b, 0) / shells.length;
+      match = Math.max(0, 1 - Math.abs(avg - dim.target));
+    }
+    if (match >= 0.5) hits += 1;
+  }
+
+  return { hits, total: dims.length };
 }
 
 function shellComplexity(shell) {
@@ -581,6 +824,279 @@ export function getScoreGrade(score) {
   return 'D';
 }
 
+const COMPETITION_FAME_FRACTIONS = [1, 0.6, 0.35, 0.35, 0.15, 0.15, 0.15, 0.15, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05];
+const COMPETITION_FUNDS_FRACTIONS = [0.5, 0.3, 0.15, 0.15, 0.05, 0.05, 0.05, 0.05, 0, 0, 0, 0, 0, 0, 0, 0];
+const COMPETITION_BASE_SCORES = { apprentice: 50, skilled: 60, technician: 70, expert: 80, master: 90 };
+
+function hashString(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+}
+
+function getCompetitionRounds(event) {
+  if (event.rounds) return event.rounds;
+  return event.rank === 'expert' || event.rank === 'master' ? 4 : 3;
+}
+
+function generateOpponentScore(event, round) {
+  const rounds = getCompetitionRounds(event);
+  const base = COMPETITION_BASE_SCORES[event.rank] ?? 60;
+  const spread = 8;
+  const mid = (rounds - 1) / 2;
+  const salt = (hashString(event.id) % 11) - 5;
+  const score = base + (round - mid) * spread + salt;
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function getRoundName(round, totalRounds) {
+  const distance = totalRounds - round;
+  if (distance === 0) return '决赛';
+  if (distance === 1) return '半决赛';
+  if (totalRounds === 3 && round === 1) return '初赛';
+  if (totalRounds === 4 && round === 1) return '1/8 决赛';
+  if (totalRounds === 4 && round === 2) return '1/4 决赛';
+  return `第 ${round} 轮`;
+}
+
+export function getCompetitionRoundNames(event) {
+  const rounds = getCompetitionRounds(event);
+  return Array.from({ length: rounds }, (_, i) => getRoundName(i + 1, rounds));
+}
+
+function lerpScalarRound(base, round, totalRounds) {
+  if (totalRounds <= 1) return base;
+  const t = (round - 1) / (totalRounds - 1);
+  const factor = 0.8 + t * 0.2; // 0.8 -> 1.0
+  return Math.max(0, Math.min(1, base * factor));
+}
+
+function scaleVectorRound(vector, round, totalRounds) {
+  if (!vector || Object.keys(vector).length === 0) return vector;
+  const t = (round - 1) / Math.max(1, totalRounds - 1);
+  const factor = 0.7 + t * 0.3; // 0.7 -> 1.0, keep theme stable
+  const result = {};
+  for (const [key, val] of Object.entries(vector)) {
+    result[key] = Math.max(0, Math.min(1, val * factor));
+  }
+  return result;
+}
+
+export function getRoundPreference(event, round, totalRounds) {
+  const base = event.preferences || {};
+  const prefs = {
+    height: lerpScalarRound(base.height ?? 0.5, round, totalRounds),
+    scale: lerpScalarRound(base.scale ?? 0.5, round, totalRounds),
+    density: lerpScalarRound(base.density ?? 0.5, round, totalRounds),
+    duration: lerpScalarRound(base.duration ?? 0.5, round, totalRounds),
+    complexity: lerpScalarRound(base.complexity ?? 0, round, totalRounds),
+    color: scaleVectorRound(base.color, round, totalRounds),
+    effects: scaleVectorRound(base.effects, round, totalRounds),
+    any: base.any,
+  };
+  return prefs;
+}
+
+export function startCompetition(state, eventId) {
+  const event = getEventById(eventId);
+  if (!event) return { success: false, reason: 'event_not_found' };
+  if (event.type !== 'competition') return { success: false, reason: 'not_competition' };
+
+  const totalRounds = getCompetitionRounds(event);
+  state.competition = {
+    eventId,
+    round: 1,
+    totalRounds,
+    remaining: 2 ** totalRounds,
+    roundResults: [],
+    eliminated: false,
+    finished: false,
+  };
+  state.selectedEventId = eventId;
+  state.currentShow = [];
+  return { success: true };
+}
+
+export function getCurrentRoundBudget(state) {
+  if (!state.competition) return null;
+  const event = getEventById(state.competition.eventId);
+  if (!event) return null;
+  return event.roundBudget ?? event.budget;
+}
+
+export function getCurrentRoundPreference(state) {
+  if (!state.competition) return null;
+  const event = getEventById(state.competition.eventId);
+  if (!event) return null;
+  return getRoundPreference(event, state.competition.round, state.competition.totalRounds);
+}
+
+export function settleCompetitionRound(state, show) {
+  if (!state.competition) return { success: false, reason: 'no_competition' };
+  if (state.competition.finished) return { success: false, reason: 'competition_finished' };
+
+  const event = getEventById(state.competition.eventId);
+  if (!event) return { success: false, reason: 'event_not_found' };
+
+  const round = state.competition.round;
+  const totalRounds = state.competition.totalRounds;
+  const roundName = getRoundName(round, totalRounds);
+
+  const validation = validateShow(state, event.id, show);
+  if (!validation.valid) return { success: false, reason: validation.reason };
+
+  const roundPreference = getRoundPreference(event, round, totalRounds);
+  const scoreResult = calculateScore(roundPreference, show);
+  const opponentScore = generateOpponentScore(event, round - 1);
+  const won = scoreResult.score > opponentScore;
+
+  state.addFunds(-validation.cost);
+
+  state.competition.roundResults.push({
+    round,
+    name: roundName,
+    playerScore: scoreResult.score,
+    opponentScore,
+    won,
+    show: JSON.parse(JSON.stringify(show)),
+    cost: validation.cost,
+  });
+
+  const roundResult = {
+    round,
+    name: roundName,
+    playerScore: scoreResult.score,
+    opponentScore,
+    won,
+    score: scoreResult,
+    cost: validation.cost,
+  };
+
+  if (!won) {
+    const finalRank = 2 ** (totalRounds - round + 1);
+    state.competition.eliminated = true;
+    state.competition.finished = true;
+    return { success: true, roundResult, eliminated: true, finalRank };
+  }
+
+  if (round === totalRounds) {
+    state.competition.finished = true;
+    return { success: true, roundResult, champion: true, finalRank: 1 };
+  }
+
+  state.competition.round += 1;
+  state.competition.remaining = Math.floor(state.competition.remaining / 2);
+  state.currentShow = [];
+
+  return { success: true, roundResult, advanced: true, nextRound: state.competition.round };
+}
+
+export function finishCompetition(state) {
+  if (!state.competition) return { success: false, reason: 'no_competition' };
+
+  const event = getEventById(state.competition.eventId);
+  if (!event) return { success: false, reason: 'event_not_found' };
+
+  const { roundResults, totalRounds } = state.competition;
+  let finalRank = 1;
+  let lastScore = 0;
+  for (const r of roundResults) {
+    if (r.played !== false) lastScore = r.playerScore;
+    if (!r.won) {
+      finalRank = 2 ** (totalRounds - r.round + 1);
+      break;
+    }
+  }
+
+  const rewards = calculateCompetitionRewards(event, lastScore, finalRank);
+
+  const isFirstClear = event.isMain && !state.isMainEventCompleted(event.id);
+  if (isFirstClear) {
+    rewards.funds += event.firstClearBonus.funds;
+    rewards.fame += event.firstClearBonus.fame;
+  }
+
+  state.addFunds(rewards.funds);
+  state.addFame(rewards.fame);
+
+  if (event.isMain) {
+    state.completeMainEvent(event.id);
+  }
+
+  const rankedUp = canRankUp(state) ? rankUp(state) : false;
+
+  const competitionData = {
+    ...state.competition,
+    finalRank,
+    rewards,
+    lastScore,
+  };
+  state.competition = null;
+  state.currentShow = [];
+
+  return {
+    success: true,
+    finalRank,
+    rewards,
+    isFirstClear,
+    rankedUp,
+    competition: competitionData,
+  };
+}
+
+export function runCompetition(event, playerScore) {
+  const rounds = getCompetitionRounds(event);
+  const roundResults = [];
+  let finalRank = 1;
+  let eliminated = false;
+
+  for (let round = 0; round < rounds; round++) {
+    const roundNumber = round + 1;
+    if (eliminated) {
+      roundResults.push({
+        round: roundNumber,
+        name: getRoundName(roundNumber, rounds),
+        playerScore: null,
+        opponentScore: null,
+        won: false,
+        played: false,
+      });
+      continue;
+    }
+
+    const opponentScore = generateOpponentScore(event, round);
+    const won = playerScore > opponentScore;
+    roundResults.push({
+      round: roundNumber,
+      name: getRoundName(roundNumber, rounds),
+      playerScore,
+      opponentScore,
+      won,
+      played: true,
+    });
+    if (!won) {
+      finalRank = 2 ** (rounds - round);
+      eliminated = true;
+    }
+  }
+
+  return { finalRank, roundResults, totalRounds: rounds };
+}
+
+export function calculateCompetitionRewards(event, playerScore, finalRank) {
+  const multiplier = getScoreMultiplier(playerScore);
+  const index = Math.min(finalRank, COMPETITION_FAME_FRACTIONS.length) - 1;
+  const fameGain = event.rewards.fame * (playerScore / 100) * COMPETITION_FAME_FRACTIONS[index] * multiplier;
+  const fundsGain = event.rewards.funds * (playerScore / 100) * COMPETITION_FUNDS_FRACTIONS[index] * multiplier;
+  return {
+    funds: Math.round(fundsGain),
+    fame: Math.round(fameGain),
+  };
+}
+
 export function calculateRewards(eventId, score) {
   const event = getEventById(eventId);
   if (!event) return { funds: 0, fame: 0 };
@@ -607,11 +1123,21 @@ export function calculateRewards(eventId, score) {
   };
 }
 
+/**
+ * @param {import('./state.js').GameState} state
+ * @param {string} eventId
+ * @param {(Shell|string)[]} show
+ * @returns {SettlementResult}
+ */
 export function settleEvent(state, eventId, show) {
   const validation = validateShow(state, eventId, show);
   if (!validation.valid) return { success: false, reason: validation.reason };
 
   const event = getEventById(eventId);
+  if (event.type === 'competition') {
+    return { success: false, reason: 'use_competition_flow' };
+  }
+
   const scoreResult = calculateScore(eventId, show);
   const rewards = calculateRewards(eventId, scoreResult.score);
 
@@ -638,5 +1164,6 @@ export function settleEvent(state, eventId, show) {
     cost: validation.cost,
     isFirstClear,
     rankedUp,
+    competition: null,
   };
 }

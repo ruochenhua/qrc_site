@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>烟花大师 视觉原型 v1</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+  body { font-family: 'Noto Sans SC', sans-serif; }
+
+  /* 开始画面烟花画布 */
+  #start-canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0;
+  }
+
+  /* Hub 房间背景元素 */
+  .wall {
+    background:
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 48px),
+      linear-gradient(180deg, #0d101c 0%, #15182a 60%, #1a1e30 100%);
+  }
+  .window {
+    background: linear-gradient(180deg, #050a1a 0%, #0f1d3d 55%, #1a3260 100%);
+    box-shadow: inset 0 0 40px rgba(0,0,0,0.6), 0 0 0 6px #1f2438, 0 0 0 8px #0b0d14;
+  }
+  .wood-btn {
+    background: linear-gradient(180deg, #3d2e1e 0%, #2a1f14 100%);
+    border: 2px solid #5c452f;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 6px 0 #1a1208, 0 8px 12px rgba(0,0,0,0.5);
+    transition: transform .1s, box-shadow .1s;
+  }
+  .wood-btn:active { transform: translateY(4px); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 0 #1a1208, 0 3px 6px rgba(0,0,0,0.5); }
+  .wood-gold { border-color: #8a6a3d; color: #ffeebb; }
+  .shelf {
+    background: linear-gradient(180deg, #2a1f14 0%, #1f1710 100%);
+    box-shadow: 0 8px 0 #120d08;
+  }
+  .bottle {
+    background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+    box-shadow: inset 0 -4px 6px rgba(0,0,0,0.4);
+  }
+
+  /* 表演画布 */
+  #perform-canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%; background: #000;
+  }
+</style>
+</head>
+<body class="bg-[#0b0d14] text-[#f0f0f5] overflow-hidden">
+
+<!-- ========== 开始画面 ========== -->
+<div id="view-start" class="view fixed inset-0 flex flex-col items-center justify-center">
+  <canvas id="start-canvas"></canvas>
+  <div class="absolute inset-0 bg-gradient-to-b from-[#0b0d14]/60 via-[#0b0d14]/30 to-[#0b0d14]/85 z-10"></div>
+
+  <div class="relative z-20 text-center px-6 max-w-md w-full">
+    <h1 class="text-6xl font-black tracking-tight mb-3 bg-gradient-to-r from-[#ffaa33] to-[#66ccff] bg-clip-text text-transparent drop-shadow-lg">
+      🎆 烟花大师
+    </h1>
+    <p class="text-[#9aa0b8] text-lg mb-12 tracking-wide">从无名学徒到烟花大师的成名之路</p>
+
+    <div class="flex flex-col gap-4 items-center">
+      <button onclick="go('hub')" class="w-56 py-4 rounded-xl bg-[#ffaa33] text-[#1a1200] font-bold text-lg shadow-[0_0_24px_rgba(255,170,51,0.35)] hover:brightness-110 active:scale-95 transition">
+        新游戏
+      </button>
+      <button onclick="go('hub')" class="w-56 py-4 rounded-xl bg-[#1f2438] border border-[#2a2f45] text-[#f0f0f5] font-semibold text-lg hover:bg-[#2a3050] active:scale-95 transition">
+        继续游戏
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== Hub 后台准备间 ========== -->
+<div id="view-hub" class="view hidden fixed inset-0 wall">
+  <!-- 顶部状态栏 -->
+  <header class="relative z-30 flex items-center justify-between px-6 py-4 bg-[#0b0d14]/70 backdrop-blur border-b border-[#2a2f45]/50">
+    <div class="flex items-center gap-2 text-[#ffaa33] font-bold text-lg"><span>🎆</span><span>烟花大师</span></div>
+    <div class="flex gap-3 text-sm">
+      <span class="px-3 py-1.5 rounded-full bg-[#15182a] border border-[#2a2f45]">等级：<span class="text-[#66ccff] font-semibold">学徒</span></span>
+      <span class="px-3 py-1.5 rounded-full bg-[#15182a] border border-[#2a2f45]">资金：<span class="text-[#ffaa33] font-semibold">¥500</span></span>
+      <span class="px-3 py-1.5 rounded-full bg-[#15182a] border border-[#2a2f45]">名气：<span class="text-[#66ccff] font-semibold">⭐0</span></span>
+    </div>
+  </header>
+
+  <!-- 房间场景 -->
+  <div class="relative flex-1 h-full w-full overflow-hidden">
+    <!-- 窗户 -->
+    <div class="absolute top-[12%] left-[8%] w-40 h-56 rounded-t-full window opacity-90">
+      <div class="absolute inset-0" style="background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15) 0%, transparent 4%), radial-gradient(circle at 70% 20%, rgba(255,255,255,0.1) 0%, transparent 3%), radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 60%);"></div>
+      <div class="absolute top-0 bottom-0 left-1/2 w-1 bg-[#1f2438]/80 -translate-x-1/2"></div>
+      <div class="absolute left-0 right-0 top-1/2 h-1 bg-[#1f2438]/80 -translate-y-1/2"></div>
+    </div>
+
+    <!-- 架子 -->
+    <div class="absolute top-[18%] right-[6%] w-36 shelf rounded-lg h-3"></div>
+    <div class="absolute top-[30%] right-[6%] w-36 shelf rounded-lg h-3"></div>
+    <div class="absolute top-[18%] right-[6%] w-3 h-40 bg-[#1f1710] rounded-full"></div>
+    <div class="absolute top-[18%] right-[38%] w-3 h-40 bg-[#1f1710] rounded-full"></div>
+    <!-- 瓶子 -->
+    <div class="absolute top-[12%] right-[10%] w-5 h-8 bottle rounded-b-lg rounded-t"></div>
+    <div class="absolute top-[10%] right-[18%] w-4 h-9 bottle rounded-b-lg rounded-t bg-red-500/30"></div>
+    <div class="absolute top-[13%] right-[26%] w-5 h-7 bottle rounded-b-lg rounded-t bg-blue-500/30"></div>
+    <div class="absolute top-[24%] right-[12%] w-5 h-8 bottle rounded-b-lg rounded-t bg-green-500/30"></div>
+    <div class="absolute top-[22%] right-[22%] w-4 h-9 bottle rounded-b-lg rounded-t bg-yellow-500/30"></div>
+
+    <!-- 工作台 -->
+    <div class="absolute bottom-0 left-0 right-0 h-[28%] bg-gradient-to-t from-[#1a1208] to-[#2a1f14] border-t-4 border-[#3d2e1e]"></div>
+    <div class="absolute bottom-[28%] left-[10%] right-[10%] h-4 bg-[#3d2e1e] rounded"></div>
+
+    <!-- 布告栏 -->
+    <div class="absolute top-[22%] left-[6%] w-28 h-36 bg-[#2a2015] border-4 border-[#3d2e1e] rounded-lg rotate-1 shadow-xl">
+      <div class="p-2 space-y-2">
+        <div class="h-2 bg-[#ffaa33]/40 rounded"></div>
+        <div class="h-2 bg-[#9aa0b8]/30 rounded w-4/5"></div>
+        <div class="h-2 bg-[#9aa0b8]/30 rounded w-3/5"></div>
+        <div class="mt-3 h-8 bg-[#15182a]/60 rounded border border-[#2a2f45]/50"></div>
+      </div>
+    </div>
+
+    <!-- 主操作按钮 -->
+    <div class="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
+      <div class="grid grid-cols-2 gap-6 pointer-events-auto mt-12">
+        <button onclick="go('perform')" class="wood-btn wood-gold w-40 h-28 rounded-xl flex flex-col items-center justify-center gap-2">
+          <span class="text-3xl">🎪</span>
+          <span class="font-bold">赛事列表</span>
+        </button>
+        <button onclick="go('perform')" class="wood-btn w-40 h-28 rounded-xl flex flex-col items-center justify-center gap-2 text-[#d8c8b0]">
+          <span class="text-3xl">🧪</span>
+          <span class="font-bold">配方实验室</span>
+        </button>
+        <button onclick="go('perform')" class="wood-btn w-40 h-28 rounded-xl flex flex-col items-center justify-center gap-2 text-[#d8c8b0]">
+          <span class="text-3xl">⬆️</span>
+          <span class="font-bold">晋升等级</span>
+        </button>
+        <button onclick="go('start')" class="wood-btn w-40 h-28 rounded-xl flex flex-col items-center justify-center gap-2 text-[#d8c8b0]">
+          <span class="text-3xl">🗑️</span>
+          <span class="font-bold">重置存档</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 表演场景 ========== -->
+<div id="view-perform" class="view hidden fixed inset-0 bg-black">
+  <canvas id="perform-canvas"></canvas>
+
+  <!-- 控制面板 -->
+  <div class="absolute top-4 left-4 right-4 z-20 flex flex-wrap gap-3 justify-center">
+    <div class="flex gap-1 bg-[#0b0d14]/80 backdrop-blur px-3 py-2 rounded-lg border border-[#2a2f45]">
+      <button onclick="setScene('village')" class="scene-btn px-3 py-1 rounded text-sm bg-[#ffaa33] text-[#1a1200] font-semibold" data-scene="village">乡村</button>
+      <button onclick="setScene('city')" class="scene-btn px-3 py-1 rounded text-sm text-[#9aa0b8] hover:text-white" data-scene="city">城市</button>
+      <button onclick="setScene('park')" class="scene-btn px-3 py-1 rounded text-sm text-[#9aa0b8] hover:text-white" data-scene="park">公园</button>
+      <button onclick="setScene('stadium')" class="scene-btn px-3 py-1 rounded text-sm text-[#9aa0b8] hover:text-white" data-scene="stadium">体育场</button>
+      <button onclick="setScene('lake')" class="scene-btn px-3 py-1 rounded text-sm text-[#9aa0b8] hover:text-white" data-scene="lake">湖畔</button>
+    </div>
+    <div class="flex gap-1 bg-[#0b0d14]/80 backdrop-blur px-3 py-2 rounded-lg border border-[#2a2f45]">
+      <button onclick="setHeight('low')" class="height-btn px-3 py-1 rounded text-sm bg-[#66ccff] text-[#0b0d14] font-semibold" data-height="low">低</button>
+      <button onclick="setHeight('mid')" class="height-btn px-3 py-1 rounded text-sm text-[#9aa0b8] hover:text-white" data-height="mid">中</button>
+      <button onclick="setHeight('high')" class="height-btn px-3 py-1 rounded text-sm text-[#9aa0b8] hover:text-white" data-height="high">高</button>
+    </div>
+    <button onclick="launch()" class="px-5 py-2 rounded-lg bg-[#ffaa33] text-[#1a1200] font-bold hover:brightness-110 active:scale-95 transition">发射一发</button>
+    <button onclick="go('hub')" class="px-5 py-2 rounded-lg bg-[#1f2438] border border-[#2a2f45] text-[#f0f0f5] hover:bg-[#2a3050] transition">返回 Hub</button>
+  </div>
+
+  <div class="absolute bottom-4 left-4 z-20 text-xs text-[#9aa0b8] bg-[#0b0d14]/70 px-3 py-2 rounded border border-[#2a2f45]">
+    当前镜头：爆炸焦点 <span id="focus-label">36%</span> · 地面占比 <span id="ground-label">33%</span>
+  </div>
+</div>
+
+<script>
+/* ---------- 视图切换 ---------- */
+function go(name) {
+  document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
+  document.getElementById('view-' + name).classList.remove('hidden');
+  if (name === 'start') startLoop();
+  else stopStart();
+  if (name === 'perform') startPerform();
+  else stopPerform();
+}
+
+/* ---------- 开始画面背景烟花 ---------- */
+const startCanvas = document.getElementById('start-canvas');
+const startCtx = startCanvas.getContext('2d');
+let startW, startH, startRaf;
+
+function resizeStart() {
+  startW = startCanvas.width = window.innerWidth;
+  startH = startCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeStart);
+resizeStart();
+
+const bgShells = [], bgParticles = [];
+const BG_COLORS = ['#ff4444','#ffcc33','#4488ff','#44ff88','#cc66ff','#ff88cc'];
+
+function spawnBgShell() {
+  const x = startW * (0.20 + Math.random() * 0.6);
+  const targetY = startH * (0.22 + Math.random() * 0.18);
+  const vy = -(2.2 + Math.random() * 0.8);
+  const duration = (targetY - startH) / vy;
+  bgShells.push({ x, y: startH, vy, targetY, maxAge: duration, age: 0, color: BG_COLORS[Math.floor(Math.random()*BG_COLORS.length)], history: [] });
+}
+setInterval(spawnBgShell, 4000);
+
+function updateStart() {
+  for (let i=bgShells.length-1;i>=0;i--) {
+    const sh = bgShells[i];
+    sh.age++;
+    sh.vy += 0.04;
+    sh.y += sh.vy;
+    sh.history.push({x:sh.x, y:sh.y});
+    if (sh.history.length > 14) sh.history.shift();
+    if (sh.y <= sh.targetY) {
+      const count = 24 + Math.floor(Math.random()*16);
+      for (let k=0;k<count;k++) {
+        const a = Math.random()*Math.PI*2;
+        const s = 0.6 + Math.random()*1.2;
+        bgParticles.push({ x:sh.x, y:sh.y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, life:90+Math.random()*60, maxLife:150, color:sh.color, size:0.6+Math.random()*1.0 });
+      }
+      bgShells.splice(i,1);
+    } else if (sh.age > sh.maxAge + 60) {
+      bgShells.splice(i,1);
+    }
+  }
+  for (let i=bgParticles.length-1;i>=0;i--) {
+    const p = bgParticles[i];
+    p.vx *= 0.98; p.vy *= 0.98; p.vy += 0.035;
+    p.x += p.vx; p.y += p.vy;
+    p.life--;
+    if (p.life <= 0) bgParticles.splice(i,1);
+  }
+}
+
+function drawStart() {
+  startCtx.globalCompositeOperation = 'source-over';
+  startCtx.fillStyle = 'rgba(11,13,20,0.22)';
+  startCtx.fillRect(0,0,startW,startH);
+
+  updateStart();
+
+  // rising shells
+  startCtx.globalCompositeOperation = 'lighter';
+  for (const sh of bgShells) {
+    startCtx.fillStyle = '#ffffff';
+    startCtx.beginPath(); startCtx.arc(sh.x,sh.y,1.8,0,Math.PI*2); startCtx.fill();
+    if (sh.history.length > 1) {
+      startCtx.beginPath();
+      startCtx.moveTo(sh.history[0].x, sh.history[0].y);
+      for (const h of sh.history) startCtx.lineTo(h.x, h.y);
+      startCtx.strokeStyle = 'rgba(255,255,255,0.25)';
+      startCtx.lineWidth = 1.2;
+      startCtx.stroke();
+    }
+  }
+  // particles
+  for (const p of bgParticles) {
+    const alpha = Math.max(0, p.life / p.maxLife) * 0.4;
+    startCtx.globalAlpha = alpha;
+    startCtx.fillStyle = p.color;
+    startCtx.shadowBlur = 4; startCtx.shadowColor = p.color;
+    startCtx.beginPath(); startCtx.arc(p.x,p.y,p.size,0,Math.PI*2); startCtx.fill();
+  }
+  startCtx.shadowBlur = 0;
+  startCtx.globalAlpha = 1;
+  startCtx.globalCompositeOperation = 'source-over';
+  startRaf = requestAnimationFrame(drawStart);
+}
+function startLoop(){ if(!startRaf) drawStart(); }
+function stopStart(){ if(startRaf){ cancelAnimationFrame(startRaf); startRaf=null; } }
+startLoop();
+
+/* ---------- 表演场景 ---------- */
+const pCanvas = document.getElementById('perform-canvas');
+const pCtx = pCanvas.getContext('2d');
+let pW, pH, pRaf, running = false;
+let currentScene = 'village', currentHeight = 'low';
+
+const SCENES = {
+  village: { skyTop:'#050a1a', skyMid:'#0f1d3d', skyBot:'#1a3260', ground:'#131830', accent:'#202642' },
+  city:    { skyTop:'#050814', skyMid:'#0f1422', skyBot:'#1a2335', ground:'#0b0f1a', accent:'#1c2335' },
+  park:    { skyTop:'#05101a', skyMid:'#0f2440', skyBot:'#1a3a55', ground:'#0f1e25', accent:'#1b3138' },
+  stadium: { skyTop:'#070a18', skyMid:'#12183a', skyBot:'#1d2855', ground:'#0d1020', accent:'#232a45' },
+  lake:    { skyTop:'#050d18', skyMid:'#0f203d', skyBot:'#1a3858', ground:'#0a1620', accent:'#152a38' },
+};
+const HEIGHTS = {
+  low:  { focus: 0.36, ground: 0.33, scale: 1.0 },
+  mid:  { focus: 0.30, ground: 0.30, scale: 0.92 },
+  high: { focus: 0.22, ground: 0.28, scale: 0.84 },
+};
+
+// 预先生成各场景的中景/地面静态形状，避免每帧用 Math.random() 导致闪烁
+const sceneShapes = { village:{mid:[],ground:[]}, city:{mid:[],ground:[]}, park:{mid:[],ground:[]}, stadium:{mid:[],ground:[]}, lake:{mid:[],ground:[]} };
+function initSceneShapes() {
+  const W = 1920; // 以 1920px 基准生成，绘制时按实际 pW 缩放
+  // village: 中景屋顶 + 地面屋顶
+  let x = -W*0.2;
+  while (x < W*1.5) { const w=30+Math.random()*50; sceneShapes.village.mid.push({x,yOff:0,w,h:20+Math.random()*25}); x += w-5; }
+  x = -W*0.2;
+  while (x < W*1.5) { const w=24+Math.random()*36; sceneShapes.village.ground.push({x,yOff:0,w,h:16+Math.random()*28}); x += w-4; }
+  // city: 中景高楼 + 地面高楼
+  x = -W*0.2;
+  while (x < W*1.5) { const w=20+Math.random()*60; sceneShapes.city.mid.push({x,yOff:0,w,h:30+Math.random()*120}); x += w+2; }
+  x = -W*0.2;
+  while (x < W*1.5) { const w=18+Math.random()*34; const h=40+Math.random()*180; sceneShapes.city.ground.push({x,yOff:h*0.1,w,h}); x += w+2; }
+  // park: 中景树 + 地面丘陵
+  x = -W*0.2;
+  while (x < W*1.5) { x += 60+Math.random()*100; sceneShapes.park.mid.push({x,r:16+Math.random()*24}); }
+  for (let i=0;i<7;i++) { sceneShapes.park.ground.push({x:Math.random()*W, r:30+Math.random()*70}); }
+  // stadium: 无额外静态细节
+  // lake: 中景山丘固定，地面水波
+  for (let i=0;i<5;i++) { sceneShapes.lake.ground.push({y:30+i*18}); }
+}
+initSceneShapes();
+
+function resizePerform() {
+  pW = pCanvas.width = window.innerWidth;
+  pH = pCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizePerform);
+
+const stars = [];
+for (let i=0;i<120;i++) stars.push({ x:Math.random(), y:Math.random()*0.7, s:0.3+Math.random()*1.2, p:Math.random()*Math.PI*2 });
+
+const shells = [], particles = [];
+
+function drawScene() {
+  const s = SCENES[currentScene];
+  const h = HEIGHTS[currentHeight];
+  const horizon = pH * (1 - h.ground);
+  const sx = pW / 1920;
+
+  pCtx.setTransform(1,0,0,1,0,0);
+  pCtx.clearRect(0,0,pW,pH);
+
+  // 镜头：根据高度缩放+平移，让爆炸中心对齐 focus
+  const scale = h.scale;
+  const heightFactor = { low:0.35, mid:0.55, high:0.78 }[currentHeight];
+  const targetY = horizon - pH * heightFactor * 0.9;
+  const offsetY = pH * h.focus - targetY * scale;
+  pCtx.setTransform(scale,0,0,scale, pW*(1-scale)/2, offsetY);
+
+  // 天空
+  const grad = pCtx.createLinearGradient(0,0,0,pH);
+  grad.addColorStop(0,s.skyTop);
+  grad.addColorStop(0.55,s.skyMid);
+  grad.addColorStop(1,s.skyBot);
+  pCtx.fillStyle = grad;
+  pCtx.fillRect(-pW,-pH, pW*3, pH*3);
+
+  // 星星
+  const t = Date.now()*0.001;
+  for (const st of stars) {
+    const sx = st.x * pW;
+    const sy = st.y * pH;
+    pCtx.globalAlpha = 0.3 + 0.7*Math.abs(Math.sin(t + st.p));
+    pCtx.fillStyle = '#ffffff';
+    pCtx.beginPath(); pCtx.arc(sx,sy,st.s,0,Math.PI*2); pCtx.fill();
+  }
+  pCtx.globalAlpha = 1;
+
+  // 中景：远景剪影（使用预先生成的静态形状，避免每帧闪烁）
+  pCtx.fillStyle = s.accent;
+  pCtx.globalAlpha = 0.45;
+  const midY = horizon - pH*0.06;
+  const shapes = sceneShapes[currentScene];
+  if (currentScene === 'village') {
+    for (const roof of shapes.mid) { pCtx.beginPath(); pCtx.moveTo(roof.x*sx,midY); pCtx.lineTo((roof.x+roof.w/2)*sx,midY-roof.h); pCtx.lineTo((roof.x+roof.w)*sx,midY); pCtx.fill(); }
+  } else if (currentScene === 'city') {
+    for (const b of shapes.mid) { pCtx.fillRect(b.x*sx, midY-b.h, b.w*sx, b.h); }
+  } else if (currentScene === 'park') {
+    for (const tr of shapes.mid) { pCtx.fillRect(tr.x*sx-3, midY-20, 6, 20); pCtx.beginPath(); pCtx.arc(tr.x*sx, midY-30, tr.r*sx, 0, Math.PI*2); pCtx.fill(); }
+  } else if (currentScene === 'stadium') {
+    pCtx.beginPath(); pCtx.arc(pW*0.5, midY+80, 160, Math.PI, 0); pCtx.fill();
+    pCtx.fillRect(pW*0.5-120,midY-40,240,40);
+  } else if (currentScene === 'lake') {
+    pCtx.beginPath(); pCtx.moveTo(-pW,midY); pCtx.lineTo(pW*0.3,midY-30); pCtx.lineTo(pW*0.7,midY-15); pCtx.lineTo(pW*1.5,midY-40); pCtx.lineTo(pW*1.5,midY); pCtx.fill();
+  }
+  pCtx.globalAlpha = 1;
+
+  // 云层
+  pCtx.fillStyle = 'rgba(180,190,210,0.12)';
+  for (let i=0;i<3;i++) {
+    const cx = ((t*2 + i*400) % (pW*1.5)) - pW*0.25;
+    const cy = horizon - pH*(0.12 + i*0.05);
+    pCtx.beginPath(); pCtx.arc(cx,cy,40,0,Math.PI*2); pCtx.arc(cx+35,cy-10,50,0,Math.PI*2); pCtx.arc(cx+70,cy,42,0,Math.PI*2); pCtx.fill();
+  }
+
+  // 地面
+  pCtx.fillStyle = s.ground;
+  pCtx.fillRect(-pW, horizon, pW*3, pH);
+  // 地面细节（静态形状）
+  pCtx.fillStyle = s.accent;
+  if (currentScene === 'village') {
+    for (const roof of shapes.ground) { pCtx.beginPath(); pCtx.moveTo(roof.x*sx,horizon); pCtx.lineTo((roof.x+roof.w/2)*sx,horizon-roof.h); pCtx.lineTo((roof.x+roof.w)*sx,horizon); pCtx.fill(); }
+  } else if (currentScene === 'city') {
+    for (const b of shapes.ground) { pCtx.fillRect(b.x*sx, horizon+b.yOff, b.w*sx, b.h); }
+  } else if (currentScene === 'park') {
+    pCtx.fillStyle = '#0f1e25';
+    for (const hill of shapes.ground) { pCtx.beginPath(); pCtx.arc(hill.x*sx, horizon, hill.r*sx, Math.PI, 0); pCtx.lineTo(hill.x*sx+hill.r*sx, horizon+pH); pCtx.lineTo(hill.x*sx-hill.r*sx, horizon+pH); pCtx.fill(); }
+  } else if (currentScene === 'stadium') {
+    pCtx.fillRect(pW*0.3,horizon,pW*0.4,pH-horizon);
+  } else if (currentScene === 'lake') {
+    pCtx.fillStyle = 'rgba(100,140,180,0.1)';
+    for (const wave of shapes.ground) { pCtx.fillRect(-pW, wave.y, pW*3, 2); }
+  }
+}
+
+function launch() {
+  if (!running) return;
+  const h = HEIGHTS[currentHeight];
+  const horizon = pH * (1 - h.ground);
+  const heightFactor = { low:0.35, mid:0.55, high:0.78 }[currentHeight];
+  const targetY = horizon - pH*heightFactor*0.9;
+  shells.push({ x: pW*(0.3+Math.random()*0.4), y: pH*1.2, vy: -5.5, targetY, color: ['#ff4444','#ffcc33','#4488ff','#44ff88','#cc66ff'][Math.floor(Math.random()*5)] });
+}
+
+function updatePerform() {
+  for (let i=shells.length-1;i>=0;i--) {
+    const sh = shells[i];
+    sh.y += sh.vy;
+    sh.vy += 0.07;
+    if (sh.y <= sh.targetY) {
+      for (let k=0;k<36;k++) {
+        const a = Math.random()*Math.PI*2;
+        const s = 1.5 + Math.random()*2.5;
+        particles.push({ x:sh.x, y:sh.y, vx:Math.cos(a)*s, vy:Math.sin(a)*s, life:50+Math.random()*30, max:80, color:sh.color, size:1.5+Math.random() });
+      }
+      shells.splice(i,1);
+    }
+  }
+  for (let i=particles.length-1;i>=0;i--) {
+    const pt = particles[i];
+    pt.vx *= 0.97; pt.vy *= 0.97; pt.vy += 0.07;
+    pt.x += pt.vx; pt.y += pt.vy;
+    pt.life--;
+    if (pt.life<=0) particles.splice(i,1);
+  }
+}
+
+function drawPerform() {
+  drawScene();
+  // 烟花
+  pCtx.globalCompositeOperation = 'lighter';
+  for (const sh of shells) {
+    pCtx.shadowBlur = 8; pCtx.shadowColor = '#fff';
+    pCtx.fillStyle = '#fff';
+    pCtx.beginPath(); pCtx.arc(sh.x,sh.y,2.5,0,Math.PI*2); pCtx.fill();
+    pCtx.shadowBlur = 0;
+  }
+  for (const pt of particles) {
+    const alpha = pt.life/pt.max;
+    pCtx.globalAlpha = alpha;
+    pCtx.fillStyle = pt.color;
+    pCtx.shadowBlur = 6; pCtx.shadowColor = pt.color;
+    pCtx.beginPath(); pCtx.arc(pt.x,pt.y,pt.size,0,Math.PI*2); pCtx.fill();
+  }
+  pCtx.globalAlpha = 1;
+  pCtx.globalCompositeOperation = 'source-over';
+
+  updatePerform();
+  pRaf = requestAnimationFrame(drawPerform);
+}
+
+function startPerform() {
+  resizePerform();
+  running = true;
+  drawPerform();
+}
+function stopPerform() {
+  running = false;
+  if (pRaf) { cancelAnimationFrame(pRaf); pRaf=null; }
+}
+
+function setScene(name) {
+  currentScene = name;
+  document.querySelectorAll('.scene-btn').forEach(b => {
+    if (b.dataset.scene === name) { b.classList.add('bg-[#ffaa33]','text-[#1a1200]','font-semibold'); b.classList.remove('text-[#9aa0b8]'); }
+    else { b.classList.remove('bg-[#ffaa33]','text-[#1a1200]','font-semibold'); b.classList.add('text-[#9aa0b8]'); }
+  });
+}
+function setHeight(name) {
+  currentHeight = name;
+  const h = HEIGHTS[name];
+  document.getElementById('focus-label').textContent = Math.round(h.focus*100) + '%';
+  document.getElementById('ground-label').textContent = Math.round(h.ground*100) + '%';
+  document.querySelectorAll('.height-btn').forEach(b => {
+    if (b.dataset.height === name) { b.classList.add('bg-[#66ccff]','text-[#0b0d14]','font-semibold'); b.classList.remove('text-[#9aa0b8]'); }
+    else { b.classList.remove('bg-[#66ccff]','text-[#0b0d14]','font-semibold'); b.classList.add('text-[#9aa0b8]'); }
+  });
+}
+</script>
+</body>
+</html>

@@ -2,14 +2,12 @@ import {
   state,
   views,
   switchView,
-  saveGame,
   renderer,
   previewRenderer,
   setCurrentAssemblyTab,
 } from './app-state.js';
-import { rankUp } from './systems.js';
 
-import { renderStart, startNewGame, continueGame, resetSave } from './views/start.js';
+import { renderStart, startNewGame, continueGame, resetSave, resizeStartRenderer } from './views/start.js';
 import { updateHub, renderEnding } from './views/hub.js';
 import { renderEvents } from './views/events.js';
 import {
@@ -22,6 +20,7 @@ import {
   switchLibraryTab,
   addAssembledShell,
   hideEventDetail,
+  renderBuild,
 } from './views/build.js';
 import { startPerformance, showResult } from './views/perform.js';
 import { renderLab } from './views/lab.js';
@@ -51,17 +50,12 @@ function init() {
     switchView('lab');
   });
   document.getElementById('hub-settings').addEventListener('click', resetSave);
-  document.getElementById('hub-rankup').addEventListener('click', () => {
-    if (rankUp(state)) {
-      saveGame();
-      updateHub();
-    }
-  });
 
   document.getElementById('events-back').addEventListener('click', () => switchView('hub'));
 
   document.getElementById('build-back').addEventListener('click', () => {
     state.clearShow();
+    if (state.competition) state.competition = null;
     if (previewRenderer) previewRenderer.stop();
     switchView('events');
   });
@@ -89,6 +83,13 @@ function init() {
   });
 
   document.getElementById('result-continue').addEventListener('click', () => {
+    const next = document.getElementById('result-continue').dataset.next;
+    if (next === 'build') {
+      document.getElementById('result-continue').dataset.next = '';
+      switchView('build');
+      renderBuild();
+      return;
+    }
     if (state.won) {
       renderEnding();
       switchView('ending');
@@ -120,6 +121,7 @@ function init() {
     if (previewRenderer) {
       previewRenderer.resize();
     }
+    resizeStartRenderer();
   });
 }
 

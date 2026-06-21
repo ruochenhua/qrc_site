@@ -1,5 +1,113 @@
 export function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
+/**
+ * @typedef {Object} Rank
+ * @property {string} id
+ * @property {string} name
+ * @property {number} threshold
+ * @property {number|null} nextThreshold
+ */
+
+/**
+ * @typedef {Object} Gunpowder
+ * @property {string} id
+ * @property {string} name
+ * @property {number} thrust
+ * @property {number} cost
+ * @property {number} unlockFame
+ * @property {number} researchCost
+ * @property {string} desc
+ */
+
+/**
+ * @typedef {Object} Casing
+ * @property {string} id
+ * @property {string} name
+ * @property {string} shape
+ * @property {number} capacity
+ * @property {number} [secondaryCapacity]
+ * @property {number} layers
+ * @property {number} scaleMultiplier
+ * @property {number} cost
+ * @property {number} unlockFame
+ * @property {number} researchCost
+ * @property {string} desc
+ */
+
+/**
+ * @typedef {Object} Colorant
+ * @property {string} id
+ * @property {string} name
+ * @property {string} color
+ * @property {number} density
+ * @property {number} cost
+ * @property {number} unlockFame
+ * @property {number} researchCost
+ * @property {string} desc
+ */
+
+/**
+ * @typedef {Object} Fuse
+ * @property {string} id
+ * @property {string} name
+ * @property {string} length
+ * @property {number} heightFactor
+ * @property {number} cost
+ * @property {number} unlockFame
+ * @property {number} researchCost
+ * @property {string} desc
+ */
+
+/**
+ * @typedef {Object} EffectAgent
+ * @property {string} id
+ * @property {string} name
+ * @property {string} effect
+ * @property {number} threshold
+ * @property {number} intensity
+ * @property {number} cost
+ * @property {number} unlockFame
+ * @property {number} researchCost
+ * @property {string} desc
+ */
+
+/**
+ * @typedef {Object} Recipe
+ * @property {string} id
+ * @property {string} name
+ * @property {Object} components
+ * @property {number} unlockFame
+ * @property {number} researchCost
+ * @property {string} desc
+ */
+
+/**
+ * @typedef {Object} Event
+ * @property {string} id
+ * @property {string} name
+ * @property {'competition'|'activity'|'repeatable'|'fallback'} type
+ * @property {string} rank
+ * @property {boolean} isMain
+ * @property {number|null} budget
+ * @property {number} minShells
+ * @property {number} maxShells
+ * @property {number} entryFee
+ * @property {Object} preferences
+ * @property {Object} rewards
+ * @property {Object} firstClearBonus
+ * @property {string} desc
+ * @property {string} preferenceDesc
+ * @property {Object} backdrop
+ */
+
+/**
+ * @typedef {Object} ComboRule
+ * @property {string} id
+ * @property {string} name
+ * @property {number} bonus
+ * @property {Function} check
+ */
+
 export const SAVE_KEY = 'firework_master_save_v1';
 export const SCHEMA_VERSION = 1;
 
@@ -63,6 +171,14 @@ export const COMPONENTS = {
   },
 };
 
+for (const category of Object.values(COMPONENTS)) {
+  for (const comp of Object.values(category)) {
+    if (typeof comp.researchCost !== 'number') {
+      comp.researchCost = Math.max(0, Math.floor(comp.unlockFame / 2));
+    }
+  }
+}
+
 // System recipes are example blueprints that demonstrate effective component combinations.
 // They are free examples, not the core unlock path.
 export const RECIPES = {
@@ -72,16 +188,16 @@ export const RECIPES = {
   r003: { id: 'r003', name: '绿闪', components: { gunpowder: { g001: 2 }, casing: 'c001', colorant: { col004: 3 }, fuse: 'f001', effect: { e001: 3 } }, unlockFame: 0, researchCost: 0, desc: '低空绿色闪烁，活泼俏皮。' },
 
   // Skilled examples (unlockFame 100)
-  r004: { id: 'r004', name: '蓝环', components: { gunpowder: { g002: 4 }, casing: 'c005', colorant: { col003: 4 }, fuse: 'f001', effect: {} }, unlockFame: 100, researchCost: 0, desc: '高空中蓝色圆环，清冷醒目。' },
-  r005: { id: 'r005', name: '爆响菊', components: { gunpowder: { g002: 4 }, casing: 'c003', colorant: { col002: 3 }, fuse: 'f001', effect: { e002: 3 } }, unlockFame: 100, researchCost: 0, desc: '爆裂声响，节日气氛拉满。' },
+  r004: { id: 'r004', name: '蓝环', components: { gunpowder: { g002: 4 }, casing: 'c005', colorant: { col003: 4 }, fuse: 'f001', effect: {} }, unlockFame: 100, researchCost: 80, desc: '高空中蓝色圆环，清冷醒目。' },
+  r005: { id: 'r005', name: '爆响菊', components: { gunpowder: { g002: 4 }, casing: 'c003', colorant: { col002: 3 }, fuse: 'f001', effect: { e002: 3 } }, unlockFame: 100, researchCost: 80, desc: '爆裂声响，节日气氛拉满。' },
 
   // Technician examples (unlockFame 400)
-  r006: { id: 'r006', name: '蓝白棕榈', components: { gunpowder: { g003: 7 }, casing: 'c009', colorant: { col003: 5 }, fuse: 'f003', effect: { e003: 4 } }, unlockFame: 400, researchCost: 0, desc: '蓝色棕榈叶配银色尾迹。' },
-  r007: { id: 'r007', name: '粉星', components: { gunpowder: { g002: 4 }, casing: 'c007', colorant: { col007: 4 }, fuse: 'f001', effect: { e004: 2 } }, unlockFame: 400, researchCost: 0, desc: '粉色星点快速闪烁。' },
+  r006: { id: 'r006', name: '蓝白棕榈', components: { gunpowder: { g003: 7 }, casing: 'c009', colorant: { col003: 5 }, fuse: 'f003', effect: { e003: 4 } }, unlockFame: 400, researchCost: 200, desc: '蓝色棕榈叶配银色尾迹。' },
+  r007: { id: 'r007', name: '粉星', components: { gunpowder: { g002: 4 }, casing: 'c007', colorant: { col007: 4 }, fuse: 'f001', effect: { e004: 2 } }, unlockFame: 400, researchCost: 200, desc: '粉色星点快速闪烁。' },
 
   // Expert examples (unlockFame 1200)
-  r008: { id: 'r008', name: '千轮', components: { gunpowder: { g003: 6 }, casing: 'c004', colorant: { col002: 5 }, fuse: 'f003', effect: { e005: 4 } }, unlockFame: 1200, researchCost: 0, desc: '万千轮状花层层叠叠。' },
-  r009: { id: 'r009', name: '二次绽放', components: { gunpowder: { g003: 4 }, casing: 'c010', colorant: { col001: 3 }, fuse: 'f002', effect: {}, secondary: { colorant: { col005: 1 }, effect: { e006: 3 } } }, unlockFame: 1200, researchCost: 0, desc: '红牡丹主爆后二次绽放白色小花。' },
+  r008: { id: 'r008', name: '千轮', components: { gunpowder: { g003: 6 }, casing: 'c004', colorant: { col002: 5 }, fuse: 'f003', effect: { e005: 4 } }, unlockFame: 1200, researchCost: 500, desc: '万千轮状花层层叠叠。' },
+  r009: { id: 'r009', name: '二次绽放', components: { gunpowder: { g003: 4 }, casing: 'c010', colorant: { col001: 3 }, fuse: 'f002', effect: {}, secondary: { colorant: { col005: 1 }, effect: { e006: 3 } } }, unlockFame: 1200, researchCost: 500, desc: '红牡丹主爆后二次绽放白色小花。' },
 };
 
 export const EVENT_TYPES = {
@@ -93,28 +209,28 @@ export const EVENT_TYPES = {
 
 export const EVENTS = {
   // Apprentice
-  e001: { id: 'e001', name: '村口庙会', type: 'competition', rank: 'apprentice', isMain: true, budget: 80, minShells: 2, maxShells: 6, entryFee: 0, preferences: { height: 0.3, scale: 0.4, density: 0.5, duration: 0.4, color: { red: 0.7, gold: 0.3 }, effects: { crackle: 0.6 }, complexity: 0.1 }, rewards: { funds: 30, fame: 60 }, firstClearBonus: { funds: 50, fame: 150 }, desc: '热闹的小庙会，红色和爆响最受欢迎。', preferenceDesc: '庙会的评委们就爱那股热闹劲儿：火红的牡丹在空中炸开，再配上一串噼里啪啦的爆响，最能点燃人群。', backdrop: { sky: 'festival', ground: 'village', clouds: 'few' }, },
-  e002: { id: 'e002', name: '小镇夜市', type: 'activity', rank: 'apprentice', isMain: false, budget: null, minShells: 1, maxShells: 8, entryFee: 0, preferences: { height: 0.2, scale: 0.5, density: 0.5, duration: 0.3, color: { gold: 1 }, effects: {}, complexity: 0 }, rewards: { funds: 80, fame: 20 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '夜市暖场表演，金色短烟花最讨喜。', preferenceDesc: '夜市离得近、看得清，金灿灿的低空小烟花最讨喜，既热闹又不扰民。', backdrop: { sky: 'twilight', ground: 'village', clouds: 'none' }, },
+  e001: { id: 'e001', name: '村口庙会', type: 'competition', rank: 'apprentice', isMain: true, budget: 80, roundBudget: 80, minShells: 2, maxShells: 6, entryFee: 0, preferences: { height: 0.3, scale: 0.4, density: 0.5, duration: 0.4, color: { red: 0.7, gold: 0.3 }, effects: { crackle: 0.6 }, complexity: 0.1 }, rewards: { funds: 30, fame: 60 }, firstClearBonus: { funds: 50, fame: 150 }, desc: '热闹的小庙会，红色和爆响最受欢迎。', preferenceDesc: '庙会的评委们就爱那股热闹劲儿：火红的牡丹在空中炸开，再配上一串噼里啪啦的爆响，最能点燃人群。', backdrop: { sky: 'festival', ground: 'village', clouds: 'few' }, },
+  e002: { id: 'e002', name: '小镇夜市', type: 'activity', rank: 'apprentice', isMain: false, budget: null, minShells: 1, maxShells: 30, entryFee: 0, preferences: { height: 0.2, scale: 0.5, density: 0.5, duration: 0.3, color: { gold: 1 }, effects: {}, complexity: 0 }, rewards: { funds: 80, fame: 20 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '夜市暖场表演，金色短烟花最讨喜。', preferenceDesc: '夜市离得近、看得清，金灿灿的低空小烟花最讨喜，既热闹又不扰民。', backdrop: { sky: 'twilight', ground: 'village', clouds: 'none' }, },
   e003: { id: 'e003', name: '街头小表演', type: 'fallback', rank: 'apprentice', isMain: false, budget: 20, minShells: 1, maxShells: 4, entryFee: 0, preferences: { height: 0.5, scale: 0.5, density: 0.5, duration: 0.5, color: {}, effects: {}, complexity: 0, any: 5 }, rewards: { funds: 25, fame: 5 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '零门槛小表演，赚点糊口钱。', preferenceDesc: '这种街头小场子不挑活儿，能放响、能开花就行，随便露一手就能拿到赏钱。', backdrop: { sky: 'clear', ground: 'grass', clouds: 'none' }, },
 
   // Skilled
-  e004: { id: 'e004', name: '县城花火大会', type: 'competition', rank: 'skilled', isMain: true, budget: 200, minShells: 3, maxShells: 8, entryFee: 0, preferences: { height: 0.6, scale: 0.7, density: 0.6, duration: 0.6, color: { blue: 0.5, white: 0.5 }, effects: { tail: 0.4, glitter: 0.4 }, complexity: 0.2 }, rewards: { funds: 80, fame: 150 }, firstClearBonus: { funds: 120, fame: 350 }, desc: '县城最大的花火大会，菊形和蓝白色是主流。', preferenceDesc: '县城花火大会讲究一个“雅”字：高空舒展的大朵菊花，蓝白冷色调，拖出一道银闪闪的尾迹，最是赏心悦目。', backdrop: { sky: 'midnight', ground: 'village', clouds: 'few' }, },
-  e005: { id: 'e005', name: '婚礼庆典', type: 'activity', rank: 'skilled', isMain: false, budget: null, minShells: 2, maxShells: 10, entryFee: 0, preferences: { height: 0.2, scale: 0.5, density: 0.6, duration: 0.5, color: { pink: 1 }, effects: {}, complexity: 0 }, rewards: { funds: 200, fame: 40 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '浪漫的婚礼现场，粉色爱心和低空烟花最应景。', preferenceDesc: '婚礼现场想要浪漫又温馨：低空炸开的粉色爱心，缓缓落下，别惊扰了新娘的裙摆。', backdrop: { sky: 'twilight', ground: 'park', clouds: 'none' }, },
+  e004: { id: 'e004', name: '县城花火大会', type: 'competition', rank: 'skilled', isMain: true, budget: 200, roundBudget: 140, minShells: 3, maxShells: 8, entryFee: 0, preferences: { height: 0.6, scale: 0.7, density: 0.6, duration: 0.6, color: { blue: 0.5, white: 0.5 }, effects: { tail: 0.4, glitter: 0.4 }, complexity: 0.2 }, rewards: { funds: 80, fame: 150 }, firstClearBonus: { funds: 120, fame: 350 }, desc: '县城最大的花火大会，菊形和蓝白色是主流。', preferenceDesc: '县城花火大会讲究一个“雅”字：高空舒展的大朵菊花，蓝白冷色调，拖出一道银闪闪的尾迹，最是赏心悦目。', backdrop: { sky: 'midnight', ground: 'village', clouds: 'few' }, },
+  e005: { id: 'e005', name: '婚礼庆典', type: 'activity', rank: 'skilled', isMain: false, budget: null, minShells: 2, maxShells: 40, entryFee: 0, preferences: { height: 0.2, scale: 0.5, density: 0.6, duration: 0.5, color: { pink: 1 }, effects: {}, complexity: 0 }, rewards: { funds: 200, fame: 40 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '浪漫的婚礼现场，粉色爱心和低空烟花最应景。', preferenceDesc: '婚礼现场想要浪漫又温馨：低空炸开的粉色爱心，缓缓落下，别惊扰了新娘的裙摆。', backdrop: { sky: 'twilight', ground: 'park', clouds: 'none' }, },
   e006: { id: 'e006', name: '商场开业', type: 'repeatable', rank: 'skilled', isMain: false, budget: 150, minShells: 2, maxShells: 8, entryFee: 0, preferences: { height: 0.4, scale: 0.6, density: 0.6, duration: 0.5, color: { gold: 1 }, effects: { crackle: 0.5 }, complexity: 0 }, rewards: { funds: 120, fame: 30 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '商场开业助兴，金色爆响最热闹。', preferenceDesc: '开业图个彩头：满天的金色，加上噼里啪啦的爆响，越热闹越有人气。', backdrop: { sky: 'clear', ground: 'city', clouds: 'none' }, },
 
   // Technician
-  e007: { id: 'e007', name: '市级烟花赛', type: 'competition', rank: 'technician', isMain: true, budget: 450, minShells: 4, maxShells: 10, entryFee: 0, preferences: { height: 0.9, scale: 0.8, density: 0.6, duration: 0.8, color: { red: 0.2, gold: 0.2, blue: 0.2, green: 0.2, white: 0.2 }, effects: { tail: 0.5, strobe: 0.5 }, complexity: 0.4 }, rewards: { funds: 240, fame: 300 }, firstClearBonus: { funds: 250, fame: 700 }, desc: '市级专业比赛，高空、长持续和复杂特效占优。', preferenceDesc: '市级赛场比拼的是气势：打得高、开得大、颜色变幻丰富，再带上尾迹或频闪，评委才看得过瘾。', backdrop: { sky: 'midnight', ground: 'city', clouds: 'scattered' }, },
-  e008: { id: 'e008', name: '音乐节暖场', type: 'activity', rank: 'technician', isMain: false, budget: null, minShells: 3, maxShells: 12, entryFee: 0, preferences: { height: 0.5, scale: 0.7, density: 0.7, duration: 0.5, color: { red: 0.2, gold: 0.2, blue: 0.2, green: 0.2, white: 0.2 }, effects: { strobe: 0.6 }, complexity: 0.2 }, rewards: { funds: 350, fame: 80 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '音乐节需要多色、闪烁、星环类活跃气氛。', preferenceDesc: '音乐节要的是节奏感：五颜六色的花火跟着鼓点频闪，越躁越好。', backdrop: { sky: 'twilight', ground: 'city', clouds: 'few' }, },
+  e007: { id: 'e007', name: '市级烟花赛', type: 'competition', rank: 'technician', isMain: true, budget: 450, roundBudget: 320, minShells: 4, maxShells: 10, entryFee: 0, preferences: { height: 0.9, scale: 0.8, density: 0.6, duration: 0.8, color: { red: 0.2, gold: 0.2, blue: 0.2, green: 0.2, white: 0.2 }, effects: { tail: 0.5, strobe: 0.5 }, complexity: 0.4 }, rewards: { funds: 240, fame: 300 }, firstClearBonus: { funds: 250, fame: 700 }, desc: '市级专业比赛，高空、长持续和复杂特效占优。', preferenceDesc: '市级赛场比拼的是气势：打得高、开得大、颜色变幻丰富，再带上尾迹或频闪，评委才看得过瘾。', backdrop: { sky: 'midnight', ground: 'city', clouds: 'scattered' }, },
+  e008: { id: 'e008', name: '音乐节暖场', type: 'activity', rank: 'technician', isMain: false, budget: null, minShells: 3, maxShells: 50, entryFee: 0, preferences: { height: 0.5, scale: 0.7, density: 0.7, duration: 0.5, color: { red: 0.2, gold: 0.2, blue: 0.2, green: 0.2, white: 0.2 }, effects: { strobe: 0.6 }, complexity: 0.2 }, rewards: { funds: 350, fame: 80 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '音乐节需要多色、闪烁、星环类活跃气氛。', preferenceDesc: '音乐节要的是节奏感：五颜六色的花火跟着鼓点频闪，越躁越好。', backdrop: { sky: 'twilight', ground: 'city', clouds: 'few' }, },
   e009: { id: 'e009', name: '公园周末秀', type: 'repeatable', rank: 'technician', isMain: false, budget: 300, minShells: 3, maxShells: 8, entryFee: 0, preferences: { height: 0.5, scale: 0.5, density: 0.5, duration: 0.5, color: {}, effects: {}, complexity: 0, any: 8 }, rewards: { funds: 240, fame: 80 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '周末公园常规表演，轻松稳定。', preferenceDesc: '周末公园秀就是图个稳：别出错、别超预算，观众开心，钱包也开心。', backdrop: { sky: 'clear', ground: 'park', clouds: 'few' }, },
 
   // Expert
-  e010: { id: 'e010', name: '省级锦标赛', type: 'competition', rank: 'expert', isMain: true, budget: 900, minShells: 5, maxShells: 12, entryFee: 0, preferences: { height: 0.85, scale: 0.9, density: 0.8, duration: 0.8, color: { gold: 0.5, silver: 0.5 }, effects: { bouquet: 0.5 }, complexity: 0.4 }, rewards: { funds: 500, fame: 600 }, firstClearBonus: { funds: 600, fame: 2500 }, desc: '省级大赛，千轮、棕榈、金银色系是高分关键。', preferenceDesc: '省级舞台讲究富贵堂皇：高空炸出层层叠叠的金银大花，像千轮绽放，才是冠军相。', backdrop: { sky: 'midnight', ground: 'city', clouds: 'few' }, },
-  e011: { id: 'e011', name: '度假村周年庆', type: 'activity', rank: 'expert', isMain: false, budget: null, minShells: 4, maxShells: 14, entryFee: 0, preferences: { height: 0.7, scale: 0.8, density: 0.7, duration: 0.9, color: { red: 0.2, gold: 0.2, blue: 0.2, green: 0.2, white: 0.2 }, effects: {}, complexity: 0.3 }, rewards: { funds: 700, fame: 150 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '度假村大型庆典，多彩长持续瀑布柳最受欢迎。', preferenceDesc: '度假村周年庆要的是场面：多彩的大花持续绽放，柳枝般垂落，像一幅流动的画。', backdrop: { sky: 'twilight', ground: 'park', clouds: 'scattered' }, },
+  e010: { id: 'e010', name: '省级锦标赛', type: 'competition', rank: 'expert', isMain: true, budget: 900, roundBudget: 450, minShells: 5, maxShells: 12, entryFee: 0, preferences: { height: 0.85, scale: 0.9, density: 0.8, duration: 0.8, color: { gold: 0.5, silver: 0.5 }, effects: { bouquet: 0.5 }, complexity: 0.4 }, rewards: { funds: 500, fame: 600 }, firstClearBonus: { funds: 600, fame: 2500 }, desc: '省级大赛，千轮、棕榈、金银色系是高分关键。', preferenceDesc: '省级舞台讲究富贵堂皇：高空炸出层层叠叠的金银大花，像千轮绽放，才是冠军相。', backdrop: { sky: 'midnight', ground: 'city', clouds: 'few' }, },
+  e011: { id: 'e011', name: '度假村周年庆', type: 'activity', rank: 'expert', isMain: false, budget: null, minShells: 4, maxShells: 60, entryFee: 0, preferences: { height: 0.7, scale: 0.8, density: 0.7, duration: 0.9, color: { red: 0.2, gold: 0.2, blue: 0.2, green: 0.2, white: 0.2 }, effects: {}, complexity: 0.3 }, rewards: { funds: 700, fame: 150 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '度假村大型庆典，多彩长持续瀑布柳最受欢迎。', preferenceDesc: '度假村周年庆要的是场面：多彩的大花持续绽放，柳枝般垂落，像一幅流动的画。', backdrop: { sky: 'twilight', ground: 'park', clouds: 'scattered' }, },
   e012: { id: 'e012', name: '商业汇演', type: 'repeatable', rank: 'expert', isMain: false, budget: 800, minShells: 4, maxShells: 10, entryFee: 0, preferences: { height: 0.5, scale: 0.5, density: 0.5, duration: 0.5, color: {}, effects: {}, complexity: 0, any: 10 }, rewards: { funds: 600, fame: 180 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '商业演出机会，收益稳定。', preferenceDesc: '商业汇演看的是性价比：控制在预算内，稳定发挥，甲方满意最重要。', backdrop: { sky: 'clear', ground: 'city', clouds: 'few' }, },
 
   // Master
-  e013: { id: 'e013', name: '国际烟花邀请赛', type: 'competition', rank: 'master', isMain: true, budget: 2000, minShells: 6, maxShells: 16, entryFee: 0, preferences: { height: 0.95, scale: 1.0, density: 0.9, duration: 0.9, color: { red: 0.2, gold: 0.2, blue: 0.2, white: 0.2, purple: 0.2 }, effects: { glitter: 0.2, crackle: 0.2, tail: 0.2, strobe: 0.2, bouquet: 0.2 }, complexity: 0.6 }, rewards: { funds: 1000, fame: 1500 }, firstClearBonus: { funds: 2000, fame: 3000 }, desc: '国际顶尖赛事，要求全能均衡，特效复杂。', preferenceDesc: '国际邀请赛是顶尖高手的对决：极限高度、超大尺寸、五色缤纷，各种特效轮番上阵，缺一厘都拿不到高分。', backdrop: { sky: 'midnight', ground: 'city', clouds: 'scattered' }, },
-  e014: { id: 'e014', name: '大师告别演出', type: 'activity', rank: 'master', isMain: false, budget: null, minShells: 5, maxShells: 16, entryFee: 0, preferences: { height: 0.8, scale: 0.8, density: 0.7, duration: 0.9, color: { red: 0.5, gold: 0.5 }, effects: {}, complexity: 0.2 }, rewards: { funds: 1500, fame: 300 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '大师级私人订制，红金长持续爱心为主题。', preferenceDesc: '这位大师想为自己的生涯画个圆满句号：红金交织的长持续爱心，饱满、深情、久久不散。', backdrop: { sky: 'twilight', ground: 'park', clouds: 'few' }, },
+  e013: { id: 'e013', name: '国际烟花邀请赛', type: 'competition', rank: 'master', isMain: true, budget: 2000, roundBudget: 900, minShells: 6, maxShells: 16, entryFee: 0, preferences: { height: 0.95, scale: 1.0, density: 0.9, duration: 0.9, color: { red: 0.2, gold: 0.2, blue: 0.2, white: 0.2, purple: 0.2 }, effects: { glitter: 0.2, crackle: 0.2, tail: 0.2, strobe: 0.2, bouquet: 0.2 }, complexity: 0.6 }, rewards: { funds: 1000, fame: 1500 }, firstClearBonus: { funds: 2000, fame: 3000 }, desc: '国际顶尖赛事，要求全能均衡，特效复杂。', preferenceDesc: '国际邀请赛是顶尖高手的对决：极限高度、超大尺寸、五色缤纷，各种特效轮番上阵，缺一厘都拿不到高分。', backdrop: { sky: 'midnight', ground: 'city', clouds: 'scattered' }, },
+  e014: { id: 'e014', name: '大师告别演出', type: 'activity', rank: 'master', isMain: false, budget: null, minShells: 5, maxShells: 80, entryFee: 0, preferences: { height: 0.8, scale: 0.8, density: 0.7, duration: 0.9, color: { red: 0.5, gold: 0.5 }, effects: {}, complexity: 0.2 }, rewards: { funds: 1500, fame: 300 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '大师级私人订制，红金长持续爱心为主题。', preferenceDesc: '这位大师想为自己的生涯画个圆满句号：红金交织的长持续爱心，饱满、深情、久久不散。', backdrop: { sky: 'twilight', ground: 'park', clouds: 'few' }, },
   e015: { id: 'e015', name: '顶级私人订制', type: 'repeatable', rank: 'master', isMain: false, budget: 1500, minShells: 5, maxShells: 12, entryFee: 0, preferences: { height: 0.5, scale: 0.5, density: 0.5, duration: 0.5, color: {}, effects: {}, complexity: 0, any: 12 }, rewards: { funds: 1000, fame: 250 }, firstClearBonus: { funds: 0, fame: 0 }, desc: '为富豪客户定制表演，报酬丰厚。', preferenceDesc: '富豪客户只要求一点：钱不是问题，场面一定要够大、够震撼，让他们觉得值回票价。', backdrop: { sky: 'midnight', ground: 'city', clouds: 'none' }, },
 };
 
@@ -163,7 +279,7 @@ export const STARTING_COMPONENTS = [
   'c001', 'c002',
   'col001', 'col002', 'col003', 'col004', 'col005',
   'f001', 'f002',
-  'e002',
+  'e001', 'e002',
 ];
 
 export const DISPLAY_LABELS = {

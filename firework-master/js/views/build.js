@@ -14,16 +14,22 @@ import { RECIPES, EVENT_TYPES, RANKS } from '../config.js';
 import { FireworkRenderer } from '../renderer.js';
 import {
   getAvailableEvents,
+  getEventById,
   getRecipeById,
   getUnlockedComponents,
   getComponentById,
   assembleShell,
   loadRecipe,
   isExactRecipeMatch,
+  areComponentsAccessible,
   getEventPreferenceHint,
   displayLabel,
   validateShellComponents,
   validateShow,
+  calculateScore,
+  getScoreGrade,
+  getCurrentRoundBudget,
+  getCurrentRoundPreference,
 } from '../systems.js';
 import {
   formatMoney,
@@ -31,10 +37,15 @@ import {
   setQty,
   sumQty,
   dominantColor,
+  dominantColorHex,
   formatColorVector,
   formatEffects,
   formatPercent,
   componentStatLine,
+  renderGlobalStatus,
+  refreshGlobalBars,
+  showToast,
+  animateNumber,
 } from '../ui-utils.js';
 import { updateHub } from './hub.js';
 
@@ -81,12 +92,29 @@ export function renderBuild() {
     return;
   }
 
-  document.getElementById('build-title').textContent = event.name;
-  document.getElementById('build-budget').textContent = event.budget !== null ? formatMoney(event.budget) : '无限制';
+  const isCompetition = event.type === 'competition';
+  const roundInfo = isCompetition && state.competition
+    ? ` · 第 ${state.competition.round}/${state.competition.totalRounds} 轮 · 剩余 ${state.competition.remaining} 人`
+    : '';
+  document.getElementById('build-title').textContent = event.name + roundInfo;
+
+  const budget = isCompetition ? getCurrentRoundBudget(state) : event.budget;
+  document.getElementById('build-budget').textContent = budget !== null ? formatMoney(budget) : '无限制';
   document.getElementById('build-min').textContent = event.minShells;
   document.getElementById('build-max').textContent = event.maxShells;
   document.getElementById('build-rewards').textContent = `资金 ${event.rewards.funds} / 名气 ${event.rewards.fame}`;
-  document.getElementById('build-hint').textContent = `偏好：${getEventPreferenceHint(event.id)}`;
+
+  if (isCompetition) {
+    const roundPref = getCurrentRoundPreference(state);
+    const roundDesc = roundPref
+      ? `本轮偏好：高度 ${Math.round(roundPref.height * 100)}% · 规模 ${Math.round(roundPref.scale * 100)}% · 持续 ${Math.round(roundPref.duration * 100)}% · 复杂度 ${Math.round(roundPref.complexity * 100)}%`
+      : '本轮偏好：未知';
+    document.getElementById('build-hint').textContent = `${getEventPreferenceHint(event.id)}（${roundDesc}）`;
+  } else {
+    document.getElementById('build-hint').textContent = `偏好：${getEventPreferenceHint(event.id)}`;
+  }
+
+  renderGlobalStatus(document.getElementById('build-global-bar'), state);
 
   const detailBtn = document.getElementById('event-detail-btn');
   detailBtn.onclick = () => showEventDetail(event);
@@ -104,7 +132,8 @@ export function showEventDetail(event) {
   body.innerHTML = `
     <div class="detail-row"><span>类型</span><span class="tag ${typeInfo.labelClass}">${typeInfo.name}</span></div>
     <div class="detail-row"><span>等级要求</span><span>${RANKS[event.rank].name}</span></div>
-    <div class="detail-row"><span>预算</span><span>${event.budget !== null ? formatMoney(event.budget) : '无限制'}</span></div>
+    <div class="detail-row"><span>${event.type === 'competition' ? '每轮预算' : '预算'}</span><span>${event.type === 'competition' ? (event.roundBudget !== undefined ? formatMoney(event.roundBudget) : formatMoney(event.budget)) : (event.budget !== null ? formatMoney(event.budget) : '无限制')}</span></div>
+    ${event.type === 'competition' && state.competition ? `<div class="detail-row"><span>当前轮次</span><span>第 ${state.competition.round}/${state.competition.totalRounds} 轮 · 剩余 ${state.competition.remaining} 人</span></div>` : ''}
     <div class="detail-row"><span>弹数限制</span><span>${event.minShells} ~ ${event.maxShells}</span></div>
     <div class="detail-row"><span>报名费</span><span>${event.entryFee > 0 ? formatMoney(event.entryFee) : '免费'}</span></div>
     <div class="detail-row"><span>基础奖励</span><span>资金 ${event.rewards.funds} / 名气 ${event.rewards.fame}</span></div>
@@ -118,11 +147,11 @@ export function showEventDetail(event) {
       <p>${event.preferenceDesc || '无特殊偏好'}</p>
     </div>
   `;
-  document.getElementById('event-detail-modal').style.display = 'block';
+  document.getElementById('event-detail-modal').classList.add('open');
 }
 
 export function hideEventDetail() {
-  document.getElementById('event-detail-modal').style.display = 'none';
+  document.getElementById('event-detail-modal').classList.remove('open');
 }
 
 export function renderAssemblyBench() {
@@ -153,8 +182,17 @@ export function renderAssemblyBench() {
     category = category.replace('secondary-', '');
   }
 
+  const catColors = {
+    gunpowder: '#ffaa33',
+    casing: '#8a9bb8',
+    colorant: '#ff5555',
+    fuse: '#ffcc33',
+    effect: '#cc77ff',
+  };
+  document.getElementById('assembly-tabs').style.setProperty('--active-cat-color', catColors[category] || '#ffaa33');
+
   const group = document.createElement('div');
-  group.className = 'category-group';
+  group.className = `category-group cat-${category}`;
   const title = isSecondary ? `${CATEGORY_LABELS[category]}（二层）` : CATEGORY_LABELS[category];
   group.innerHTML = `<div class="category-title">${title}</div>`;
   const cards = document.createElement('div');
@@ -164,36 +202,45 @@ export function renderAssemblyBench() {
   const selectedMapOrId = isSecondary ? currentAssembly.secondary[category] : currentAssembly[category];
 
   for (const comp of Object.values(unlocked[category])) {
+    const isOwned = state.ownedComponents.has(comp.id);
     const card = document.createElement('div');
     card.className = 'component-card';
     if (isQuantity) card.classList.add('quantity');
+    if (!isOwned) card.classList.add('locked');
 
-    const qty = isQuantity ? getQty(selectedMapOrId, comp.id) : 0;
+    const qty = isQuantity && isOwned ? getQty(selectedMapOrId, comp.id) : 0;
     const selected = isQuantity ? qty > 0 : selectedMapOrId === comp.id;
-    if (selected) card.classList.add('selected');
+    if (selected && isOwned) card.classList.add('selected');
 
     const qtyBadge = isQuantity && qty > 0 ? `<span class="qty-badge">${qty}</span>` : '';
+    const lockBadge = !isOwned ? '<span class="lock-badge">🔒</span>' : '';
     const desc = comp.desc ? `<span class="comp-desc">${comp.desc}</span>` : '';
     card.innerHTML = `
-      <span class="comp-name">${comp.name}${qtyBadge}</span>
+      <span class="comp-name">${comp.name}${qtyBadge}${lockBadge}</span>
       <span class="comp-meta">${formatMoney(comp.cost)} · ${componentStatLine(category, comp)}</span>
       ${desc}
     `;
 
-    card.addEventListener('click', () => {
-      if (isQuantity) {
-        const map = isSecondary ? currentAssembly.secondary[category] : currentAssembly[category];
-        setQty(map, comp.id, getQty(map, comp.id) + 1);
-      } else {
-        currentAssembly[category] = comp.id;
-        if (category === 'casing' && comp.layers < 2) {
-          currentAssembly.secondary = { colorant: {}, effect: {} };
+    if (isOwned) {
+      card.addEventListener('click', () => {
+        if (isQuantity) {
+          const map = isSecondary ? currentAssembly.secondary[category] : currentAssembly[category];
+          setQty(map, comp.id, getQty(map, comp.id) + 1);
+        } else {
+          currentAssembly[category] = comp.id;
+          if (category === 'casing' && comp.layers < 2) {
+            currentAssembly.secondary = { colorant: {}, effect: {} };
+          }
         }
-      }
-      renderAssemblyBench();
-      updateAssemblyPreview();
-      renderLoadout();
-    });
+        renderAssemblyBench();
+        updateAssemblyPreview();
+        renderLoadout();
+      });
+    } else {
+      card.addEventListener('click', () => {
+        showToast(`未拥有 ${comp.name}，请先去配方实验室购买`, { type: 'warning' });
+      });
+    }
 
     cards.appendChild(card);
   }
@@ -409,7 +456,7 @@ export function addAssembledShell() {
   if (!event || !currentShell) return;
   if (state.currentShow.length >= event.maxShells) return;
 
-  const matchedRecipeId = findMatchingOwnedRecipe();
+  const matchedRecipeId = findMatchingKnownRecipe();
   const shell = matchedRecipeId
     ? assembleShell(currentAssembly, RECIPES[matchedRecipeId])
     : currentShell;
@@ -418,16 +465,28 @@ export function addAssembledShell() {
   renderShow();
 }
 
-function findMatchingOwnedRecipe() {
-  for (const recipeId of state.ownedRecipes) {
+function findMatchingKnownRecipe() {
+  for (const recipeId of Object.keys(RECIPES)) {
+    const recipe = RECIPES[recipeId];
+    if (!areComponentsAccessible(recipe.components, state)) continue;
     if (isExactRecipeMatch(currentAssembly, recipeId)) return recipeId;
   }
   return null;
 }
 
 export function removeFromShow(index) {
-  state.removeFromShow(index);
-  renderShow();
+  const showList = document.getElementById('build-show');
+  const item = showList ? showList.children[index] : null;
+  if (item) {
+    item.classList.add('leaving');
+    setTimeout(() => {
+      state.removeFromShow(index);
+      renderShow();
+    }, 150);
+  } else {
+    state.removeFromShow(index);
+    renderShow();
+  }
 }
 
 export function renderShow() {
@@ -441,19 +500,60 @@ export function renderShow() {
     const itemEl = document.createElement('div');
     itemEl.className = 'show-item';
     const displayName = shell.name || `${displayLabel('color', dominantColor(shell.color))}·${displayLabel('shape', shell.shape)}`;
-    itemEl.innerHTML = `<span>${displayName}</span><button aria-label="移除">×</button>`;
+    const swatchColor = dominantColorHex(shell.color);
+    itemEl.innerHTML = `<span class="show-swatch" style="background: ${swatchColor}"></span><span class="show-name">${displayName}</span><button aria-label="移除">×</button>`;
     itemEl.querySelector('button').addEventListener('click', () => removeFromShow(index));
     showList.appendChild(itemEl);
   });
   if (state.currentShow.length === 0) {
     showList.innerHTML = '<p class="empty-show">节目单为空，请从左侧组装或加载配方</p>';
   }
-  document.getElementById('build-cost').textContent = formatMoney(cost);
-  document.getElementById('build-count').textContent = state.currentShow.length;
+  animateNumber(document.getElementById('build-cost'), cost, { formatter: v => formatMoney(v) });
+  animateNumber(document.getElementById('build-count'), state.currentShow.length);
+
+  const event = getEventById(state.selectedEventId);
+  const isCompetition = event && event.type === 'competition';
+  const budget = isCompetition ? getCurrentRoundBudget(state) : event?.budget;
+  const budgetFill = document.getElementById('build-budget-fill');
+  const budgetText = document.getElementById('build-budget-text');
+  if (event) {
+    const totalCost = cost + (event.entryFee || 0);
+    if (budget !== null && budget !== undefined) {
+      const ratio = totalCost / budget;
+      const pct = Math.min(100, ratio * 100);
+      budgetFill.style.width = `${pct}%`;
+      budgetFill.classList.remove('warn', 'danger');
+      if (totalCost > budget) budgetFill.classList.add('danger');
+      else if (ratio > 0.7) budgetFill.classList.add('warn');
+      budgetText.textContent = `${formatMoney(totalCost)} / ${formatMoney(budget)}`;
+    } else {
+      budgetFill.style.width = '0%';
+      budgetFill.classList.remove('warn', 'danger');
+      budgetText.textContent = `已用 ${formatMoney(totalCost)}（无限制）`;
+    }
+  } else {
+    budgetFill.style.width = '0%';
+    budgetFill.classList.remove('warn', 'danger');
+    budgetText.textContent = '--';
+  }
+
+  const estimateEl = document.getElementById('build-estimate');
+  if (!event || state.currentShow.length === 0) {
+    estimateEl.textContent = '--';
+  } else {
+    const estimatePref = isCompetition ? getCurrentRoundPreference(state) : event.id;
+    const estimate = calculateScore(estimatePref, state.currentShow);
+    estimateEl.textContent = `${estimate.score} 分（${getScoreGrade(estimate.score)}）`;
+  }
 
   const validation = validateShow(state, state.selectedEventId, state.currentShow);
   const confirmBtn = document.getElementById('build-confirm');
   confirmBtn.disabled = !validation.valid;
+  if (isCompetition && state.competition) {
+    confirmBtn.textContent = `开始第 ${state.competition.round} 轮`;
+  } else {
+    confirmBtn.textContent = '确认表演';
+  }
 
   const validationEl = document.getElementById('build-validation');
   if (validation.valid) {
@@ -468,16 +568,29 @@ export function renderShow() {
 export function renderLibrary() {
   const recipeTab = document.getElementById('library-recipes');
   recipeTab.innerHTML = '';
-  for (const recipeId of Array.from(state.ownedRecipes).sort()) {
-    const recipe = getRecipeById(recipeId);
-    if (!recipe) continue;
+  const recipes = Object.values(RECIPES).sort((a, b) => a.cost - b.cost);
+  for (const recipe of recipes) {
+    const components = loadRecipe(recipe.id);
+    const accessible = components && areComponentsAccessible(components, state);
     const item = document.createElement('button');
     item.className = 'library-item';
+    if (!accessible) item.classList.add('locked');
+    const swatchColor = dominantColorHex(recipe.color);
+    const lockBadge = accessible ? '' : ' 🔒';
     item.innerHTML = `
-      <span class="item-name">${recipe.name}</span>
-      <span class="item-meta">${formatMoney(recipe.cost)} · ${displayLabel('shape', recipe.shape)} · ${displayLabel('color', dominantColor(recipe.color))}</span>
+      <span class="library-swatch" style="background: ${swatchColor}"></span>
+      <span class="item-info">
+        <span class="item-name">${recipe.name}${lockBadge}</span>
+        <span class="item-meta">${formatMoney(recipe.cost)} · ${displayLabel('shape', recipe.shape)} · ${displayLabel('color', dominantColor(recipe.color))}</span>
+      </span>
     `;
-    item.addEventListener('click', () => loadRecipeIntoAssembly(recipeId));
+    if (accessible) {
+      item.addEventListener('click', () => loadRecipeIntoAssembly(recipe.id));
+    } else {
+      item.addEventListener('click', () => {
+        showToast('未拥有该示例所需全部材料，请先去配方实验室购买', { type: 'warning' });
+      });
+    }
     recipeTab.appendChild(item);
   }
 
@@ -555,9 +668,9 @@ function showPreviewToast(message) {
   const toast = document.getElementById('preview-toast');
   if (!toast) return;
   toast.textContent = message;
-  toast.style.display = 'block';
+  toast.classList.add('show');
   if (toast._timer) clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => { toast.style.display = 'none'; }, 1800);
+  toast._timer = setTimeout(() => { toast.classList.remove('show'); }, 1800);
 }
 
 export function applyAssembly(components) {
@@ -575,12 +688,12 @@ export function applyAssembly(components) {
 export function openBlueprintSaveModal() {
   const input = document.getElementById('blueprint-name-input');
   input.value = '';
-  document.getElementById('blueprint-save-modal').style.display = 'block';
+  document.getElementById('blueprint-save-modal').classList.add('open');
   input.focus();
 }
 
 export function closeBlueprintSaveModal() {
-  document.getElementById('blueprint-save-modal').style.display = 'none';
+  document.getElementById('blueprint-save-modal').classList.remove('open');
 }
 
 export function confirmSaveBlueprint() {
@@ -594,16 +707,17 @@ export function confirmSaveBlueprint() {
   try {
     const result = state.saveBlueprint(name, currentAssembly);
     if (!result.success) {
-      alert('保存失败：' + (VALIDATION_REASONS[result.reason] || result.reason));
+      showToast('保存失败：' + (VALIDATION_REASONS[result.reason] || result.reason), { type: 'error' });
       return;
     }
     saveGame();
     renderBlueprints();
     switchLibraryTab('blueprints');
     showPreviewToast(`蓝图已保存：${result.blueprint.name}`);
+    showToast(`蓝图已保存：${result.blueprint.name}`, { type: 'success' });
   } catch (err) {
     console.error('save blueprint failed', err);
-    alert('保存蓝图时出错，请查看控制台。');
+    showToast('保存蓝图时出错，请查看控制台。', { type: 'error' });
   }
   closeBlueprintSaveModal();
 }
@@ -611,12 +725,14 @@ export function confirmSaveBlueprint() {
 export function expandBlueprintSlot() {
   const result = state.expandBlueprintSlot();
   if (!result.success) {
-    alert('扩展失败：资金不足');
+    showToast('扩展失败：资金不足', { type: 'warning' });
     return;
   }
   saveGame();
   updateHub();
+  refreshGlobalBars(state);
   renderBlueprints();
+  showToast(`蓝图槽位已扩展至 ${state.blueprintSlots} 个`, { type: 'success' });
 }
 
 export function switchLibraryTab(tab) {

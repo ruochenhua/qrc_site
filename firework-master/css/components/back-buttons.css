@@ -1,0 +1,95 @@
+/* ===== Back buttons ===== */
+#events-back,
+#lab-back,
+#build-back {
+  background: transparent;
+  border: 1px solid #5c4530;
+  color: #d8c8a8;
+}
+
+#events-back:hover,
+#lab-back:hover,
+#build-back:hover {
+  background: rgba(255, 238, 187, 0.08);
+}
+
+.global-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.global-brand {
+  font-weight: 700;
+  color: var(--accent-light);
+  font-size: 15px;
+}
+
+.global-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.global-bar .pill {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.budget-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  font-size: 12px;
+}
+
+.budget-label { color: var(--muted); }
+
+.budget-track {
+  flex: 1;
+  height: 10px;
+  background: #0d101c;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.budget-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--success) 0%, #66dd99 100%);
+  box-shadow: 0 0 10px rgba(85,204,136,0.35);
+  transition: width var(--transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1), background var(--transition-base);
+}
+
+.budget-fill.warn {
+  background: linear-gradient(90deg, var(--warn) 0%, #ffe066 100%);
+  box-shadow: 0 0 10px rgba(255,204,51,0.35);
+}
+
+.budget-fill.danger {
+  background: linear-gradient(90deg, var(--danger) 0%, #ff7777 100%);
+  box-shadow: 0 0 10px rgba(255,85,85,0.4);
+}
+
+.budget-text { color: var(--muted); white-space: nowrap; }
+
+.estimate-row {
+  font-size: 13px;
+  color: var(--text-body);
+  margin: 8px 0 4px;
+}
+
+#build-estimate {
+  font-weight: 700;
+  color: var(--accent-light);
+}
+

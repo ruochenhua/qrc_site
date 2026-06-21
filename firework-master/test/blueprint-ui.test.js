@@ -36,7 +36,7 @@ describe('Blueprint UI in browser-like env', () => {
     // Click save to open the modal.
     saveBtn.click();
     const modal = document.getElementById('blueprint-save-modal');
-    assert.equal(modal.style.display, 'block', 'save modal should be visible');
+    assert.ok(modal.classList.contains('open'), 'save modal should be visible');
 
     // Enter a name and confirm.
     const input = document.getElementById('blueprint-name-input');
@@ -45,7 +45,7 @@ describe('Blueprint UI in browser-like env', () => {
     confirmBtn.click();
 
     // Modal should close and blueprint list should contain the new item.
-    assert.equal(modal.style.display, 'none', 'save modal should close');
+    assert.ok(!modal.classList.contains('open'), 'save modal should close');
 
     const blueprintsList = document.getElementById('library-blueprints');
     assert.equal(blueprintsList.style.display, 'flex', 'should switch to blueprints tab');
@@ -60,7 +60,7 @@ describe('Blueprint UI in browser-like env', () => {
 
     // After loading, a toast should appear.
     const toast = document.getElementById('preview-toast');
-    assert.equal(toast.style.display, 'block', 'toast should be visible');
+    assert.ok(toast.classList.contains('show'), 'toast should be visible');
     assert.ok(toast.textContent.includes('我的测试蓝图'), 'toast should mention blueprint name');
   });
 });

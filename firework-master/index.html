@@ -4,13 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>烟花大师 - Firework Master</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/views/start.css">
+<link rel="stylesheet" href="css/views/hub.css">
+<link rel="stylesheet" href="css/views/build.css">
+<link rel="stylesheet" href="css/views/perform.css">
+<link rel="stylesheet" href="css/views/ending.css">
+<link rel="stylesheet" href="css/views/build-assembly.css">
+<link rel="stylesheet" href="css/components/modal.css">
+<link rel="stylesheet" href="css/components/preview.css">
+<link rel="stylesheet" href="css/components/library.css">
+<link rel="stylesheet" href="css/components/shared-headers.css">
+<link rel="stylesheet" href="css/views/events.css">
+<link rel="stylesheet" href="css/views/lab.css">
+<link rel="stylesheet" href="css/views/build-page.css">
+<link rel="stylesheet" href="css/views/result.css">
+<link rel="stylesheet" href="css/components/back-buttons.css">
+<link rel="stylesheet" href="css/components/toast.css">
 </head>
 <body>
 <div id="game">
   <div id="view-start" class="view active">
+    <canvas id="start-canvas"></canvas>
+    <div class="start-overlay"></div>
     <div class="start-screen">
-      <h1>🎆 烟花大师</h1>
+      <svg class="start-logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M24 4C24 4 18 14 18 22C18 30 24 38 24 38C24 38 30 30 30 22C30 14 24 4 24 4Z" fill="url(#g1)"/>
+        <circle cx="24" cy="22" r="4" fill="#fff"/>
+        <path d="M24 10L26 16H22L24 10Z" fill="#ffeebb"/>
+        <path d="M10 18L16 21L10 24" stroke="#ffaa33" stroke-width="2" stroke-linecap="round"/>
+        <path d="M38 18L32 21L38 24" stroke="#ffaa33" stroke-width="2" stroke-linecap="round"/>
+        <path d="M12 32L17 28" stroke="#66ccff" stroke-width="2" stroke-linecap="round"/>
+        <path d="M36 32L31 28" stroke="#66ccff" stroke-width="2" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="g1" x1="24" y1="4" x2="24" y2="38" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#ffaa33"/>
+            <stop offset="1" stop-color="#ff4444"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <h1>烟花大师</h1>
       <p class="subtitle">从无名学徒到烟花大师的成名之路</p>
       <div class="actions">
         <button id="new-game-btn" class="btn primary large">新游戏</button>
@@ -28,22 +61,68 @@
         <span class="pill">名气：<span id="hub-fame">0</span></span>
         <span class="pill">下级所需：<span id="hub-next">--</span></span>
       </div>
+      <div class="hub-progress" id="hub-progress">主线进度：--</div>
     </header>
-    <div class="hub-actions">
-      <button id="hub-events" class="btn primary large">🎪 赛事列表</button>
-      <button id="hub-lab" class="btn large">🧪 配方实验室</button>
-      <button id="hub-rankup" class="btn success large" style="display:none">⬆️ 晋升等级</button>
-      <button id="hub-settings" class="btn danger large">🗑️ 重置存档</button>
+    <div class="hub-room">
+      <div class="hub-light"></div>
+      <div class="hub-floor"></div>
+
+      <div class="hub-window">
+        <div class="hub-window-pane pane-v"></div>
+        <div class="hub-window-pane pane-h"></div>
+      </div>
+
+      <div class="hub-shelf shelf-top">
+        <div class="hub-bottle bottle-red"></div>
+        <div class="hub-bottle bottle-gold"></div>
+        <div class="hub-bottle bottle-blue"></div>
+      </div>
+      <div class="hub-shelf shelf-bottom">
+        <div class="hub-bottle bottle-green"></div>
+        <div class="hub-bottle bottle-purple"></div>
+      </div>
+
+      <div class="hub-noticeboard">
+        <div class="notice-row notice-gold"></div>
+        <div class="notice-row"></div>
+        <div class="notice-row notice-short"></div>
+        <div class="notice-pin"></div>
+      </div>
+
+      <div class="hub-workbench">
+        <div class="bench-top"></div>
+        <div class="bench-leg leg-left"></div>
+        <div class="bench-leg leg-right"></div>
+        <div class="bench-prop prop-mortar"></div>
+        <div class="bench-prop prop-ruler"></div>
+      </div>
+
+      <button id="hub-events" class="hub-object hub-scroll">
+        <span class="hub-icon">🎪</span>
+        <span class="hub-label">赛事列表</span>
+      </button>
+
+      <button id="hub-lab" class="hub-object hub-book">
+        <span class="hub-icon">🧪</span>
+        <span class="hub-label">配方实验室</span>
+      </button>
+
+      <button id="hub-settings" class="hub-object hub-chest">
+        <span class="hub-icon">🗑️</span>
+        <span class="hub-label">重置存档</span>
+      </button>
     </div>
   </div>
 
   <div id="view-events" class="view">
+    <div class="global-bar" id="events-global-bar"></div>
     <header><h2>🎪 赛事列表</h2></header>
     <div id="event-list" class="card-list"></div>
     <button id="events-back" class="btn">← 返回 Hub</button>
   </div>
 
   <div id="view-build" class="view">
+    <div class="global-bar" id="build-global-bar"></div>
     <header>
       <h2>组建节目单</h2>
       <div class="build-meta">
@@ -89,7 +168,7 @@
       <div class="panel preview-panel">
         <h3>实时预览</h3>
         <div id="preview-toast" class="preview-toast" style="display:none"></div>
-        <canvas id="preview-canvas" width="640" height="360"></canvas>
+        <canvas id="preview-canvas"></canvas>
         <div id="preview-attrs" class="preview-attrs">
           <div class="attr-row"><span>高度</span><span id="attr-height">--</span></div>
           <div class="attr-row"><span>规模</span><span id="attr-scale">--</span></div>
@@ -126,6 +205,14 @@
             <span>总成本：<span id="build-cost">¥0</span></span>
             <span>弹数：<span id="build-count">0</span></span>
           </div>
+          <div class="budget-row">
+            <span class="budget-label">预算使用</span>
+            <div class="budget-track">
+              <div id="build-budget-fill" class="budget-fill"></div>
+            </div>
+            <span id="build-budget-text" class="budget-text">--</span>
+          </div>
+          <div class="estimate-row">预计得分：<span id="build-estimate">--</span></div>
           <div id="build-validation" class="validation-msg"></div>
           <div class="build-actions">
             <button id="build-clear" class="btn">清空</button>
@@ -144,6 +231,7 @@
   </div>
 
   <div id="view-result" class="view">
+    <div class="global-bar" id="result-global-bar"></div>
     <div class="result-screen">
       <h2>评分结算</h2>
       <div class="score-display">
@@ -152,21 +240,42 @@
       </div>
       <div id="result-breakdown" class="breakdown"></div>
       <div class="reward-row">
-        <span>资金：<span id="result-funds">+¥0</span></span>
-        <span>名气：<span id="result-fame">+0</span></span>
+        <div class="reward-card">
+          <span class="reward-icon">💰</span>
+          <span class="reward-label">资金</span>
+          <span id="result-funds" class="reward-value">+¥0</span>
+        </div>
+        <div class="reward-card">
+          <span class="reward-icon">⭐</span>
+          <span class="reward-label">名气</span>
+          <span id="result-fame" class="reward-value">+0</span>
+        </div>
       </div>
+      <div id="result-competition"></div>
       <div id="result-extra"></div>
       <button id="result-continue" class="btn primary large">返回 Hub</button>
     </div>
   </div>
 
   <div id="view-lab" class="view">
+    <div class="global-bar" id="lab-global-bar"></div>
     <header><h2>🧪 配方实验室</h2></header>
-    <div id="lab-owned" class="card-list"></div>
+    <div class="lab-group">
+      <h3>已掌握</h3>
+      <div id="lab-owned" class="card-list"></div>
+    </div>
+    <div class="lab-group">
+      <h3>可研发</h3>
+      <div id="lab-researchable" class="card-list"></div>
+    </div>
+    <div class="lab-group">
+      <h3>未解锁</h3>
+      <div id="lab-locked" class="card-list"></div>
+    </div>
     <button id="lab-back" class="btn">← 返回 Hub</button>
   </div>
 
-  <div id="event-detail-modal" class="modal" style="display:none">
+  <div id="event-detail-modal" class="modal">
     <div class="modal-backdrop"></div>
     <div class="modal-content">
       <h3 id="detail-name">--</h3>
@@ -177,7 +286,7 @@
     </div>
   </div>
 
-  <div id="blueprint-save-modal" class="modal" style="display:none">
+  <div id="blueprint-save-modal" class="modal">
     <div class="modal-backdrop"></div>
     <div class="modal-content">
       <h3>保存蓝图</h3>
@@ -200,6 +309,8 @@
       <button id="ending-back" class="btn primary large">返回 Hub</button>
     </div>
   </div>
+
+  <div id="toast-container" role="status" aria-live="polite"></div>
 
   <div id="file-protocol-warning" style="display:none;padding:20px;text-align:center">
     <div style="font-size:32px;margin-bottom:12px">⚠️</div>

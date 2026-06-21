@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { GameState } from '../js/state.js';
-import { getShowCost, validateShow, settleEvent, assembleShell } from '../js/systems.js';
+import { getShowCost, validateShow, assembleShell, startCompetition, settleCompetitionRound, finishCompetition } from '../js/systems.js';
 import { EVENTS } from '../js/config.js';
 
 function makeShell(overrides = {}) {
@@ -32,7 +32,7 @@ describe('Show builder with assembled shells', () => {
   test('valid show within budget and shell limit', () => {
     const state = new GameState();
     const show = [makeShell({ cost: 12 }), makeShell({ cost: 16 }), makeShell({ cost: 12 })];
-    const result = validateShow(state, 'e001', show);
+    const result = validateShow(state, 'e002', show);
     assert.equal(result.valid, true);
     assert.equal(result.cost, 40);
   });
@@ -72,7 +72,7 @@ describe('Show builder with assembled shells', () => {
   test('shells using unlocked components are valid', () => {
     const state = new GameState();
     const shell = assembleShell({ gunpowder: { g001: 2 }, casing: 'c001', colorant: { col001: 2 }, fuse: 'f002', effect: {} });
-    const result = validateShow(state, 'e001', [shell, shell]);
+    const result = validateShow(state, 'e002', [shell, shell]);
     assert.equal(result.valid, true);
   });
 
@@ -80,7 +80,7 @@ describe('Show builder with assembled shells', () => {
     const state = new GameState();
     const shell = assembleShell({ gunpowder: { g003: 2 }, casing: 'c001', colorant: { col001: 2 }, fuse: 'f002', effect: {} });
     const validShell = assembleShell({ gunpowder: { g001: 2 }, casing: 'c001', colorant: { col001: 2 }, fuse: 'f002', effect: {} });
-    const result = validateShow(state, 'e001', [shell, validShell]);
+    const result = validateShow(state, 'e002', [shell, validShell]);
     assert.equal(result.valid, false);
     assert.equal(result.reason, 'component_not_unlocked');
   });
@@ -102,13 +102,16 @@ describe('Show builder with assembled shells', () => {
     assert.equal(state.currentShow[0].id, 'b');
   });
 
-  test('settleEvent works with assembled shell objects', () => {
+  test('competition round works with assembled shell objects', () => {
     const state = new GameState();
     const shell = assembleShell({ gunpowder: { g001: 2 }, casing: 'c001', colorant: { col001: 2 }, fuse: 'f002', effect: {} });
     const initialFunds = state.funds;
-    const result = settleEvent(state, 'e001', [shell, shell]);
+    startCompetition(state, 'e001');
+    const round = settleCompetitionRound(state, [shell, shell]);
+    assert.equal(round.success, true);
+    const result = finishCompetition(state);
     assert.equal(result.success, true);
-    assert.ok(result.score.score > 0);
+    assert.ok(round.roundResult.score.score > 0);
     assert.ok(state.isMainEventCompleted('e001'));
     assert.equal(state.funds, initialFunds - shell.cost * 2 + result.rewards.funds);
   });

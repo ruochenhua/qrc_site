@@ -1,8 +1,11 @@
 import { GameState, SaveSystem } from './state.js';
 
+/** @type {import('./state.js').GameState} */
 export const state = new GameState();
 
+/** @type {import('./renderer.js').FireworkRenderer|null} */
 export let renderer = null;
+/** @type {import('./renderer.js').FireworkRenderer|null} */
 export let previewRenderer = null;
 
 export const currentAssembly = {
@@ -37,7 +40,16 @@ export function setCurrentAssemblyTab(t) {
 
 export function switchView(name) {
   for (const [key, el] of Object.entries(views)) {
-    if (el) el.classList.toggle('active', key === name);
+    if (!el) continue;
+    const active = key === name;
+    el.classList.toggle('active', active);
+    if (active) {
+      el.classList.remove('view-enter');
+      void el.offsetWidth;
+      el.classList.add('view-enter');
+    } else {
+      el.classList.remove('view-enter');
+    }
   }
 }
 

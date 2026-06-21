@@ -8,14 +8,20 @@ const BACKDROP_PRESETS = {
     clear: { top: '#050a1a', mid: '#0f2448', bottom: '#1a3d66', stars: 110 },
   },
   ground: {
-    village: { color: '#131830', roofColor: '#202642' },
-    grass: { color: '#111f15', hillColor: '#1a2e1f' },
-    city: { color: '#0f1422', buildingColor: '#1c2335' },
-    park: { color: '#12222b', treeColor: '#1b3138' },
+    village: { color: '#0b1120', roofColor: '#2a3b5a' },
+    grass: { color: '#0a1812', hillColor: '#1c3628' },
+    city: { color: '#0a0f1a', buildingColor: '#24304a' },
+    park: { color: '#0b181f', treeColor: '#223d48' },
   },
 };
 
 const CLOUD_COUNTS = { none: 0, few: 2, scattered: 4 };
+
+const CAMERA_PRESETS = {
+  low:  { ground: 0.33, focus: 0.36 },
+  mid:  { ground: 0.30, focus: 0.30 },
+  high: { ground: 0.28, focus: 0.22 },
+};
 
 const GRAVITY = 0.07;
 const AIR_RESISTANCE = 0.97;
@@ -77,6 +83,14 @@ export class FireworkRenderer {
     this._bgDirty = true;
     this._stars = [];
     this._clouds = [];
+    this._camera = {
+      ground: CAMERA_PRESETS.mid.ground,
+      focus: CAMERA_PRESETS.mid.focus,
+      targetGround: CAMERA_PRESETS.mid.ground,
+      targetFocus: CAMERA_PRESETS.mid.focus,
+    };
+    this._cameraInitialized = false;
+    this._showMaxHeight = 0.55;
   }
 
   _requestFrame(cb) {
@@ -117,6 +131,7 @@ export class FireworkRenderer {
     this.width = rect.width;
     this.height = rect.height;
     this._bgDirty = true;
+    this._cameraInitialized = false;
   }
 
   setBackdrop(config) {
@@ -137,37 +152,57 @@ export class FireworkRenderer {
     return s / 233280;
   }
 
-  _ensureBackground() {
-    if (!this.backdrop || !this.ctx) return;
-    const needRebuild = this._bgDirty || !this._bgCanvas ||
-                        this._bgCanvas.width !== this.width ||
-                        this._bgCanvas.height !== this.height;
-    if (!needRebuild) return;
+  _cameraPresetForHeight(maxHeight) {
+    if (maxHeight <= 0.42) return CAMERA_PRESETS.low;
+    if (maxHeight <= 0.68) return CAMERA_PRESETS.mid;
+    return CAMERA_PRESETS.high;
+  }
 
-    const canCreate = (typeof document !== 'undefined' && document.createElement);
-    if (!canCreate) {
-      this._bgCanvas = null;
-      return;
+  _setCameraForShow(shells) {
+    const heights = shells.map(shell =>
+      typeof shell.height === 'number' ? shell.height : ({ low: 0.35, mid: 0.55, high: 0.78 }[shell.height] || 0.55)
+    );
+    const maxHeight = Math.max(0.25, ...heights);
+    this._showMaxHeight = maxHeight;
+    const preset = this._cameraPresetForHeight(maxHeight);
+    this._camera.targetGround = preset.ground;
+    this._camera.targetFocus = preset.focus;
+    if (!this._cameraInitialized) {
+      this._camera.ground = preset.ground;
+      this._camera.focus = preset.focus;
+      this._cameraInitialized = true;
     }
+  }
 
-    if (!this._bgCanvas) {
-      this._bgCanvas = document.createElement('canvas');
-    }
-    this._bgCanvas.width = this.width;
-    this._bgCanvas.height = this.height;
-    const bgCtx = this._bgCanvas.getContext('2d');
-    if (!bgCtx) return;
+  _updateCamera(dt) {
+    const factor = 1 - Math.exp(-dt * 0.006);
+    this._camera.ground += (this._camera.targetGround - this._camera.ground) * factor;
+    this._camera.focus += (this._camera.targetFocus - this._camera.focus) * factor;
+  }
 
-    this._renderBackground(bgCtx, this.width, this.height);
-    this._bgDirty = false;
+  _horizon() {
+    return this.height * (1 - this._camera.ground);
+  }
+
+  _focusY() {
+    return this.height * this._camera.focus;
+  }
+
+  _renderBackdrop(ctx, w, h) {
+    if (!this.backdrop) return;
+    const horizon = this._horizon();
+    const { sky, ground, clouds } = this.backdrop;
+    this._drawSky(ctx, w, h, horizon, sky);
+    this._drawHorizonGlow(ctx, w, horizon, sky, ground);
+    this._drawStars(ctx, w, horizon, sky);
+    this._initClouds(w, horizon, clouds);
+    this._drawClouds(ctx, w, horizon);
+    this._drawGround(ctx, w, h, horizon, ground);
   }
 
   _renderBackground(ctx, w, h) {
-    const { sky, ground, clouds } = this.backdrop;
-    const horizon = h * 0.78;
-    this._drawSky(ctx, w, h, horizon, sky);
-    this._drawGround(ctx, w, h, horizon, ground);
-    this._initClouds(w, horizon, clouds);
+    // Kept for backwards compatibility; delegates to live backdrop rendering.
+    this._renderBackdrop(ctx, w, h);
   }
 
   _drawSky(ctx, w, h, horizon, skyKey) {
@@ -183,6 +218,30 @@ export class FireworkRenderer {
     grad.addColorStop(1, preset.bottom);
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
+  }
+
+  _hexToRgba(hex, alpha) {
+    const clean = hex.replace('#', '');
+    const bigint = parseInt(clean, 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  _drawHorizonGlow(ctx, w, horizon, skyKey, groundKey) {
+    if (!ctx.createLinearGradient) return;
+    const skyPreset = BACKDROP_PRESETS.sky[skyKey] || BACKDROP_PRESETS.sky.midnight;
+    const groundPreset = BACKDROP_PRESETS.ground[groundKey] || BACKDROP_PRESETS.ground.village;
+    const glow = ctx.createLinearGradient(0, horizon - 55, 0, horizon + 55);
+    glow.addColorStop(0, 'rgba(255,255,255,0)');
+    glow.addColorStop(0.45, this._hexToRgba(skyPreset.bottom, 0.3));
+    glow.addColorStop(0.55, this._hexToRgba(groundPreset.color, 0.35));
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = glow;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    ctx.fillRect(0, horizon - 55, w, 110);
   }
 
   _drawStars(ctx, w, horizon, skyKey) {
@@ -202,7 +261,7 @@ export class FireworkRenderer {
     }
     ctx.fillStyle = 'rgba(255,255,255,0.85)';
     for (const s of this._stars) {
-      ctx.globalAlpha = 0.3 + 0.7 * Math.abs(Math.sin(Date.now() * 0.002 + s.phase));
+      ctx.globalAlpha = 0.35 + 0.65 * Math.abs(Math.sin(Date.now() * 0.00035 + s.phase));
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
       ctx.fill();
@@ -220,8 +279,8 @@ export class FireworkRenderer {
         x: this._seededRandom(seed) * w,
         y: (0.05 + this._seededRandom(seed + 1) * 0.4) * horizon,
         scale: 0.5 + this._seededRandom(seed + 2) * 0.8,
-        speed: 0.015 + this._seededRandom(seed + 3) * 0.025,
-        opacity: 0.12 + this._seededRandom(seed + 4) * 0.14,
+        speed: 0.003 + this._seededRandom(seed + 3) * 0.005,
+        opacity: 0.10 + this._seededRandom(seed + 4) * 0.12,
       });
     }
   }
@@ -250,8 +309,18 @@ export class FireworkRenderer {
   _drawGround(ctx, w, h, horizon, groundKey) {
     if (!ctx.fillRect) return;
     const preset = BACKDROP_PRESETS.ground[groundKey] || BACKDROP_PRESETS.ground.village;
-    ctx.fillStyle = preset.color;
-    ctx.fillRect(0, horizon, w, h - horizon);
+    const groundH = h - horizon;
+
+    // Base ground with a subtle top-to-bottom darkening.
+    if (ctx.createLinearGradient) {
+      const baseGrad = ctx.createLinearGradient(0, horizon, 0, h);
+      baseGrad.addColorStop(0, preset.color);
+      baseGrad.addColorStop(1, '#000000');
+      ctx.fillStyle = baseGrad;
+    } else {
+      ctx.fillStyle = preset.color;
+    }
+    ctx.fillRect(0, horizon, w, groundH);
 
     ctx.fillStyle = preset.roofColor || preset.buildingColor || preset.hillColor || preset.treeColor || preset.color;
     switch (groundKey) {
@@ -272,73 +341,254 @@ export class FireworkRenderer {
     }
   }
 
+  _drawSkyline(ctx, w, h, horizon, opts) {
+    const groundH = h - horizon;
+    const segments = [];
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    let x = 0;
+    let seed = opts.seed;
+    let baseY = horizon + groundH * (opts.baseMin + this._seededRandom(seed) * (opts.baseMax - opts.baseMin));
+    ctx.lineTo(0, baseY);
+    while (x < w) {
+      const width = opts.widthMin + this._seededRandom(seed + 1) * (opts.widthMax - opts.widthMin);
+      const height = opts.heightMin + this._seededRandom(seed + 2) * (opts.heightMax - opts.heightMin);
+      const nextX = Math.min(w, x + width);
+      if (opts.peaked) {
+        const peakX = x + width * (0.25 + this._seededRandom(seed + 3) * 0.5);
+        const peakY = baseY - height;
+        ctx.lineTo(peakX, peakY);
+        ctx.lineTo(nextX, baseY);
+      } else {
+        const topY = baseY - height;
+        ctx.lineTo(x, topY);
+        ctx.lineTo(nextX, topY);
+        ctx.lineTo(nextX, baseY);
+      }
+      segments.push({ x, y: baseY, width: nextX - x, height });
+      x = nextX;
+      baseY = horizon + groundH * (opts.baseMin + this._seededRandom(seed + 4) * (opts.baseMax - opts.baseMin));
+      if (x < w) ctx.lineTo(x, baseY);
+      seed += 7;
+    }
+    ctx.lineTo(w, h);
+    ctx.fill();
+    return segments;
+  }
+
+  _drawCottage(ctx, x, baseline, width, height) {
+    // Wall.
+    ctx.fillStyle = '#3d5475';
+    ctx.fillRect(x, baseline - height, width, height);
+    // Steep pointed roof.
+    ctx.fillStyle = '#2a3c56';
+    ctx.beginPath();
+    ctx.moveTo(x - width * 0.1, baseline - height);
+    ctx.lineTo(x + width * 0.5, baseline - height - height * 0.55);
+    ctx.lineTo(x + width * 1.1, baseline - height);
+    ctx.fill();
+    // Warm window.
+    ctx.fillStyle = 'rgba(255, 200, 85, 0.6)';
+    ctx.fillRect(x + width * 0.2, baseline - height * 0.55, width * 0.22, height * 0.28);
+  }
+
+  _drawPine(ctx, x, baseY, size) {
+    ctx.fillStyle = '#0c121f';
+    // Trunk.
+    ctx.fillRect(x - size * 0.07, baseY - size * 0.12, size * 0.14, size * 0.12);
+    // Three tiers.
+    ctx.beginPath();
+    ctx.moveTo(x - size * 0.32, baseY - size * 0.12);
+    ctx.lineTo(x, baseY - size * 0.52);
+    ctx.lineTo(x + size * 0.32, baseY - size * 0.12);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x - size * 0.26, baseY - size * 0.38);
+    ctx.lineTo(x, baseY - size * 0.78);
+    ctx.lineTo(x + size * 0.26, baseY - size * 0.38);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(x - size * 0.18, baseY - size * 0.65);
+    ctx.lineTo(x, baseY - size);
+    ctx.lineTo(x + size * 0.18, baseY - size * 0.65);
+    ctx.fill();
+  }
+
+  _drawMountainLayer(ctx, w, h, horizon, opts) {
+    const groundH = h - horizon;
+    ctx.fillStyle = opts.color;
+    const prevAlpha = ctx.globalAlpha;
+    if (opts.alpha != null) ctx.globalAlpha = opts.alpha;
+    const overhang = opts.overhang || 100;
+    const step = opts.step || 25;
+    const amps = opts.amps || [0.1];
+    const phases = opts.phases || amps.map(() => 0);
+
+    const sampleY = (x) => {
+      let val = opts.base;
+      for (let k = 0; k < amps.length; k++) {
+        const n = k + 1;
+        val += amps[k] * Math.cos((x / w) * n * Math.PI + phases[k]);
+      }
+      return horizon - groundH * val;
+    };
+
+    ctx.beginPath();
+    ctx.moveTo(-overhang, h);
+    ctx.lineTo(-overhang, sampleY(-overhang));
+    for (let i = -overhang; i <= w + overhang; i += step) {
+      ctx.lineTo(i, sampleY(i));
+    }
+    ctx.lineTo(w + overhang, h);
+    ctx.fill();
+    ctx.globalAlpha = prevAlpha;
+  }
+
   _drawVillageGround(ctx, w, h, horizon) {
     const groundH = h - horizon;
-    const base = horizon + groundH * 0.25;
-    let x = 0;
-    let seed = 11;
-    while (x < w) {
-      const width = 24 + this._seededRandom(seed) * 36;
-      const height = 16 + this._seededRandom(seed + 1) * 28;
-      ctx.beginPath();
-      ctx.moveTo(x, base);
-      ctx.lineTo(x + width * 0.5, base - height);
-      ctx.lineTo(x + width, base);
-      ctx.closePath();
-      ctx.fill();
-      ctx.fillRect(x + width * 0.15, base, width * 0.7, height * 0.55);
-      x += width - 4 + this._seededRandom(seed + 2) * 8;
-      seed += 3;
+
+    // Multiple mountain ridges that rise above the horizon and exit horizontally.
+    this._drawMountainLayer(ctx, w, h, horizon, {
+      color: '#252f4d', alpha: 0.65, base: 0.26, amps: [0.08, 0.04, 0.02], phases: [0, 1.2, 2.5], step: 30,
+    });
+    this._drawMountainLayer(ctx, w, h, horizon, {
+      color: '#1b243d', alpha: 0.85, base: 0.16, amps: [0.10, 0.05, 0.03], phases: [2.0, 0.5, 1.8], step: 25,
+    });
+    this._drawMountainLayer(ctx, w, h, horizon, {
+      color: '#12182a', base: 0.06, amps: [0.12, 0.06, 0.04], phases: [1.0, 2.2, 0.5], step: 20,
+    });
+
+    // Mid rolling hill (below horizon, same smooth off-screen exit).
+    this._drawMountainLayer(ctx, w, h, horizon, {
+      color: '#1b263d', base: -0.48, amps: [0.06, 0.03], phases: [0.8, 2.2], step: 30, overhang: 80,
+    });
+
+    // Sparse cottages on the hill.
+    let seed = 101;
+    let x = 40;
+    while (x < w - 40) {
+      x += 90 + this._seededRandom(seed) * 200;
+      if (x > w - 40) break;
+      const width = 20 + this._seededRandom(seed + 1) * 24;
+      const height = 16 + this._seededRandom(seed + 2) * 18;
+      const baseline = horizon + groundH * (0.62 + this._seededRandom(seed + 3) * 0.04);
+      this._drawCottage(ctx, x, baseline, width, height);
+      seed += 10;
+    }
+
+    // Foreground pine trees.
+    let tx = -20;
+    seed = 201;
+    while (tx < w + 20) {
+      tx += 60 + this._seededRandom(seed) * 140;
+      if (tx > w + 20) break;
+      const size = 18 + this._seededRandom(seed + 1) * 32;
+      const baseY = h - 4 - this._seededRandom(seed + 2) * 18;
+      this._drawPine(ctx, tx, baseY, size);
+      seed += 5;
     }
   }
 
   _drawGrassGround(ctx, w, h, horizon) {
     const groundH = h - horizon;
-    const seed = 21;
-    for (let i = 0; i < 5; i++) {
-      const x = this._seededRandom(seed + i * 3) * w;
-      const r = 30 + this._seededRandom(seed + i * 3 + 1) * 70;
-      const y = horizon + groundH * (0.2 + this._seededRandom(seed + i * 3 + 2) * 0.7);
+    const layers = [
+      { color: '#0d1c13', offset: -0.05, amp: 0.10 },
+      { color: '#142b1e', offset: 0.15, amp: 0.14 },
+      { color: '#1e3f2e', offset: 0.40, amp: 0.18 },
+    ];
+    for (const layer of layers) {
+      ctx.fillStyle = layer.color;
       ctx.beginPath();
-      ctx.arc(x, y, r, Math.PI, 0);
-      ctx.lineTo(x + r, horizon + groundH);
-      ctx.lineTo(x - r, horizon + groundH);
-      ctx.closePath();
+      ctx.moveTo(0, h);
+      ctx.lineTo(0, horizon + groundH * layer.offset);
+      for (let i = 0; i <= w; i += 30) {
+        const y = horizon + groundH * (layer.offset + layer.amp * Math.sin(i * 0.007 + layer.offset * 12));
+        ctx.lineTo(i, y);
+      }
+      ctx.lineTo(w, h);
       ctx.fill();
     }
   }
 
   _drawCityGround(ctx, w, h, horizon) {
     const groundH = h - horizon;
-    let x = 0;
-    let seed = 31;
-    while (x < w) {
-      const width = 18 + this._seededRandom(seed) * 34;
-      const height = 20 + this._seededRandom(seed + 1) * groundH * 0.9;
-      ctx.fillRect(x, horizon + groundH - height, width, height);
-      x += width + 2 + this._seededRandom(seed + 2) * 10;
-      seed += 3;
+
+    // Distant skyline (rises above horizon to hide the straight line).
+    ctx.fillStyle = '#131a2b';
+    this._drawSkyline(ctx, w, h, horizon, {
+      seed: 31,
+      baseMin: -0.05,
+      baseMax: 0.10,
+      heightMin: 15,
+      heightMax: groundH * 0.55,
+      widthMin: 28,
+      widthMax: 64,
+      peaked: false,
+    });
+
+    // Near skyline.
+    ctx.fillStyle = '#2b3d5a';
+    const buildings = this._drawSkyline(ctx, w, h, horizon, {
+      seed: 131,
+      baseMin: 0.25,
+      baseMax: 0.55,
+      heightMin: 22,
+      heightMax: groundH * 0.85,
+      widthMin: 24,
+      widthMax: 72,
+      peaked: false,
+    });
+
+    // Lit windows.
+    ctx.fillStyle = 'rgba(255, 215, 110, 0.45)';
+    let seed = 231;
+    for (const b of buildings) {
+      if (this._seededRandom(seed) > 0.2) {
+        const cols = Math.max(1, Math.floor(b.width / 8));
+        const rows = Math.max(1, Math.floor(b.height / 14));
+        for (let r = 1; r < rows; r++) {
+          for (let c = 1; c < cols; c++) {
+            if (this._seededRandom(seed + r * cols + c) > 0.62) {
+              ctx.fillRect(b.x + c * 6, b.y - r * 11, 3, 5);
+            }
+          }
+        }
+      }
+      seed += 7;
     }
   }
 
   _drawParkGround(ctx, w, h, horizon) {
     const groundH = h - horizon;
-    // Flat ground with a few trees
+
+    // Rolling hill (rises above horizon).
+    ctx.fillStyle = '#132b21';
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    ctx.lineTo(0, horizon - groundH * 0.05);
+    for (let i = 0; i <= w; i += 40) {
+      const y = horizon + groundH * (-0.05 + 0.12 * Math.sin(i * 0.008) + 0.07 * Math.sin(i * 0.022));
+      ctx.lineTo(i, y);
+    }
+    ctx.lineTo(w, h);
+    ctx.fill();
+
+    // Tree silhouettes.
+    ctx.fillStyle = '#1d4031';
     let x = 0;
     let seed = 41;
     while (x < w) {
-      const gap = 40 + this._seededRandom(seed) * 70;
-      x += gap;
+      x += 40 + this._seededRandom(seed) * 90;
       if (x > w) break;
-      const trunkW = 4 + this._seededRandom(seed + 1) * 4;
-      const trunkH = 10 + this._seededRandom(seed + 2) * 14;
-      const foliageR = 14 + this._seededRandom(seed + 3) * 16;
-      ctx.fillRect(x - trunkW * 0.5, horizon + groundH * 0.55 - trunkH, trunkW, trunkH);
+      const trunkW = 3 + this._seededRandom(seed + 1) * 4;
+      const trunkH = 10 + this._seededRandom(seed + 2) * 18;
+      const foliageR = 12 + this._seededRandom(seed + 3) * 20;
+      const baseY = horizon + groundH * (0.30 + this._seededRandom(seed + 4) * 0.45);
+      ctx.fillRect(x - trunkW * 0.5, baseY - trunkH, trunkW, trunkH);
       ctx.beginPath();
-      ctx.arc(x, horizon + groundH * 0.55 - trunkH - foliageR * 0.4, foliageR, 0, Math.PI * 2);
+      ctx.arc(x, baseY - trunkH - foliageR * 0.35, foliageR, 0, Math.PI * 2);
       ctx.fill();
-      x += trunkW;
-      seed += 4;
+      seed += 5;
     }
   }
 
@@ -358,6 +608,7 @@ export class FireworkRenderer {
       if (typeof item === 'string') return getRecipeById(item);
       return item;
     }).filter(Boolean);
+    this._setCameraForShow(shells);
     this._scheduleShells(shells);
 
     this._raf = this._requestFrame(t => this._loop(t));
@@ -370,6 +621,10 @@ export class FireworkRenderer {
     if (this._previewInterval) {
       clearInterval(this._previewInterval);
       this._previewInterval = null;
+    }
+    if (this._ambientInterval) {
+      clearInterval(this._ambientInterval);
+      this._ambientInterval = null;
     }
   }
 
@@ -396,6 +651,40 @@ export class FireworkRenderer {
     this.startPreview(shell);
   }
 
+  startAmbient() {
+    if (!this.canvas || !this.ctx) return;
+    this.stop();
+    this.running = true;
+    this.shells = [];
+    this.particles = [];
+    this._pendingSecondary = [];
+    this._startTime = null;
+    this._showDuration = Infinity;
+    this._previewShell = null;
+    this.setBackdrop(null);
+
+    const colors = ['red', 'gold', 'blue', 'green', 'purple', 'pink', 'silver', 'white'];
+    const shapes = ['peony', 'chrysanthemum', 'willow', 'ring', 'heart', 'star', 'palm'];
+
+    const launchOne = () => {
+      if (!this.running) return;
+      const shell = {
+        color: colors[Math.floor(Math.random() * colors.length)],
+        shape: shapes[Math.floor(Math.random() * shapes.length)],
+        height: 0.22 + Math.random() * 0.30,
+        effects: {},
+      };
+      this._launch(shell);
+    };
+
+    launchOne();
+    this._ambientInterval = setInterval(launchOne, 2200 + Math.floor(Math.random() * 2600));
+
+    const now = (typeof globalThis !== 'undefined' && globalThis.performance && globalThis.performance.now) ? globalThis.performance.now() : Date.now();
+    this.lastTime = now;
+    this._raf = this._requestFrame(t => this._loop(t));
+  }
+
   _scheduleShells(shells) {
     let delay = 0;
     for (const shell of shells) {
@@ -411,11 +700,22 @@ export class FireworkRenderer {
     const startX = this.width * (0.2 + Math.random() * 0.6);
     const startY = this.height;
     const heightValue = typeof shell.height === 'number' ? shell.height : { low: 0.35, mid: 0.55, high: 0.78 }[shell.height] || 0.55;
-    // In preview mode use a tighter top margin so tall shells remain visible in the small canvas.
-    const topMargin = this._previewShell ? 0.06 : 0.15;
-    const targetY = this.height * (1 - heightValue * (1 - topMargin));
-    const vy = -(5 + Math.random() * 1.5);
-    const duration = Math.abs((targetY - startY) / vy);
+
+    let targetY;
+    if (this._previewShell) {
+      const topMargin = 0.06;
+      targetY = this.height * (1 - heightValue * (1 - topMargin));
+    } else {
+      const horizonY = this._horizon();
+      const focusY = this._focusY();
+      const maxH = Math.max(0.25, this._showMaxHeight);
+      const ratio = Math.min(1, heightValue / maxH);
+      targetY = horizonY - ratio * Math.max(0, horizonY - focusY);
+    }
+
+    const frames = 40 + Math.random() * 15;
+    const vy = (targetY - startY) / frames;
+    const duration = frames;
     const vx = (Math.random() - 0.5) * 0.5;
 
     this.shells.push({
@@ -507,6 +807,7 @@ export class FireworkRenderer {
     const dt = timestamp - this.lastTime;
     this.lastTime = timestamp;
 
+    this._updateCamera(dt);
     this._update(dt);
     this._draw();
 
@@ -598,19 +899,10 @@ export class FireworkRenderer {
 
     ctx.globalCompositeOperation = 'source-over';
     if (this.backdrop) {
-      this._ensureBackground();
-      if (this._bgCanvas && ctx.drawImage) {
-        ctx.drawImage(this._bgCanvas, 0, 0, w, h);
-      } else {
-        ctx.fillStyle = '#050814';
-        ctx.fillRect(0, 0, w, h);
-      }
+      this._renderBackdrop(ctx, w, h);
       // Subtle trail fade that keeps the scenery readable.
       ctx.fillStyle = 'rgba(5, 8, 20, 0.18)';
       ctx.fillRect(0, 0, w, h);
-      const horizon = h * 0.78;
-      this._drawStars(ctx, w, horizon, this.backdrop.sky);
-      this._drawClouds(ctx, w, horizon);
     } else {
       // Clear with trail fade
       ctx.fillStyle = 'rgba(5, 8, 20, 0.25)';

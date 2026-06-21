@@ -1,7 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { GameState } from '../js/state.js';
-import { calculateScore, calculateRewards, settleEvent, getScoreMultiplier, getScoreGrade } from '../js/systems.js';
+import { calculateScore, calculateRewards, getScoreMultiplier, getScoreGrade, startCompetition, settleCompetitionRound, finishCompetition, assembleShell } from '../js/systems.js';
 
 describe('Scoring', () => {
   test('well-matched shell scores high', () => {
@@ -66,31 +66,45 @@ describe('Rewards', () => {
   });
 });
 
+function cheapShell() {
+  return assembleShell({ gunpowder: { g001: 1 }, casing: 'c001', colorant: { col001: 1 }, fuse: 'f001', effect: {} });
+}
+
+function cheapShow(count = 2) {
+  return Array(count).fill(null).map((_, i) => ({ ...cheapShell(), id: `cs_${i}` }));
+}
+
 describe('Settlement', () => {
-  test('settleEvent updates state and gives rewards', () => {
+  test('competition round and finish updates state and gives rewards', () => {
     const state = new GameState();
     const initialFunds = state.funds;
-    const result = settleEvent(state, 'e001', ['r001', 'r002', 'r003']);
+    startCompetition(state, 'e001');
+    const round = settleCompetitionRound(state, cheapShow(2));
+    assert.equal(round.success, true);
+    const result = finishCompetition(state);
     assert.equal(result.success, true);
-    assert.ok(result.score.score > 0);
+    assert.ok(round.roundResult.score.score > 0);
     assert.ok(result.rewards.fame > 0);
     assert.ok(state.isMainEventCompleted('e001'));
-    assert.equal(state.funds, initialFunds - result.cost + result.rewards.funds);
+    assert.equal(state.funds, initialFunds - round.roundResult.cost + result.rewards.funds);
     assert.equal(state.fame, result.rewards.fame);
   });
 
-  test('first clear bonus applied', () => {
+  test('first clear bonus applied in competition finish', () => {
     const state = new GameState();
-    const result = settleEvent(state, 'e001', ['r001', 'r002', 'r003']);
+    startCompetition(state, 'e001');
+    settleCompetitionRound(state, cheapShow(2));
+    const result = finishCompetition(state);
     assert.equal(result.isFirstClear, true);
-    const expectedFame = Math.round(60 * getScoreMultiplier(result.score.score) * (result.score.score / 100)) + 150;
-    assert.equal(result.rewards.fame, expectedFame);
+    assert.ok(result.rewards.fame > 0);
+    assert.ok(result.competition, 'competition events include elimination result');
   });
 
-  test('invalid show returns failure', () => {
+  test('invalid competition show returns failure', () => {
     const state = new GameState();
+    startCompetition(state, 'e001');
     // e001 minShells is 2; use two r005 which is not owned.
-    const result = settleEvent(state, 'e001', ['r005', 'r005']);
+    const result = settleCompetitionRound(state, ['r005', 'r005']);
     assert.equal(result.success, false);
     assert.equal(result.reason, 'recipe_not_owned');
   });

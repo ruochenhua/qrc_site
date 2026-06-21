@@ -5,6 +5,7 @@ import {
   STARTING_FAME,
   STARTING_RANK,
   STARTING_RECIPES,
+  STARTING_COMPONENTS,
 } from './config.js';
 
 export class GameState {
@@ -12,21 +13,43 @@ export class GameState {
     this.reset();
   }
 
+  /**
+   * Reset all runtime and persisted state to defaults.
+   * @returns {void}
+   */
   reset() {
+    /** @type {number} */
     this.funds = STARTING_FUNDS;
+    /** @type {number} */
     this.fame = STARTING_FAME;
+    /** @type {string} */
     this.rank = STARTING_RANK;
+    /** @type {Set<string>} */
     this.unlockedRecipes = new Set(STARTING_RECIPES);
+    /** @type {Set<string>} */
     this.ownedRecipes = new Set(STARTING_RECIPES);
+    /** @type {Set<string>} */
+    this.ownedComponents = new Set(STARTING_COMPONENTS);
+    /** @type {Set<string>} */
     this.completedMainEvents = new Set();
+    /** @type {string} */
     this.phase = 'START';
+    /** @type {string|null} */
     this.selectedEventId = null;
+    /** @type {Array<import('./systems.js').Shell|string>} */
     this.currentShow = [];
+    /** @type {boolean} */
     this.gameOver = false;
+    /** @type {boolean} */
     this.won = false;
+    /** @type {number} */
     this.blueprintSlots = 5;
+    /** @type {Set<string>} */
     this.ownedBlueprints = new Set();
+    /** @type {Object<string, Object>} */
     this.blueprints = {};
+    /** @type {Object|null} */
+    this.competition = null;
   }
 
   addFunds(delta) {
@@ -45,6 +68,14 @@ export class GameState {
     if (!this.unlockedRecipes.has(recipeId)) return false;
     this.ownedRecipes.add(recipeId);
     return true;
+  }
+
+  ownComponent(componentId) {
+    this.ownedComponents.add(componentId);
+  }
+
+  isComponentOwned(componentId) {
+    return this.ownedComponents.has(componentId);
   }
 
   completeMainEvent(eventId) {
@@ -127,6 +158,7 @@ export class SaveSystem {
       rank: state.rank,
       unlockedRecipes: Array.from(state.unlockedRecipes),
       ownedRecipes: Array.from(state.ownedRecipes),
+      ownedComponents: Array.from(state.ownedComponents),
       completedMainEvents: Array.from(state.completedMainEvents),
       phase: state.phase,
       selectedEventId: state.selectedEventId,
@@ -136,6 +168,7 @@ export class SaveSystem {
       blueprintSlots: state.blueprintSlots,
       ownedBlueprints: Array.from(state.ownedBlueprints),
       blueprints: state.blueprints,
+      competition: state.competition,
       timestamp: Date.now(),
     };
     localStorage.setItem(this.KEY, JSON.stringify(data));
@@ -163,6 +196,7 @@ export class SaveSystem {
     state.rank = data.rank ?? STARTING_RANK;
     state.unlockedRecipes = new Set(data.unlockedRecipes ?? STARTING_RECIPES);
     state.ownedRecipes = new Set(data.ownedRecipes ?? STARTING_RECIPES);
+    state.ownedComponents = new Set(data.ownedComponents ?? STARTING_COMPONENTS);
     state.completedMainEvents = new Set(data.completedMainEvents ?? []);
     state.phase = data.phase ?? 'START';
     state.selectedEventId = data.selectedEventId ?? null;
@@ -172,6 +206,7 @@ export class SaveSystem {
     state.blueprintSlots = data.blueprintSlots ?? 5;
     state.ownedBlueprints = new Set(data.ownedBlueprints ?? []);
     state.blueprints = data.blueprints ? { ...data.blueprints } : {};
+    state.competition = data.competition || null;
     return true;
   }
 

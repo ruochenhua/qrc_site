@@ -1,0 +1,38 @@
+/* Perform */
+#view-perform {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 10;
+}
+
+#perform-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#perform-status {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+  animation: status-breathe 2s ease-in-out infinite;
+}
+
+@keyframes status-breathe {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+#perform-skip {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  opacity: 0.7;
+}
+
+#perform-skip:hover { opacity: 1; }
+
