@@ -131,16 +131,34 @@ QRC.hero3d = (function () {
             resize();
             window.addEventListener('resize', resize);
 
+            /* 渲染循环故障保护：异常或 WebGL 上下文丢失时恢复 CSS 标题并停帧 */
+            let stopped = false;
+
+            renderer.domElement.addEventListener('webglcontextlost', function (event) {
+                event.preventDefault();
+                stopped = true;
+                QRC.handleError(new Error('WebGL context lost'), 'hero3d.webglcontextlost');
+                cleanup(stage, fallback);
+            });
+
             (function animate() {
+                if (stopped) return;
+                try {
+                    const scroll = Math.min(1, window.scrollY / window.innerHeight);
+                    logo.rotation.y += 0.005;
+                    tiltGroup.rotation.x += (targetRX - tiltGroup.rotation.x) * 0.05;
+                    tiltGroup.rotation.y += (targetRY - tiltGroup.rotation.y) * 0.05;
+                    const scale = 1 - scroll * 0.5;
+                    tiltGroup.scale.set(scale, scale, scale);
+                    tiltGroup.position.y = 0.6 + scroll * 2;
+                    renderer.render(scene, camera);
+                } catch (error) {
+                    stopped = true;
+                    QRC.handleError(error, 'hero3d.animate');
+                    cleanup(stage, fallback);
+                    return; // 不再调度下一帧
+                }
                 requestAnimationFrame(animate);
-                const scroll = Math.min(1, window.scrollY / window.innerHeight);
-                logo.rotation.y += 0.005;
-                tiltGroup.rotation.x += (targetRX - tiltGroup.rotation.x) * 0.05;
-                tiltGroup.rotation.y += (targetRY - tiltGroup.rotation.y) * 0.05;
-                const scale = 1 - scroll * 0.5;
-                tiltGroup.scale.set(scale, scale, scale);
-                tiltGroup.position.y = 0.6 + scroll * 2;
-                renderer.render(scene, camera);
             })();
         } catch (error) {
             QRC.handleError(error, 'hero3d.init');
