@@ -46,9 +46,16 @@ QRC-Eye 个人创作者主页 + 想法试验场。静态站点，GitHub Pages �
 
 ```
 qrcsite/
-├── index.html          # 主页
+├── index.html          # 主页（Y2K 换皮，手写 CSS，无 Tailwind）
+├── assets/y2k/         # 全站共享 Y2K 主题包
+│   ├── theme.css       # 设计令牌（配色/字体）+ 通用组件 + 页面布局
+│   ├── fx.js           # 动效套件：光标+拖尾、glitch、滚动动画、启动画面、降级判定（QRC.fx.flags）
+│   ├── sfx.js          # WebAudio 合成音效，默认静音（QRC.sfx）
+│   ├── hero3d.js       # Three.js 主页主视觉（import map，three@0.160.0，失败降级 CSS 标题）
+│   ├── shell.css       # 游戏页外壳样式（顶栏 + INSERT COIN 启动画面）
+│   └── shell.js        # 游戏页外壳注入（纯 DOM 创建，游戏内部零改动）
 ├── cybertravel/        # 游戏目录
-│   ├── index.html      # 游戏 DOM 容器
+│   ├── index.html      # 游戏 DOM 容器（已注入 y2k shell 两行）
 │   ├── style.css       # 游戏样式
 │   ├── js/             # 游戏逻辑（ES Module）
 │   │   ├── config.js   # 配置数据（路线/事件/物品/天气等）
@@ -58,11 +65,12 @@ qrcsite/
 │   │   └── game.js     # 游戏主控 + 入口
 │   ├── openspec/       # 变更管理
 │   └── doc/            # 设计文档
-├── firework-master/    # 游戏目录（单文件 index.html 为主）
-├── kings-field/        # 游戏目录（单文件 index.html，Canvas 光线投射）
-├── js/                 # 网站 JS
-└── dev-blog/           # 实验笔记（当前未在首页导航展示）
+├── firework-master/    # 游戏目录（单文件 index.html 为主，已注入 y2k shell）
+├── kings-field/        # 游戏目录（规划中/未落地；落地后需注入 y2k shell）
+└── dev-blog/           # 实验笔记（Y2K 换皮，当前未在首页导航展示）
 ```
+
+说明：原 `js/main.js` 已被 `assets/y2k/fx.js` 吸收并删除；kings-field 目录在 2026-07 Y2K 改造时尚不存在。
 
 ## 架构约束
 
