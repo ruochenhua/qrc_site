@@ -1,0 +1,97 @@
+/* ==========================================================================
+   QRC-Eye Y2K game shell — 游戏页面外壳（顶栏 + INSERT COIN 启动画面）
+   独立自包含：不依赖 theme.css，不与游戏内部样式耦合。
+   所有选择器带 y2k- 前缀 / 高 z-index，避免污染游戏。
+   ========================================================================== */
+
+#y2k-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 44px;
+    z-index: 99990;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1rem;
+    background: rgba(10, 12, 16, 0.92);
+    border-bottom: 1px solid rgba(57, 255, 106, 0.35);
+    font-family: 'Courier New', Courier, monospace;
+    box-sizing: border-box;
+}
+
+.y2k-topbar-back {
+    color: #39ff6a;
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    white-space: nowrap;
+}
+
+.y2k-topbar-back:hover {
+    text-shadow: 0 0 8px rgba(57, 255, 106, 0.6);
+}
+
+.y2k-topbar-title {
+    color: #9a9aa5;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* shell.js 注入成功时给 body 加此类，为顶栏腾出空间 */
+body.y2k-shell {
+    padding-top: 44px !important;
+}
+
+#y2k-boot {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: #0a0c10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.4s;
+}
+
+#y2k-boot.y2k-boot-off {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.y2k-boot-inner {
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.y2k-boot-coin {
+    color: #ffe14d;
+    font-size: 1.4rem;
+    letter-spacing: 0.3em;
+    margin: 0 0 1rem;
+    animation: y2k-blink 1s steps(2) infinite;
+}
+
+.y2k-boot-start {
+    color: #39ff6a;
+    font-size: 0.85rem;
+    letter-spacing: 0.25em;
+    margin: 0;
+}
+
+@keyframes y2k-blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .y2k-boot-coin {
+        animation: none;
+    }
+}
