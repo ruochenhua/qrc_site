@@ -19,24 +19,27 @@
     <meta name="twitter:description" content="QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #050a18; font-family: 'Inter', sans-serif; color: #fff; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/y2k/theme.css">
 </head>
-<body class="p-6 md:p-24">
-    <nav class="mb-20"><a href="../index.html" class="text-emerald-400 font-bold tracking-widest uppercase text-xs">← Back to Home</a></nav>
-    <main class="max-w-4xl mx-auto">
-        <h1 class="text-6xl md:text-8xl font-[900] mb-4 tracking-tighter">Notes<span class="text-emerald-400">.</span></h1>
-        <p class="text-white/40 mb-16 tracking-[0.2em] uppercase font-bold">记录想法从草稿到原型的过程</p>
+<body>
+    <main class="notes-main">
+        <nav class="notes-nav">
+            <a href="../index.html" class="notes-back">← Back to Home</a>
+        </nav>
+        <h1 class="notes-title chrome-text" data-glitch>Notes.</h1>
+        <p class="notes-sub">记录想法从草稿到原型的过程</p>
 
-        <div class="glass p-12 md:p-16 rounded-[2.5rem] text-center">
-            <div class="text-4xl mb-4">📝</div>
-            <p class="text-white/60 text-lg font-light">还没有实验笔记。</p>
-            <p class="text-white/30 text-sm mt-2">等有想法值得记录的时候，会放在这里。</p>
+        <div class="card-y2k note-empty">
+            <span class="card-emoji">📝</span>
+            <p>还没有实验笔记。</p>
+            <p class="note-empty-sub">等有想法值得记录的时候，会放在这里。</p>
         </div>
     </main>
+
+    <button id="sfx-toggle" class="sfx-toggle" aria-pressed="false" aria-label="开启或关闭音效">SOUND: OFF</button>
+
+    <script src="../assets/y2k/sfx.js" defer></script>
+    <script src="../assets/y2k/fx.js" defer></script>
 </body>
 </html>

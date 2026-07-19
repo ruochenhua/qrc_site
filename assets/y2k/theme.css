@@ -771,3 +771,109 @@ body.y2k-cursor-on button {
         animation: none;
     }
 }
+
+/* ---------- 7. dev-blog（实验笔记） ---------- */
+.notes-main {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 4rem 1.5rem;
+}
+
+.notes-nav {
+    margin-bottom: 4rem;
+}
+
+.notes-back {
+    color: var(--y2k-neon);
+    font-family: var(--y2k-font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.notes-back:hover {
+    text-shadow: 0 0 8px rgba(57, 255, 106, 0.5);
+}
+
+.notes-title {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    margin: 0 0 1rem;
+}
+
+.notes-sub {
+    color: var(--y2k-muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    margin: 0 0 4rem;
+}
+
+.note-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.note-empty .card-emoji {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.note-empty p {
+    margin: 0 0 0.5rem;
+    color: var(--y2k-text);
+}
+
+.note-empty .note-empty-sub {
+    color: var(--y2k-muted);
+    font-size: 0.85rem;
+}
+
+/* 文章页 */
+.post-header {
+    max-width: 42rem;
+    margin: 8rem auto 4rem;
+    padding: 0 1.5rem;
+}
+
+.post-title {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    color: var(--y2k-chrome-1);
+    margin: 0 0 1.5rem;
+    line-height: 1.2;
+}
+
+.post-date {
+    color: var(--y2k-neon);
+    font-family: var(--y2k-font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.post-body {
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: 0 1.5rem 6rem;
+}
+
+.prose-y2k {
+    color: var(--y2k-text);
+    line-height: 1.9;
+    font-size: 1.05rem;
+}
+
+.prose-y2k p {
+    margin: 0 0 1.5rem;
+}
+
+.prose-y2k h2 {
+    font-size: 1.4rem;
+    color: var(--y2k-chrome-1);
+    margin: 3rem 0 1rem;
+}
+
+.prose-y2k h2::before {
+    content: '// ';
+    color: var(--y2k-neon);
+}
