@@ -38,6 +38,7 @@ QRC-Eye 个人创作者主页 + 想法试验场。静态站点，GitHub Pages �
 | **烟花表演渲染** | 使用 Canvas 2D 粒子系统实时呈现烟花升空、爆炸、拖尾、二次爆炸等效果，带有随机性和物理拟真 |
 | **保底事件** | 收益稳定、难度极低的可重复事件，确保玩家即使资金紧张也能持续获得少量资金，避免游戏卡死或硬性失败 |
 | **Firework Master MVP** | 《烟花大师》最小可玩版本：5 等级、自由组件组装、系统配方示例、玩家蓝图保存、15 个事件、Canvas 粒子表演、双货币成长、localStorage 存档。部署在 `/firework-master/`
+| **王土之下 / Below the King's Field** | 第一人称地牢探索 HTML5 游戏，《King's Field》(1994) 精神复刻：黑暗压抑氛围、笨重近战、敌人遭遇、物品拾取、死亡重来。单文件 Canvas 光线投射渲染，部署在 `/kings-field/` |
 | **OpenSpec** | 配置驱动的变更管理流程 |
 | **MVP** | 单文件 HTML5 游戏，最小可玩版本 |
 
@@ -57,6 +58,8 @@ qrcsite/
 │   │   └── game.js     # 游戏主控 + 入口
 │   ├── openspec/       # 变更管理
 │   └── doc/            # 设计文档
+├── firework-master/    # 游戏目录（单文件 index.html 为主）
+├── kings-field/        # 游戏目录（单文件 index.html，Canvas 光线投射）
 ├── js/                 # 网站 JS
 └── dev-blog/           # 实验笔记（当前未在首页导航展示）
 ```
