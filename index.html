@@ -21,246 +21,154 @@
     <meta name="twitter:description" content="QRC-Eye 是一个做实验性产品原型的个人空间。有些东西会长成作品，有些只是画着玩。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @keyframes fade-up {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.05); }
-        }
-
-        .animate-fade-up {
-            animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .animate-on-scroll {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .animate-on-scroll.animated {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        body {
-            background-color: #050a18;
-            font-family: 'Inter', "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-            -webkit-font-smoothing: antialiased;
-            letter-spacing: -0.02em;
-        }
-
-        .text-gradient {
-            background: linear-gradient(135deg, #5eead4 0%, #60a5fa 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .glow-bg {
-            position: fixed;
-            top: -20%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 120vw;
-            height: 80vh;
-            background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.12) 0%, rgba(59, 130, 246, 0.04) 40%, transparent 70%);
-            z-index: -1;
-            animation: pulse-glow 10s infinite ease-in-out;
-            pointer-events: none;
-        }
-
-        .nav-blur {
-            background: rgba(5, 10, 24, 0.8);
-            backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        .project-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .project-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(16, 185, 129, 0.4);
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(16, 185, 129, 0.1);
-        }
-
-        .project-card:hover .card-arrow {
-            transform: translateX(4px);
-        }
-
-        .card-arrow {
-            transition: transform 0.3s ease;
-        }
-
-        .status-badge {
-            background: rgba(16, 185, 129, 0.12);
-            color: #5eead4;
-            border: 1px solid rgba(16, 185, 129, 0.25);
-        }
-
-        .section-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/y2k/theme.css">
 </head>
-<body class="text-slate-200 overflow-x-hidden">
+<body>
 
-    <div class="glow-bg"></div>
-
-    <nav class="fixed top-0 w-full z-50 nav-blur" aria-label="主导航">
-        <div class="max-w-5xl mx-auto flex justify-between items-center px-6 py-5 md:px-8">
-            <a href="#" class="text-xl font-[900] tracking-tighter text-white" aria-label="返回顶部">
-                QRC<span class="text-emerald-400">.</span>EYE
+    <nav class="nav-y2k" aria-label="主导航">
+        <div class="nav-inner">
+            <a href="#" class="nav-logo" aria-label="返回顶部">
+                QRC<span class="neon">.</span>EYE
             </a>
-            <div class="hidden md:flex items-center gap-8 text-sm font-semibold">
-                <a href="#projects" class="text-white/60 hover:text-white transition-colors">项目</a>
-                <a href="#about" class="text-white/60 hover:text-white transition-colors">关于</a>
+            <div class="nav-links">
+                <a href="#projects">项目</a>
+                <a href="#about">关于</a>
             </div>
-            <button class="md:hidden text-white text-2xl" onclick="toggleMobileMenu()" aria-label="打开菜单" aria-expanded="false" id="menu-button">
+            <button class="menu-button" onclick="toggleMobileMenu()" aria-label="打开菜单" aria-expanded="false" id="menu-button">
                 ☰
             </button>
         </div>
-        <div id="mobile-menu" class="hidden md:hidden nav-blur px-6 pb-4" aria-hidden="true" aria-labelledby="menu-button">
-            <div class="flex flex-col gap-3 text-sm font-semibold">
-                <a href="#projects" onclick="toggleMobileMenu()" class="text-white/60 hover:text-white transition-colors py-2">项目</a>
-                <a href="#about" onclick="toggleMobileMenu()" class="text-white/60 hover:text-white transition-colors py-2">关于</a>
-            </div>
+        <div id="mobile-menu" class="hidden" aria-hidden="true" aria-labelledby="menu-button">
+            <a href="#projects" onclick="toggleMobileMenu()">项目</a>
+            <a href="#about" onclick="toggleMobileMenu()">关于</a>
         </div>
     </nav>
 
     <main>
         <!-- Hero -->
-        <section class="relative min-h-screen flex items-center justify-center px-6 pt-24 pb-16">
-            <div class="max-w-4xl mx-auto text-center">
-                <div class="inline-block px-4 py-1.5 mb-8 text-[11px] font-black tracking-[0.35em] text-emerald-300 border border-emerald-500/30 rounded-full bg-emerald-500/5 uppercase animate-on-scroll">
-                    Idea Lab · 想法试验场
+        <section class="hero">
+            <div class="hero-inner">
+                <div class="hero-badge animate-on-scroll">
+                    <span class="badge-led">Idea Lab · 想法试验场</span>
                 </div>
-                <h1 class="text-5xl md:text-7xl lg:text-8xl font-[900] tracking-tight mb-8 text-white leading-[1.05] animate-on-scroll">
-                    QRC-Eye<br>
-                    <span class="text-gradient">想法的草稿本</span>
+                <div id="hero-3d-stage" aria-hidden="true"></div>
+                <h1 class="hero-title animate-on-scroll">
+                    <span id="hero-title-text" class="chrome-text" data-glitch>QRC-Eye</span>
+                    <span class="hero-title-zh">想法的草稿本</span>
                 </h1>
-                <p class="text-lg md:text-2xl text-white/50 max-w-2xl mx-auto mb-12 leading-relaxed font-light animate-on-scroll" style="transition-delay: 0.1s;">
+                <p class="hero-tagline animate-on-scroll">
                     有些东西会长成作品，有些只是画着玩。
                 </p>
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-on-scroll" style="transition-delay: 0.2s;">
-                    <a href="#projects" class="group inline-flex items-center gap-2 bg-emerald-400 text-black px-8 py-4 rounded-full font-black transition-all hover:bg-emerald-300 hover:scale-105 active:scale-95">
+                <div class="hero-actions animate-on-scroll">
+                    <a href="#projects" class="btn-metal">
                         看看草稿
-                        <svg class="w-5 h-5 card-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+                        <span class="card-arrow" aria-hidden="true">-&gt;</span>
                     </a>
-                    <a href="#about" class="inline-flex items-center gap-2 text-white/60 hover:text-white px-8 py-4 rounded-full font-semibold transition-colors">
-                        关于我
-                    </a>
+                    <a href="#about" class="btn-ghost">关于我</a>
                 </div>
             </div>
         </section>
+
+        <!-- Marquee -->
+        <div class="marquee" aria-hidden="true">
+            <div class="marquee-track">
+                <span>★ NOW PLAYING ★ CYBERTRAVEL ★ 烟花大师 FIREWORK MASTER ★ 王土之下 KING'S FIELD ★ MORE SKETCHES LOADING ★&nbsp;</span>
+                <span>★ NOW PLAYING ★ CYBERTRAVEL ★ 烟花大师 FIREWORK MASTER ★ 王土之下 KING'S FIELD ★ MORE SKETCHES LOADING ★&nbsp;</span>
+            </div>
+        </div>
 
         <!-- Projects -->
-        <section id="projects" class="relative px-6 py-24 md:py-32">
-            <div class="max-w-5xl mx-auto">
-                <div class="mb-16 animate-on-scroll">
-                    <h2 class="text-3xl md:text-5xl font-[900] text-white mb-4">草稿</h2>
-                    <p class="text-white/40 text-lg font-light">正在做或已经能玩的实验性原型。</p>
-                </div>
-
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- CyberTravel -->
-                    <a href="cybertravel/index.html" class="project-card block p-8 rounded-[2rem] group animate-on-scroll">
-                        <div class="flex items-start justify-between mb-6">
-                            <span class="text-4xl">🚲</span>
-                            <span class="status-badge px-3 py-1 rounded-full text-[11px] font-black tracking-wider uppercase">可玩原型</span>
-                        </div>
-                        <h3 class="text-white font-bold text-2xl mb-3 group-hover:text-emerald-300 transition-colors">CyberTravel</h3>
-                        <p class="text-white/50 leading-relaxed mb-6">
-                            在川藏线上当骑行网红，看看能走多远。
-                        </p>
-                        <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                            <span>试玩</span>
-                            <svg class="w-4 h-4 card-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </div>
-                    </a>
-
-                    <!-- Firework Master -->
-                    <a href="firework-master/index.html" class="project-card block p-8 rounded-[2rem] group animate-on-scroll">
-                        <div class="flex items-start justify-between mb-6">
-                            <span class="text-4xl">🎆</span>
-                            <span class="status-badge px-3 py-1 rounded-full text-[11px] font-black tracking-wider uppercase">可玩原型</span>
-                        </div>
-                        <h3 class="text-white font-bold text-2xl mb-3 group-hover:text-emerald-300 transition-colors">烟花大师</h3>
-                        <p class="text-white/50 leading-relaxed mb-6">
-                            收集配方、编排节目单，在夜空中绽放属于你的烟花秀。
-                        </p>
-                        <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                            <span>试玩</span>
-                            <svg class="w-4 h-4 card-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </div>
-                    </a>
-
-                    <!-- 王土之下 -->
-                    <a href="kings-field/index.html" class="project-card block p-8 rounded-[2rem] group animate-on-scroll">
-                        <div class="flex items-start justify-between mb-6">
-                            <span class="text-4xl">🗡️</span>
-                            <span class="status-badge px-3 py-1 rounded-full text-[11px] font-black tracking-wider uppercase">可玩原型</span>
-                        </div>
-                        <h3 class="text-white font-bold text-2xl mb-3 group-hover:text-emerald-300 transition-colors">王土之下</h3>
-                        <p class="text-white/50 leading-relaxed mb-6">
-                            精神复刻 1994《国王密令》：黑暗无缝地牢、笨重近战，死亡是唯一的教师。
-                        </p>
-                        <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                            <span>试玩</span>
-                            <svg class="w-4 h-4 card-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </div>
-                    </a>
-
-                    <!-- Future projects will be added here following the same card structure -->
-                </div>
-
-                <p class="text-white/30 text-center mt-16 text-sm font-medium animate-on-scroll">
-                    更多想法正在画草稿 …
-                </p>
+        <section id="projects" class="section">
+            <div class="section-head animate-on-scroll">
+                <h2 class="section-title" data-glitch>草稿</h2>
+                <p class="section-sub">正在做或已经能玩的实验性原型。</p>
             </div>
+
+            <div class="cards-grid">
+                <!-- CyberTravel -->
+                <a href="cybertravel/index.html" class="card-y2k animate-on-scroll">
+                    <div class="card-top">
+                        <span class="card-emoji">🚲</span>
+                        <span class="badge-led">可玩原型</span>
+                    </div>
+                    <h3 class="card-title">CyberTravel</h3>
+                    <p class="card-desc">
+                        在川藏线上当骑行网红，看看能走多远。
+                    </p>
+                    <div class="card-link">
+                        <span>试玩</span>
+                        <span class="card-arrow" aria-hidden="true">&gt;</span>
+                    </div>
+                </a>
+
+                <!-- Firework Master -->
+                <a href="firework-master/index.html" class="card-y2k animate-on-scroll">
+                    <div class="card-top">
+                        <span class="card-emoji">🎆</span>
+                        <span class="badge-led">可玩原型</span>
+                    </div>
+                    <h3 class="card-title">烟花大师</h3>
+                    <p class="card-desc">
+                        收集配方、编排节目单，在夜空中绽放属于你的烟花秀。
+                    </p>
+                    <div class="card-link">
+                        <span>试玩</span>
+                        <span class="card-arrow" aria-hidden="true">&gt;</span>
+                    </div>
+                </a>
+
+                <!-- 王土之下 -->
+                <a href="kings-field/index.html" class="card-y2k animate-on-scroll">
+                    <div class="card-top">
+                        <span class="card-emoji">🗡️</span>
+                        <span class="badge-led">可玩原型</span>
+                    </div>
+                    <h3 class="card-title">王土之下</h3>
+                    <p class="card-desc">
+                        精神复刻 1994《国王密令》：黑暗无缝地牢、笨重近战，死亡是唯一的教师。
+                    </p>
+                    <div class="card-link">
+                        <span>试玩</span>
+                        <span class="card-arrow" aria-hidden="true">&gt;</span>
+                    </div>
+                </a>
+
+                <!-- Future projects will be added here following the same card structure -->
+            </div>
+
+            <p class="more-note animate-on-scroll">
+                更多想法正在画草稿 …
+            </p>
         </section>
 
-        <div class="section-divider max-w-5xl mx-auto"></div>
+        <div class="section-divider"></div>
 
         <!-- About -->
-        <section id="about" class="relative px-6 py-24 md:py-32">
-            <div class="max-w-5xl mx-auto">
-                <div class="grid md:grid-cols-2 gap-12 md:gap-20 items-start">
-                    <div class="animate-on-scroll">
-                        <h2 class="text-3xl md:text-5xl font-[900] text-white mb-6">关于</h2>
-                        <p class="text-white/40 text-lg font-light">为什么有这个站点。</p>
-                    </div>
-                    <div class="space-y-6 text-lg text-white/70 leading-relaxed animate-on-scroll" style="transition-delay: 0.1s;">
-                        <p>
-                            我是 QRC-Eye，一个还在寻找自己表达方式的创作者。
-                        </p>
-                        <p>
-                            这个站点是我的想法草稿本：把脑子里的东西快速做成可交互的原型，看看哪些会长成作品，哪些只是画着玩。
-                        </p>
-                        <p>
-                            朋友偶尔会一起来玩。
-                        </p>
-                    </div>
+        <section id="about" class="section">
+            <div class="about-grid">
+                <div class="animate-on-scroll">
+                    <h2 class="section-title" data-glitch>关于</h2>
+                    <p class="section-sub">为什么有这个站点。</p>
+                </div>
+                <div class="about-text animate-on-scroll">
+                    <p>
+                        我是 QRC-Eye，一个还在寻找自己表达方式的创作者。
+                    </p>
+                    <p>
+                        这个站点是我的想法草稿本：把脑子里的东西快速做成可交互的原型，看看哪些会长成作品，哪些只是画着玩。
+                    </p>
+                    <p>
+                        朋友偶尔会一起来玩。
+                    </p>
                 </div>
             </div>
         </section>
     </main>
 
-    <footer class="py-16 border-t border-white/10 text-center px-6">
-        <p class="text-white/80 font-black text-xs tracking-[0.4em] uppercase mb-4">QRC-Eye</p>
-        <a href="https://beian.miit.gov.cn/" target="_blank" class="text-white/30 hover:text-emerald-400 transition text-[11px] font-bold">
+    <footer class="site-footer">
+        <p class="footer-logo">QRC-Eye</p>
+        <a href="https://beian.miit.gov.cn/" target="_blank" class="footer-beian">
             粤ICP备2024189519号-1
         </a>
     </footer>
