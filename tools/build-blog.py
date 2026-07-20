@@ -450,6 +450,47 @@ def render_feed(posts):
     )
 
 
+HOME_PLACEHOLDER = '<p class="notes-placeholder">笔记还在酝酿中 …</p>'
+
+
+def render_home_latest(posts):
+    """Inner HTML for the BLOG-LATEST markers on the homepage (max 3 posts)."""
+    latest = posts[:3]
+    if not latest:
+        return HOME_PLACEHOLDER
+    cards = "\n".join(
+        "                " + render_post_card(post, posts_prefix="dev-blog/posts/")
+        for post in latest
+    )
+    return '<div class="cards-grid">\n' + cards + "\n            </div>"
+
+
+def replace_marked_region(original, start_mark, end_mark, inner):
+    """Replace the text between start_mark and end_mark (the marks are kept).
+
+    Raises BuildError if either marker is missing or they are misordered, so
+    a hand-edit that breaks the markers fails loudly instead of corrupting
+    the homepage.
+    """
+    start = original.find(start_mark)
+    end = original.find(end_mark)
+    if start == -1 or end == -1 or end < start:
+        raise BuildError(
+            f"index.html: missing or misordered {start_mark} / {end_mark} markers"
+        )
+    start += len(start_mark)
+    return original[:start] + "\n            " + inner + "\n            " + original[end:]
+
+
+def update_homepage(posts):
+    """Rewrite only the BLOG-LATEST region of index.html; nothing else."""
+    original = HOME_PAGE.read_text(encoding="utf-8")
+    updated = replace_marked_region(
+        original, HOME_START_MARK, HOME_END_MARK, render_home_latest(posts)
+    )
+    HOME_PAGE.write_text(updated, encoding="utf-8")
+
+
 def main():
     posts = load_posts()
     for post in posts:
@@ -460,6 +501,8 @@ def main():
     print(f"build-blog: wrote {LIST_PAGE.relative_to(ROOT)}")
     render_feed(posts)
     print(f"build-blog: wrote {FEED_FILE.relative_to(ROOT)}")
+    update_homepage(posts)
+    print(f"build-blog: updated {HOME_PAGE.relative_to(ROOT)} BLOG-LATEST block")
     print(f"build-blog: done, {len(posts)} post(s)")
 
 

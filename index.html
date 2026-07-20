@@ -50,6 +50,7 @@
             </a>
             <div class="nav-links">
                 <a href="#projects">项目</a>
+                <a href="dev-blog/index.html">笔记</a>
                 <a href="#about">关于</a>
             </div>
             <button class="menu-button" onclick="toggleMobileMenu()" aria-label="打开菜单" aria-expanded="false" id="menu-button">
@@ -58,6 +59,7 @@
         </div>
         <div id="mobile-menu" class="hidden" aria-hidden="true" aria-labelledby="menu-button">
             <a href="#projects" onclick="toggleMobileMenu()">项目</a>
+            <a href="dev-blog/index.html" onclick="toggleMobileMenu()">笔记</a>
             <a href="#about" onclick="toggleMobileMenu()">关于</a>
         </div>
     </nav>
@@ -156,6 +158,33 @@
 
             <p class="more-note animate-on-scroll">
                 更多想法正在画草稿 …
+            </p>
+        </section>
+
+        <!-- Latest notes: BLOG-LATEST 标记之间由 tools/build-blog.py 重写，标记外手写维护 -->
+        <section id="notes" class="section latest-notes">
+            <div class="section-head animate-on-scroll">
+                <h2 class="section-title" data-glitch>最新笔记</h2>
+                <p class="section-sub">想法从草稿到原型的过程记录。</p>
+            </div>
+            <!-- BLOG-LATEST:START -->
+            <div class="cards-grid">
+                <a href="dev-blog/posts/firework-master-dev-notes-1.html" class="card-y2k note-card" data-tags="game-design firework-master">
+            <div class="note-card-top">
+                <span class="note-card-date">2026-07-19</span>
+                <div class="note-card-tags"><span class="tag-badge">game-design</span><span class="tag-badge">firework-master</span></div>
+            </div>
+            <h3 class="card-title">烟花大师开发笔记 #1：评分公式怎么定</h3>
+            <p class="card-desc">第一篇开发笔记：烟花大师的评分公式为什么用连续值匹配，以及调参时踩过的坑。</p>
+            <div class="card-link">
+                <span>阅读</span>
+                <span class="card-arrow" aria-hidden="true">&gt;</span>
+            </div>
+        </a>
+            </div>
+            <!-- BLOG-LATEST:END -->
+            <p class="more-note animate-on-scroll">
+                <a href="dev-blog/index.html">全部笔记</a>
             </p>
         </section>
 
