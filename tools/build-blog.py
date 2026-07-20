@@ -9,10 +9,13 @@ stays fully static.
 Usage: .venv/bin/python tools/build-blog.py
 """
 
+import html as html_lib
 import re
 import sys
 from datetime import date
 from pathlib import Path
+
+import markdown
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = ROOT / "dev-blog" / "src"
@@ -162,9 +165,133 @@ def load_posts():
     return posts
 
 
+MD_EXTENSIONS = ["extra", "toc", "codehilite"]
+MD_EXTENSION_CONFIGS = {
+    "toc": {"toc_depth": "2-2"},
+    "codehilite": {"guess_lang": False, "css_class": "codehilite"},
+}
+
+
+def render_markdown(body):
+    """Render a Markdown body to HTML.
+
+    Returns (body_html, toc_html, h2_count). A fresh Markdown instance is
+    created per call (converter state is not reusable across documents).
+    With toc_depth "2-2", top-level toc tokens correspond to h2 headings.
+    """
+    md = markdown.Markdown(
+        extensions=MD_EXTENSIONS, extension_configs=MD_EXTENSION_CONFIGS
+    )
+    body_html = md.convert(body)
+    return body_html, md.toc, len(md.toc_tokens)
+
+
+def render_tag_badges(tags):
+    """Render the tag badge row for a post (empty string when no tags)."""
+    return "".join(
+        f'<span class="tag-badge">{html_lib.escape(tag)}</span>' for tag in tags
+    )
+
+
+POST_PAGE_TEMPLATE = """<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title} | QRC-Eye Notes</title>
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+    <meta name="description" content="{description}">
+    <meta name="author" content="QRC-Eye">
+    <meta property="og:title" content="{title} | QRC-Eye Notes">
+    <meta property="og:description" content="{description}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{post_url}">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{title} | QRC-Eye Notes">
+    <meta name="twitter:description" content="{description}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/y2k/theme.css">
+</head>
+<body>
+    <nav class="nav-y2k" aria-label="文章导航">
+        <div class="nav-inner">
+            <a href="../index.html" class="notes-back">← 返回列表</a>
+            <div class="nav-logo">QRC<span class="neon">.</span>EYE</div>
+        </div>
+    </nav>
+    <article>
+        <header class="post-header">
+            <h1 class="post-title" data-glitch>{title}</h1>
+            <div class="post-date">PUBLISHED ON {date_iso}</div>
+            <div class="post-tags">{tag_badges}</div>
+        </header>
+        {content_block}
+    </article>
+
+    <button id="sfx-toggle" class="sfx-toggle" aria-pressed="false" aria-label="开启或关闭音效">SOUND: OFF</button>
+
+    <script src="../../assets/y2k/sfx.js" defer></script>
+    <script src="../../assets/y2k/fx.js" defer></script>
+</body>
+</html>
+"""
+
+
+def render_post_page(post):
+    """Render one post to dev-blog/posts/<slug>.html. Returns the path written."""
+    body_html, toc_html, h2_count = render_markdown(post["body"])
+    body_block = '<div class="post-body prose-y2k">\n' + body_html + "        </div>"
+    if h2_count >= TOC_MIN_H2:
+        toc_block = (
+            '<aside class="post-toc" aria-label="文章目录">\n'
+            '                <p class="post-toc-title">目录</p>\n'
+            "                "
+            + toc_html.replace("\n", "\n                ").rstrip()
+            + "\n            </aside>"
+        )
+        content_block = (
+            '<div class="post-layout">\n            '
+            + toc_block
+            + "\n            "
+            + body_block
+            + "\n        </div>"
+        )
+    else:
+        content_block = body_block
+    page = POST_PAGE_TEMPLATE.format(
+        title=html_lib.escape(post["title"]),
+        description=html_lib.escape(post["description"], quote=True),
+        date_iso=post["date_iso"],
+        tag_badges=render_tag_badges(post["tags"]),
+        post_url=BLOG_URL + "posts/" + post["slug"] + ".html",
+        content_block=content_block,
+    )
+    POSTS_DIR.mkdir(parents=True, exist_ok=True)
+    out_path = POSTS_DIR / (post["slug"] + ".html")
+    out_path.write_text(page, encoding="utf-8")
+    return out_path
+
+
+def clean_stale_posts(slugs):
+    """Delete generated post pages whose source md no longer exists."""
+    if not POSTS_DIR.is_dir():
+        return
+    for html_file in sorted(POSTS_DIR.glob("*.html")):
+        if html_file.stem not in slugs:
+            html_file.unlink()
+            print(f"build-blog: removed stale {html_file.relative_to(ROOT)}")
+
+
 def main():
     posts = load_posts()
-    print(f"build-blog: {len(posts)} post(s) validated")
+    for post in posts:
+        out_path = render_post_page(post)
+        print(f"build-blog: wrote {out_path.relative_to(ROOT)}")
+    clean_stale_posts({post["slug"] for post in posts})
+    print(f"build-blog: done, {len(posts)} post(s)")
 
 
 if __name__ == "__main__":

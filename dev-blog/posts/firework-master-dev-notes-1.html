@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>烟花大师开发笔记 #1：评分公式怎么定 | QRC-Eye Notes</title>
+    <link rel="icon" href="../../favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
+    <meta name="description" content="第一篇开发笔记：烟花大师的评分公式为什么用连续值匹配，以及调参时踩过的坑。">
+    <meta name="author" content="QRC-Eye">
+    <meta property="og:title" content="烟花大师开发笔记 #1：评分公式怎么定 | QRC-Eye Notes">
+    <meta property="og:description" content="第一篇开发笔记：烟花大师的评分公式为什么用连续值匹配，以及调参时踩过的坑。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.qrc-eye.com/dev-blog/posts/firework-master-dev-notes-1.html">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="烟花大师开发笔记 #1：评分公式怎么定 | QRC-Eye Notes">
+    <meta name="twitter:description" content="第一篇开发笔记：烟花大师的评分公式为什么用连续值匹配，以及调参时踩过的坑。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/y2k/theme.css">
+</head>
+<body>
+    <nav class="nav-y2k" aria-label="文章导航">
+        <div class="nav-inner">
+            <a href="../index.html" class="notes-back">← 返回列表</a>
+            <div class="nav-logo">QRC<span class="neon">.</span>EYE</div>
+        </div>
+    </nav>
+    <article>
+        <header class="post-header">
+            <h1 class="post-title" data-glitch>烟花大师开发笔记 #1：评分公式怎么定</h1>
+            <div class="post-date">PUBLISHED ON 2026-07-19</div>
+            <div class="post-tags"><span class="tag-badge">game-design</span><span class="tag-badge">firework-master</span></div>
+        </header>
+        <div class="post-layout">
+            <aside class="post-toc" aria-label="文章目录">
+                <p class="post-toc-title">目录</p>
+                <div class="toc">
+                <ul>
+                <li><a href="#_1">为什么不用阈值判定</a></li>
+                <li><a href="#_2">连续值匹配的思路</a></li>
+                <li><a href="#_3">复杂度奖励与重复惩罚</a></li>
+                <li><a href="#_4">调参时踩过的坑</a></li>
+                </ul>
+                </div>
+            </aside>
+            <div class="post-body prose-y2k">
+<p>烟花大师的核心循环是「组装烟花 → 参加比赛 → 拿名气和资金」。让这套循环转起来的关键是评分公式：它决定了玩家每一次组装决策会得到什么反馈。这篇笔记记录评分公式从拍脑袋到定稿的过程。</p>
+<h2 id="_1">为什么不用阈值判定</h2>
+<p>最早的版本是阈值式的：高度超过 80 得满分，否则线性衰减。玩起来感觉「要么满分要么垃圾」，中间态毫无区分度，玩家凑出一个达标配方后就不再尝试新组合。</p>
+<p>阈值的问题在于它把连续的属性空间切成了阶梯。烟花的高度、规模、颜色、持续时间、特效是五个连续维度，玩家真正有意思的是「再改一点点会不会更好」的探索感，阶梯式评分直接掐死了这个动机。</p>
+<h2 id="_2">连续值匹配的思路</h2>
+<p>定稿方案是连续值匹配：每个事件对五个维度各有一个偏好值，玩家烟花属性与偏好的拟合度决定得分。偏离越小分越高，偏离方向不重要——超配和欠配同样扣分。</p>
+<p>核心计算大概长这样：</p>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">dimension_score</span><span class="p">(</span><span class="n">actual</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">preferred</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;单维度得分：偏离越少分越高，超出容差为 0。&quot;&quot;&quot;</span>
+    <span class="n">deviation</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">actual</span> <span class="o">-</span> <span class="n">preferred</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">deviation</span> <span class="o">&gt;=</span> <span class="n">tolerance</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="p">(</span><span class="n">deviation</span> <span class="o">/</span> <span class="n">tolerance</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+</code></pre></div>
+
+<p>用平方而不是线性，是为了让「差一点」和「差很多」的手感差异更明显：接近偏好时曲线平缓（鼓励微调），远离偏好时快速衰减。</p>
+<h2 id="_3">复杂度奖励与重复惩罚</h2>
+<p>光有拟合度会导致最优解永远是「单发贴脸配方」，表演毫无观赏性。所以总分里加了两项：</p>
+<ul>
+<li>复杂度奖励：节目单里烟花弹数量、组件种类越多，加成越高，但有上限；</li>
+<li>重复惩罚：同一配方重复出现会递减得分，逼玩家为一场表演设计多个不同烟花。</li>
+</ul>
+<h2 id="_4">调参时踩过的坑</h2>
+<p>最大的坑是容差（tolerance）的取值：定得太宽，玩家随便装都能拿高分，赛事没有挑战性；定得太窄，预算限制的赛事根本完不成。最后的做法是每个职业等级一套容差基准——学徒宽、大师窄，让评分难度跟着玩家成长曲线走。</p>
+<p>另一个教训是评分结果必须可解释。得分界面会逐维度显示拟合度条，玩家能看到「颜色差了一点」，而不是一个莫名其妙的总分——否则公式调得再好，玩家也学不会怎么改进。</p>
+<p>下一篇打算写 Canvas 粒子表演的渲染管线，以及二次爆炸（多层壳）是怎么在粒子上实现的。</p>        </div>
+        </div>
+    </article>
+
+    <button id="sfx-toggle" class="sfx-toggle" aria-pressed="false" aria-label="开启或关闭音效">SOUND: OFF</button>
+
+    <script src="../../assets/y2k/sfx.js" defer></script>
+    <script src="../../assets/y2k/fx.js" defer></script>
+</body>
+</html>
