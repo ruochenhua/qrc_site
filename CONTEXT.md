@@ -46,10 +46,10 @@ QRC-Eye 个人创作者主页 + 想法试验场。静态站点，GitHub Pages �
 
 ```
 qrcsite/
-├── index.html          # 主页（Y2K 换皮，手写 CSS，无 Tailwind）
+├── index.html          # 主页（导航含「笔记」；BLOG-LATEST 标记区间由生成器重写，其余手写）
 ├── assets/y2k/         # 全站共享 Y2K 主题包
-│   ├── theme.css       # 设计令牌（配色/字体）+ 通用组件 + 页面布局
-│   ├── fx.js           # 动效套件：光标+拖尾、glitch、滚动动画、启动画面、降级判定（QRC.fx.flags）
+│   ├── theme.css       # 设计令牌（配色/字体）+ 通用组件 + 页面布局 + blog 组件样式
+│   ├── fx.js           # 动效套件：光标+拖尾、glitch、滚动动画、启动画面、降级判定、博客标签筛选
 │   ├── sfx.js          # WebAudio 合成音效，默认静音（QRC.sfx）
 │   ├── hero3d.js       # Three.js 主页主视觉（import map，three@0.160.0，失败降级 CSS 标题）
 │   ├── shell.css       # 游戏页外壳样式（顶栏 + INSERT COIN 启动画面）
@@ -67,10 +67,18 @@ qrcsite/
 │   └── doc/            # 设计文档
 ├── firework-master/    # 游戏目录（单文件 index.html 为主，已注入 y2k shell）
 ├── kings-field/        # 游戏目录（规划中/未落地；落地后需注入 y2k shell）
-└── dev-blog/           # 实验笔记（Y2K 换皮，当前未在首页导航展示）
+├── tools/
+│   ├── build-blog.py   # dev-blog 静态生成器（运行：.venv/bin/python tools/build-blog.py）
+│   └── requirements.txt# 钉版本：markdown==3.7、pygments==2.18.0（装本地 .venv/，不入库）
+└── dev-blog/           # 实验笔记（Markdown + 生成器工作流）
+    ├── index.html      # 列表页（生成器整页重写，勿手写）
+    ├── post-template.html # 文章页结构蓝本（生成器内嵌模板以其为原型，本文件保持不动）
+    ├── posts/          # 生成的文章页 <slug>.html（勿手写）
+    ├── feed.xml        # RSS 2.0（生成器产出）
+    └── src/            # Markdown 源文件（--- 围栏 front matter：title/date/tags/description）
 ```
 
-说明：原 `js/main.js` 已被 `assets/y2k/fx.js` 吸收并删除；kings-field 目录在 2026-07 Y2K 改造时尚不存在。
+说明：原 `js/main.js` 已被 `assets/y2k/fx.js` 吸收并删除；kings-field 目录在 2026-07 Y2K 改造时尚不存在。发布文章工作流：在 `dev-blog/src/` 新建 `<slug>.md`（slug 英文小写连字符）→ 运行 `.venv/bin/python tools/build-blog.py` → `git add -A && git commit` 提交产物；生成器输出确定（无时间戳），连跑两次产物一致，校验失败时非零退出且不产出半成品。
 
 ## 架构约束
 
