@@ -51,6 +51,8 @@
         boot.appendChild(inner);
         boot.addEventListener('click', function () {
             boot.classList.add('y2k-boot-off');
+            /* 揭示被 shell.css 藏住的游戏画面（在覆盖层淡出期间同步进行） */
+            document.body.classList.add('y2k-shell-on');
             setTimeout(function () {
                 if (boot.parentNode) boot.parentNode.removeChild(boot);
             }, 450);
@@ -58,5 +60,7 @@
         document.body.appendChild(boot);
     } catch (error) {
         handleError(error, 'y2k-shell');
+        /* 注入失败也不能让页面保持隐藏（shell.css 的防穿帮规则） */
+        document.body.classList.add('y2k-shell-on');
     }
 })();

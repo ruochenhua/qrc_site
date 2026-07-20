@@ -48,6 +48,22 @@ body.y2k-shell {
     padding-top: 44px !important;
 }
 
+/* 防穿帮：shell.js 是 defer 加载，注入覆盖层前游戏画面会先绘制。
+   这里利用 <head> 中的 CSS 在首帧前把 body 藏住，覆盖层/顶栏保持可见；
+   点击启动后由 JS 加 y2k-shell-on 揭示游戏。JS 失败时 catch 里也会加，不会白屏。 */
+html {
+    background: #0a0c10;
+}
+
+body:not(.y2k-shell-on) {
+    visibility: hidden;
+}
+
+#y2k-topbar,
+#y2k-boot {
+    visibility: visible;
+}
+
 #y2k-boot {
     position: fixed;
     inset: 0;
