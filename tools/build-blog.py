@@ -12,8 +12,10 @@ Usage: .venv/bin/python tools/build-blog.py
 import html as html_lib
 import re
 import sys
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
+from email.utils import format_datetime
 from pathlib import Path
+from xml.sax.saxutils import escape as xml_escape
 
 import markdown
 
@@ -403,6 +405,51 @@ def render_list_page(posts):
     )
 
 
+FEED_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>QRC-Eye 实验笔记</title>
+    <link>{blog_url}</link>
+    <description>QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。</description>
+    <language>zh-CN</language>
+{items}
+  </channel>
+</rss>
+"""
+
+
+def render_feed(posts):
+    """Write dev-blog/feed.xml (RSS 2.0).
+
+    No lastBuildDate and no build-time timestamps anywhere, so the output is
+    byte-identical across runs with the same sources (idempotency).
+    """
+    items = []
+    for post in posts:
+        post_url = BLOG_URL + "posts/" + post["slug"] + ".html"
+        pub_date = datetime(
+            post["date"].year,
+            post["date"].month,
+            post["date"].day,
+            12,
+            0,
+            tzinfo=timezone(timedelta(hours=8)),
+        )
+        items.append(
+            "    <item>\n"
+            f"      <title>{xml_escape(post['title'])}</title>\n"
+            f"      <link>{post_url}</link>\n"
+            f'      <guid isPermaLink="true">{post_url}</guid>\n'
+            f"      <pubDate>{format_datetime(pub_date)}</pubDate>\n"
+            f"      <description>{xml_escape(post['description'])}</description>\n"
+            "    </item>"
+        )
+    FEED_FILE.write_text(
+        FEED_TEMPLATE.format(blog_url=BLOG_URL, items="\n".join(items)),
+        encoding="utf-8",
+    )
+
+
 def main():
     posts = load_posts()
     for post in posts:
@@ -411,6 +458,8 @@ def main():
     clean_stale_posts({post["slug"] for post in posts})
     render_list_page(posts)
     print(f"build-blog: wrote {LIST_PAGE.relative_to(ROOT)}")
+    render_feed(posts)
+    print(f"build-blog: wrote {FEED_FILE.relative_to(ROOT)}")
     print(f"build-blog: done, {len(posts)} post(s)")
 
 

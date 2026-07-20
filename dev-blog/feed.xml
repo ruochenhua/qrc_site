@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>QRC-Eye 实验笔记</title>
+    <link>https://www.qrc-eye.com/dev-blog/</link>
+    <description>QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。</description>
+    <language>zh-CN</language>
+    <item>
+      <title>烟花大师开发笔记 #1：评分公式怎么定</title>
+      <link>https://www.qrc-eye.com/dev-blog/posts/firework-master-dev-notes-1.html</link>
+      <guid isPermaLink="true">https://www.qrc-eye.com/dev-blog/posts/firework-master-dev-notes-1.html</guid>
+      <pubDate>Sun, 19 Jul 2026 12:00:00 +0800</pubDate>
+      <description>第一篇开发笔记：烟花大师的评分公式为什么用连续值匹配，以及调参时踩过的坑。</description>
+    </item>
+  </channel>
+</rss>
