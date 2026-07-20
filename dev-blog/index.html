@@ -30,10 +30,24 @@
         <h1 class="notes-title chrome-text" data-glitch>Notes.</h1>
         <p class="notes-sub">记录想法从草稿到原型的过程</p>
 
-        <div class="card-y2k note-empty">
-            <span class="card-emoji">📝</span>
-            <p>还没有实验笔记。</p>
-            <p class="note-empty-sub">等有想法值得记录的时候，会放在这里。</p>
+        <div id="tag-filter" role="group" aria-label="按标签筛选">
+            <button type="button" class="tag-filter-btn active" data-tag="all">全部</button>
+            <button type="button" class="tag-filter-btn" data-tag="firework-master">firework-master</button>
+            <button type="button" class="tag-filter-btn" data-tag="game-design">game-design</button>
+        </div>
+        <div class="notes-grid">
+            <a href="posts/firework-master-dev-notes-1.html" class="card-y2k note-card" data-tags="game-design firework-master">
+            <div class="note-card-top">
+                <span class="note-card-date">2026-07-19</span>
+                <div class="note-card-tags"><span class="tag-badge">game-design</span><span class="tag-badge">firework-master</span></div>
+            </div>
+            <h3 class="card-title">烟花大师开发笔记 #1：评分公式怎么定</h3>
+            <p class="card-desc">第一篇开发笔记：烟花大师的评分公式为什么用连续值匹配，以及调参时踩过的坑。</p>
+            <div class="card-link">
+                <span>阅读</span>
+                <span class="card-arrow" aria-hidden="true">&gt;</span>
+            </div>
+        </a>
         </div>
     </main>
 

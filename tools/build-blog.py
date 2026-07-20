@@ -285,12 +285,132 @@ def clean_stale_posts(slugs):
             print(f"build-blog: removed stale {html_file.relative_to(ROOT)}")
 
 
+LIST_PAGE_TEMPLATE = """<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验笔记 | QRC-Eye</title>
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
+    <meta name="description" content="QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。">
+    <meta name="keywords" content="实验笔记, 原型, QRC-Eye, 想法, 开发">
+    <meta name="author" content="QRC-Eye">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="实验笔记 | QRC-Eye">
+    <meta property="og:description" content="QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.qrc-eye.com/dev-blog/">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="实验笔记 | QRC-Eye">
+    <meta name="twitter:description" content="QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/y2k/theme.css">
+</head>
+<body>
+    <main class="notes-main">
+        <nav class="notes-nav">
+            <a href="../index.html" class="notes-back">← Back to Home</a>
+        </nav>
+        <h1 class="notes-title chrome-text" data-glitch>Notes.</h1>
+        <p class="notes-sub">记录想法从草稿到原型的过程</p>
+
+        {list_block}
+    </main>
+
+    <button id="sfx-toggle" class="sfx-toggle" aria-pressed="false" aria-label="开启或关闭音效">SOUND: OFF</button>
+
+    <script src="../assets/y2k/sfx.js" defer></script>
+    <script src="../assets/y2k/fx.js" defer></script>
+</body>
+</html>
+"""
+
+EMPTY_LIST_BLOCK = (
+    '<div class="card-y2k note-empty">\n'
+    '            <span class="card-emoji">📝</span>\n'
+    "            <p>还没有实验笔记。</p>\n"
+    '            <p class="note-empty-sub">等有想法值得记录的时候，会放在这里。</p>\n'
+    "        </div>"
+)
+
+
+def collect_tags(posts):
+    """All distinct tags across posts, sorted alphabetically."""
+    tags = set()
+    for post in posts:
+        tags.update(post["tags"])
+    return sorted(tags)
+
+
+def render_tag_filter(tags):
+    """The tag filter bar: an 'all' button plus one button per tag."""
+    buttons = [
+        '<button type="button" class="tag-filter-btn active" data-tag="all">全部</button>'
+    ]
+    for tag in tags:
+        buttons.append(
+            f'<button type="button" class="tag-filter-btn" data-tag="{html_lib.escape(tag)}">'
+            f"{html_lib.escape(tag)}</button>"
+        )
+    return (
+        '<div id="tag-filter" role="group" aria-label="按标签筛选">\n            '
+        + "\n            ".join(buttons)
+        + "\n        </div>"
+    )
+
+
+def render_post_card(post, posts_prefix="posts/"):
+    """One blog card. Shared by the list page and the homepage latest block.
+
+    posts_prefix is "posts/" on the list page and "dev-blog/posts/" on the
+    homepage. Cards carry data-tags for the list page tag filter.
+    """
+    href = posts_prefix + post["slug"] + ".html"
+    data_tags = html_lib.escape(" ".join(post["tags"]))
+    return (
+        f'<a href="{href}" class="card-y2k note-card" data-tags="{data_tags}">\n'
+        '            <div class="note-card-top">\n'
+        f'                <span class="note-card-date">{post["date_iso"]}</span>\n'
+        f'                <div class="note-card-tags">{render_tag_badges(post["tags"])}</div>\n'
+        "            </div>\n"
+        f'            <h3 class="card-title">{html_lib.escape(post["title"])}</h3>\n'
+        f'            <p class="card-desc">{html_lib.escape(post["description"])}</p>\n'
+        '            <div class="card-link">\n'
+        "                <span>阅读</span>\n"
+        '                <span class="card-arrow" aria-hidden="true">&gt;</span>\n'
+        "            </div>\n"
+        "        </a>"
+    )
+
+
+def render_list_page(posts):
+    """Rewrite dev-blog/index.html: filter bar + cards, or the empty state."""
+    if posts:
+        cards = "\n".join("            " + render_post_card(post) for post in posts)
+        list_block = (
+            render_tag_filter(collect_tags(posts))
+            + '\n        <div class="notes-grid">\n'
+            + cards
+            + "\n        </div>"
+        )
+    else:
+        list_block = EMPTY_LIST_BLOCK
+    LIST_PAGE.write_text(
+        LIST_PAGE_TEMPLATE.format(list_block=list_block), encoding="utf-8"
+    )
+
+
 def main():
     posts = load_posts()
     for post in posts:
         out_path = render_post_page(post)
         print(f"build-blog: wrote {out_path.relative_to(ROOT)}")
     clean_stale_posts({post["slug"] for post in posts})
+    render_list_page(posts)
+    print(f"build-blog: wrote {LIST_PAGE.relative_to(ROOT)}")
     print(f"build-blog: done, {len(posts)} post(s)")
 
 

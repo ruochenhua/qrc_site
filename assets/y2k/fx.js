@@ -250,6 +250,31 @@ QRC.fx = (function () {
         }
     }
 
+    /* ---------- dev-blog 标签筛选（仅列表页，守卫 #tag-filter 存在） ---------- */
+    function initBlogFilter() {
+        const filter = document.getElementById('tag-filter');
+        if (!filter) return; // 非列表页或无文章（空状态无筛选条）
+        try {
+            const buttons = filter.querySelectorAll('.tag-filter-btn');
+            const cards = document.querySelectorAll('.note-card');
+            filter.addEventListener('click', function (e) {
+                const btn = e.target.closest('.tag-filter-btn');
+                if (!btn) return;
+                const tag = btn.getAttribute('data-tag');
+                buttons.forEach(function (b) {
+                    b.classList.toggle('active', b === btn);
+                });
+                cards.forEach(function (card) {
+                    const cardTags = (card.getAttribute('data-tags') || '').split(' ');
+                    const show = tag === 'all' || cardTags.indexOf(tag) !== -1;
+                    card.classList.toggle('note-card-hidden', !show);
+                });
+            });
+        } catch (error) {
+            QRC.handleError(error, 'fx.initBlogFilter');
+        }
+    }
+
     function init() {
         handleScrollAnimations();
         window.addEventListener('scroll', handleScrollAnimations);
@@ -258,6 +283,7 @@ QRC.fx = (function () {
         initGlitch();
         initParallax();
         initBootScreen();
+        initBlogFilter();
     }
 
     return {
