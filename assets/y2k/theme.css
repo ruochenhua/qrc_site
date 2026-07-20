@@ -877,3 +877,320 @@ body.y2k-cursor-on button {
     content: '// ';
     color: var(--y2k-neon);
 }
+
+
+/* ---------- 8. dev-blog 生成器组件（tools/build-blog.py 产物） ---------- */
+
+/* 标签徽章（复用 .badge-led 风格，换冷蓝、无 LED 灯） */
+.tag-badge {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--y2k-font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 10px;
+    color: var(--y2k-blue);
+    border: 1px solid rgba(125, 162, 255, 0.4);
+    background: rgba(125, 162, 255, 0.06);
+    padding: 3px 8px;
+}
+
+/* 文章页头部标签行 */
+.post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+
+/* 文章页带 TOC 时的双栏布局（无 TOC 时不用 .post-layout） */
+.post-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 42rem);
+    justify-content: center;
+    gap: 2.5rem;
+    padding: 0 1.5rem 6rem;
+}
+
+@media (min-width: 1024px) {
+    .post-layout {
+        grid-template-columns: 14rem minmax(0, 42rem);
+        gap: 3rem;
+    }
+}
+
+.post-layout .post-body {
+    margin: 0;
+    padding: 0;
+}
+
+/* TOC 区块（移动端在正文上方，桌面端左侧 sticky） */
+.post-toc {
+    align-self: start;
+    border: 1px solid rgba(154, 154, 165, 0.35);
+    background: var(--y2k-panel);
+    padding: 1.25rem 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .post-toc {
+        position: sticky;
+        top: 6rem;
+    }
+}
+
+.post-toc-title {
+    font-family: var(--y2k-font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+    color: var(--y2k-neon);
+    margin: 0 0 0.75rem;
+}
+
+.post-toc .toc ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.post-toc .toc li {
+    margin: 0 0 0.5rem;
+}
+
+.post-toc .toc a {
+    color: var(--y2k-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.post-toc .toc a:hover {
+    color: var(--y2k-neon);
+}
+
+/* 标签筛选条（列表页） */
+#tag-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 0 0 2.5rem;
+}
+
+.tag-filter-btn {
+    font-family: var(--y2k-font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.75rem;
+    color: var(--y2k-muted);
+    background: none;
+    border: 1px solid rgba(154, 154, 165, 0.4);
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.tag-filter-btn:hover {
+    color: var(--y2k-neon);
+    border-color: var(--y2k-neon);
+}
+
+.tag-filter-btn.active {
+    color: var(--y2k-neon);
+    border-color: var(--y2k-neon);
+    background: rgba(57, 255, 106, 0.06);
+}
+
+/* 博客卡片列表（列表页单列，主页复用 .cards-grid 多列） */
+.notes-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.note-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.note-card-date {
+    font-family: var(--y2k-font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: var(--y2k-neon);
+}
+
+.note-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* 标签筛选隐藏态（fx.js initBlogFilter 切换） */
+.note-card-hidden {
+    display: none;
+}
+
+/* 主页「最新笔记」空占位 */
+.notes-placeholder {
+    max-width: 64rem;
+    margin: 0 auto;
+    text-align: center;
+    color: var(--y2k-muted);
+}
+
+/* .prose-y2k 扩展：Markdown 正文常见元素 */
+.prose-y2k h3 {
+    font-size: 1.1rem;
+    color: var(--y2k-chrome-1);
+    margin: 2rem 0 0.75rem;
+}
+
+.prose-y2k ul,
+.prose-y2k ol {
+    margin: 0 0 1.5rem;
+    padding-left: 1.5rem;
+}
+
+.prose-y2k li {
+    margin-bottom: 0.5rem;
+}
+
+.prose-y2k a {
+    color: var(--y2k-blue);
+}
+
+.prose-y2k a:hover {
+    color: var(--y2k-neon);
+}
+
+.prose-y2k strong {
+    color: var(--y2k-chrome-1);
+}
+
+.prose-y2k blockquote {
+    margin: 0 0 1.5rem;
+    padding: 0.5rem 0 0.5rem 1.25rem;
+    border-left: 2px solid var(--y2k-neon);
+    color: var(--y2k-muted);
+}
+
+.prose-y2k hr {
+    border: none;
+    border-top: 1px solid rgba(154, 154, 165, 0.35);
+    margin: 2.5rem 0;
+}
+
+/* 行内代码 */
+.prose-y2k code {
+    font-family: var(--y2k-font-mono);
+    font-size: 0.9em;
+    color: var(--y2k-neon);
+    background: rgba(57, 255, 106, 0.08);
+    padding: 0.1em 0.35em;
+}
+
+/* 代码块（codehilite 生成时高亮，静态 <span> 标记） */
+.codehilite {
+    background: var(--y2k-panel);
+    border: 1px solid rgba(154, 154, 165, 0.35);
+    margin: 0 0 1.5rem;
+    overflow-x: auto;
+}
+
+.codehilite pre {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    font-family: var(--y2k-font-mono);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--y2k-text);
+}
+
+.codehilite code {
+    color: inherit;
+    background: none;
+    padding: 0;
+}
+
+/* pygments token 配色（Y2K：蓝关键字 / 黄字符串与数字 / 绿函数 / 灰注释） */
+.codehilite .k,
+.codehilite .kc,
+.codehilite .kd,
+.codehilite .kn,
+.codehilite .kp,
+.codehilite .kr,
+.codehilite .kt {
+    color: var(--y2k-blue);
+}
+
+.codehilite .s,
+.codehilite .sa,
+.codehilite .sb,
+.codehilite .sc,
+.codehilite .dl,
+.codehilite .sd,
+.codehilite .s1,
+.codehilite .s2,
+.codehilite .se,
+.codehilite .sh,
+.codehilite .si,
+.codehilite .sr,
+.codehilite .ss,
+.codehilite .sx {
+    color: var(--y2k-yellow);
+}
+
+.codehilite .c,
+.codehilite .ch,
+.codehilite .cm,
+.codehilite .c1,
+.codehilite .cp,
+.codehilite .cpf,
+.codehilite .cs {
+    color: var(--y2k-muted);
+    font-style: italic;
+}
+
+.codehilite .nf,
+.codehilite .fm {
+    color: var(--y2k-neon);
+}
+
+.codehilite .m,
+.codehilite .mb,
+.codehilite .mf,
+.codehilite .mh,
+.codehilite .mi,
+.codehilite .il,
+.codehilite .mo {
+    color: var(--y2k-yellow);
+}
+
+.codehilite .nb,
+.codehilite .bp,
+.codehilite .nc,
+.codehilite .nn,
+.codehilite .no,
+.codehilite .ne {
+    color: var(--y2k-blue);
+}
+
+.codehilite .o,
+.codehilite .ow {
+    color: var(--y2k-chrome-2);
+}
+
+.codehilite .p {
+    color: var(--y2k-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tag-filter-btn {
+        transition: none;
+    }
+}
