@@ -216,6 +216,7 @@ POST_PAGE_TEMPLATE = """<!DOCTYPE html>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/y2k/theme.css">
+    <link rel="alternate" type="application/rss+xml" title="QRC-Eye 实验笔记 RSS" href="https://www.qrc-eye.com/dev-blog/feed.xml">
 </head>
 <body>
     <nav class="nav-y2k" aria-label="文章导航">
@@ -310,6 +311,7 @@ LIST_PAGE_TEMPLATE = """<!DOCTYPE html>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/y2k/theme.css">
+    <link rel="alternate" type="application/rss+xml" title="QRC-Eye 实验笔记 RSS" href="https://www.qrc-eye.com/dev-blog/feed.xml">
 </head>
 <body>
     <main class="notes-main">
