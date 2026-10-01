@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>QRC-Eye world runtime fixture</title>
+    <style>
+      body { margin: 16px; background: #f5f0df; color: #253b3b; font: 16px/1.5 system-ui, sans-serif; }
+      #world-host { max-width: 960px; margin-inline: auto; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>世界场景测试页</h1>
+      <p id="scene-status" role="status">正在载入场景</p>
+      <div id="world-host" aria-hidden="true" data-world-debug="true"></div>
+      <section aria-label="静态项目入口">
+        <h2>全部项目</h2>
+        <a href="#project-cybertravel" id="project-link">CyberTravel</a>
+        <label for="fixture-note">文本输入焦点测试</label>
+        <input id="fixture-note" type="text">
+      </section>
+    </main>
+    <script type="module">
+      const host = document.querySelector('#world-host');
+      const status = document.querySelector('#scene-status');
+
+      host.addEventListener('qrc-world:ready', (event) => {
+        status.textContent = '场景已载入';
+        host.dataset.worldReady = 'true';
+        host.dataset.reducedMotion = String(event.detail.reducedMotion);
+        host.dataset.anchorCount = String(event.detail.anchorCount);
+        document.documentElement.dataset.worldReady = 'true';
+      });
+      host.addEventListener('qrc-world:nearby', (event) => {
+        host.dataset.nearbyId = event.detail.id ?? '';
+        host.dataset.nearbyLabel = event.detail.label ?? '';
+      });
+      host.addEventListener('qrc-world:select', (event) => {
+        host.dataset.selectedId = event.detail.id;
+        host.dataset.selectSource = event.detail.source;
+        host.dataset.selectCount = String((Number(host.dataset.selectCount) || 0) + 1);
+        status.textContent = `已选择：${event.detail.label}`;
+      });
+      host.addEventListener('qrc-world:error', () => {
+        status.textContent = '场景素材暂不可用，请使用下方项目入口';
+        host.dataset.worldError = 'true';
+      });
+      host.addEventListener('qrc-world:close', () => {
+        host.dataset.closeCount = String((Number(host.dataset.closeCount) || 0) + 1);
+      });
+
+      import('/src/bootstrap/main.ts')
+        .then(({ mountWorld }) => {
+          mountWorld(host);
+        })
+        .catch(() => {
+          status.textContent = '场景暂不可用，请使用下方项目入口';
+          document.documentElement.dataset.worldFallback = 'true';
+          host.remove();
+        });
+    </script>
+  </body>
+</html>

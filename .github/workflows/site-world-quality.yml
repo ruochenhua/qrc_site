@@ -1,0 +1,74 @@
+name: Site World Quality
+
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'assets/world/**'
+      - 'site-world/**'
+      - '.github/workflows/site-world-quality.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'assets/world/**'
+      - 'site-world/**'
+      - '.github/workflows/site-world-quality.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: site-world
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: site-world/.nvmrc
+          cache: npm
+          cache-dependency-path: site-world/package-lock.json
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Generate deterministic world assets
+        run: npm run art:generate
+
+      - name: Check generated homepage project cards
+        working-directory: site-world
+        run: npm run sync:homepage -- --check
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Install Chromium for browser tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Browser smoke tests
+        run: npm run test:e2e
+
+      - name: Build static world runtime
+        run: npm run build
+
+      - name: Verify runtime files
+        run: npm run verify:dist
+
+      - name: Production browser smoke tests
+        run: npm run test:e2e:production
+
+      - name: Ensure generated files are committed
+        working-directory: .
+        run: |
+          if [ -n "$(git status --porcelain -- index.html assets/world/runtime site-world/art site-world/maps)" ]; then
+            git status --short -- index.html assets/world/runtime site-world/art site-world/maps
+            exit 1
+          fi

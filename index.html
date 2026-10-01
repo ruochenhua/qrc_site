@@ -2,228 +2,197 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>QRC-Eye | 想法的草稿本</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRC-Eye | 像素小镇</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <meta name="description" content="QRC-Eye 是一个做实验性产品原型的个人空间。有些东西会长成作品，有些只是画着玩。">
+    <meta name="description" content="走进 QRC-Eye 的俯视角像素小镇，探索独立游戏原型、创作工作室和开发笔记。">
     <meta name="keywords" content="QRC-Eye, 原型, 实验, 独立开发, 小游戏, 个人项目">
     <meta name="author" content="QRC-Eye">
     <meta name="robots" content="index, follow">
     <!-- Open Graph 标签 -->
-    <meta property="og:title" content="QRC-Eye | 想法的草稿本">
-    <meta property="og:description" content="QRC-Eye 是一个做实验性产品原型的个人空间。有些东西会长成作品，有些只是画着玩。">
+    <meta property="og:title" content="QRC-Eye | 像素小镇">
+    <meta property="og:description" content="走进 QRC-Eye 的俯视角像素小镇，探索独立游戏原型、创作工作室和开发笔记。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.qrc-eye.com">
     <!-- Twitter Card 标签 -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="QRC-Eye | 想法的草稿本">
-    <meta name="twitter:description" content="QRC-Eye 是一个做实验性产品原型的个人空间。有些东西会长成作品，有些只是画着玩。">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/y2k/theme.css">
+    <meta name="twitter:title" content="QRC-Eye | 像素小镇">
+    <meta name="twitter:description" content="走进 QRC-Eye 的俯视角像素小镇，探索独立游戏原型、创作工作室和开发笔记。">
+    <meta name="color-scheme" content="dark">
+    <link rel="stylesheet" href="assets/world/runtime/world.css">
+    <link rel="stylesheet" href="assets/world/home.css">
     <link rel="alternate" type="application/rss+xml" title="QRC-Eye 实验笔记 RSS" href="https://www.qrc-eye.com/dev-blog/feed.xml">
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-        }
-    }
-    </script>
 </head>
-<body>
+<body class="world-page">
+    <main id="top" class="world-screen">
+        <section id="world" class="world-stage" role="region" aria-label="可探索的俯视角像素 RPG 小镇">
+            <div id="world-host" class="qrc-world-host" role="group" aria-label="像素 RPG 场景"></div>
 
-    <div id="boot-screen" role="dialog" aria-label="系统启动画面">
-        <div class="boot-box">
-            <p class="boot-line">QRC-EYE SYSTEM BOOT</p>
-            <div class="boot-bar"><div class="boot-fill" id="boot-fill"></div></div>
-            <p class="boot-line boot-status" id="boot-status">LOADING… 0%</p>
-            <p class="boot-hint">CLICK TO SKIP</p>
-        </div>
-    </div>
-
-    <nav class="nav-y2k" aria-label="主导航">
-        <div class="nav-inner">
-            <a href="#" class="nav-logo" aria-label="返回顶部">
-                QRC<span class="neon">.</span>EYE
+            <a href="#top" class="world-hud__brand" aria-label="QRC-Eye 像素世界首页">
+                <span class="world-hud__mark" aria-hidden="true">Q</span>
+                <span>QRC-Eye<small>想法工坊</small></span>
             </a>
-            <div class="nav-links">
-                <a href="#projects">项目</a>
-                <a href="dev-blog/index.html">笔记</a>
-                <a href="#about">关于</a>
-            </div>
-            <button class="menu-button" onclick="toggleMobileMenu()" aria-label="打开菜单" aria-expanded="false" id="menu-button">
-                ☰
-            </button>
-        </div>
-        <div id="mobile-menu" class="hidden" aria-hidden="true" aria-labelledby="menu-button">
-            <a href="#projects" onclick="toggleMobileMenu()">项目</a>
-            <a href="dev-blog/index.html" onclick="toggleMobileMenu()">笔记</a>
-            <a href="#about" onclick="toggleMobileMenu()">关于</a>
-        </div>
-    </nav>
+            <a href="/dev-blog/index.html" class="world-hud__journal"><span aria-hidden="true">📖</span> 开发笔记</a>
 
-    <main>
-        <!-- Hero -->
-        <section class="hero">
-            <div class="hero-inner">
-                <div class="hero-badge animate-on-scroll">
-                    <span class="badge-led">Idea Lab · 想法试验场</span>
-                </div>
-                <div id="hero-3d-stage" aria-hidden="true"></div>
-                <h1 class="hero-title animate-on-scroll">
-                    <span id="hero-title-text" class="chrome-text" data-glitch>QRC-Eye</span>
-                    <span class="hero-title-zh">想法的草稿本</span>
-                </h1>
-                <p class="hero-tagline animate-on-scroll">
-                    有些东西会长成作品，有些只是画着玩。
-                </p>
-                <div class="hero-actions animate-on-scroll">
-                    <a href="#projects" class="btn-metal">
-                        看看草稿
-                        <span class="card-arrow" aria-hidden="true">-&gt;</span>
-                    </a>
-                    <a href="#about" class="btn-ghost">关于我</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Marquee -->
-        <div class="marquee" aria-hidden="true">
-            <div class="marquee-track">
-                <span>★ NOW PLAYING ★ CYBERTRAVEL ★ 烟花大师 FIREWORK MASTER ★ 王土之下 KING'S FIELD ★ MORE SKETCHES LOADING ★&nbsp;</span>
-                <span>★ NOW PLAYING ★ CYBERTRAVEL ★ 烟花大师 FIREWORK MASTER ★ 王土之下 KING'S FIELD ★ MORE SKETCHES LOADING ★&nbsp;</span>
-            </div>
-        </div>
-
-        <!-- Projects -->
-        <section id="projects" class="section">
-            <div class="section-head animate-on-scroll">
-                <h2 class="section-title" data-glitch>草稿</h2>
-                <p class="section-sub">正在做或已经能玩的实验性原型。</p>
+            <div class="world-hud__controls" aria-label="游戏操作说明">
+                <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 移动</span>
+                <span><kbd>E</kbd> 互动</span>
+                <span>点击场景物件也可互动</span>
             </div>
 
-            <div class="cards-grid">
-                <!-- CyberTravel -->
-                <a href="cybertravel/index.html" class="card-y2k animate-on-scroll">
-                    <div class="card-top">
-                        <span class="card-emoji">🚲</span>
-                        <span class="badge-led">可玩原型</span>
-                    </div>
-                    <h3 class="card-title">CyberTravel</h3>
-                    <p class="card-desc">
-                        在川藏线上当骑行网红，看看能走多远。
-                    </p>
-                    <div class="card-link">
-                        <span>试玩</span>
-                        <span class="card-arrow" aria-hidden="true">&gt;</span>
-                    </div>
+            <p id="world-status" class="visually-hidden" role="status" aria-live="polite">正在启动像素小镇。</p>
+
+            <section id="world-fallback" class="world-fallback-screen" hidden aria-labelledby="world-fallback-title">
+                <div class="world-fallback-screen__panel">
+                    <p class="world-fallback-screen__eyebrow">QRC-EYE · WORLD GATE</p>
+                    <h1 id="world-fallback-title">小镇暂时无法载入</h1>
+                    <p class="world-fallback-screen__summary">场景入口遇到问题。你仍可以从这里直接进入作品。</p>
+                    <noscript><p class="world-fallback-screen__notice">互动场景需要启用 JavaScript；下方项目入口可以直接打开。</p></noscript>
+                    <div class="world-fallback-screen__projects">
+                        <!-- WORLD-PROJECTS:START -->
+                <a href="/cybertravel/index.html" class="world-project-card" data-project-id="cybertravel">
+                    <span class="world-project-card__top">
+                        <span class="world-project-card__icon" aria-hidden="true">🚲</span>
+                        <span class="world-project-card__status">可玩原型</span>
+                    </span>
+                    <span class="world-project-card__title">CyberTravel</span>
+                    <span class="world-project-card__summary">在川藏线上当骑行网红，看看能走多远。</span>
+                    <span class="world-project-card__action">试玩 <span aria-hidden="true">→</span></span>
                 </a>
-
-                <!-- Firework Master -->
-                <a href="firework-master/index.html" class="card-y2k animate-on-scroll">
-                    <div class="card-top">
-                        <span class="card-emoji">🎆</span>
-                        <span class="badge-led">可玩原型</span>
-                    </div>
-                    <h3 class="card-title">烟花大师</h3>
-                    <p class="card-desc">
-                        收集配方、编排节目单，在夜空中绽放属于你的烟花秀。
-                    </p>
-                    <div class="card-link">
-                        <span>试玩</span>
-                        <span class="card-arrow" aria-hidden="true">&gt;</span>
-                    </div>
+                <a href="/firework-master/index.html" class="world-project-card" data-project-id="firework-master">
+                    <span class="world-project-card__top">
+                        <span class="world-project-card__icon" aria-hidden="true">🎆</span>
+                        <span class="world-project-card__status">可玩原型</span>
+                    </span>
+                    <span class="world-project-card__title">烟花大师</span>
+                    <span class="world-project-card__summary">收集配方、编排节目单，在夜空中绽放属于你的烟花秀。</span>
+                    <span class="world-project-card__action">试玩 <span aria-hidden="true">→</span></span>
                 </a>
-
-                <!-- 王土之下 -->
-                <a href="kings-field/index.html" class="card-y2k animate-on-scroll">
-                    <div class="card-top">
-                        <span class="card-emoji">🗡️</span>
-                        <span class="badge-led">制作中</span>
-                    </div>
-                    <h3 class="card-title">王土之下</h3>
-                    <p class="card-desc">
-                        精神复刻 1994《国王密令》：黑暗无缝地牢、笨重近战，死亡是唯一的教师。
-                    </p>
-                    <div class="card-link">
-                        <span>试玩</span>
-                        <span class="card-arrow" aria-hidden="true">&gt;</span>
-                    </div>
+                <a href="/cyber-money-tree/index.html" class="world-project-card" data-project-id="cyber-money-tree">
+                    <span class="world-project-card__top">
+                        <span class="world-project-card__icon" aria-hidden="true">🌳</span>
+                        <span class="world-project-card__status">共同养成</span>
+                    </span>
+                    <span class="world-project-card__title">赛博发财树</span>
+                    <span class="world-project-card__summary">给大家一起养的树浇水，收下一张叶笺，再给下一位留一句祝福。</span>
+                    <span class="world-project-card__action">去浇水 <span aria-hidden="true">→</span></span>
                 </a>
-
-                <!-- Future projects will be added here following the same card structure -->
-            </div>
-
-            <p class="more-note animate-on-scroll">
-                更多想法正在画草稿 …
-            </p>
-        </section>
-
-        <!-- Latest notes: BLOG-LATEST 标记之间由 tools/build-blog.py 重写，标记外手写维护 -->
-        <section id="notes" class="section latest-notes">
-            <div class="section-head animate-on-scroll">
-                <h2 class="section-title" data-glitch>最新笔记</h2>
-                <p class="section-sub">想法从草稿到原型的过程记录。</p>
-            </div>
-            <!-- BLOG-LATEST:START -->
-            <div class="cards-grid">
-                <a href="dev-blog/posts/firework-master-dev-notes-1.html" class="card-y2k note-card" data-tags="game-design firework-master">
-            <div class="note-card-top">
-                <span class="note-card-date">2026-07-19</span>
-                <div class="note-card-tags"><span class="tag-badge">game-design</span><span class="tag-badge">firework-master</span></div>
-            </div>
-            <h3 class="card-title">烟花大师开发笔记 #1：评分公式怎么定</h3>
-            <p class="card-desc">第一篇开发笔记：烟花大师的评分公式为什么用连续值匹配，以及调参时踩过的坑。</p>
-            <div class="card-link">
-                <span>阅读</span>
-                <span class="card-arrow" aria-hidden="true">&gt;</span>
-            </div>
-        </a>
-            </div>
-            <!-- BLOG-LATEST:END -->
-            <p class="more-note animate-on-scroll">
-                <a href="dev-blog/index.html">全部笔记</a>
-            </p>
-        </section>
-
-        <div class="section-divider"></div>
-
-        <!-- About -->
-        <section id="about" class="section">
-            <div class="about-grid">
-                <div class="animate-on-scroll">
-                    <h2 class="section-title" data-glitch>关于</h2>
-                    <p class="section-sub">为什么有这个站点。</p>
+                <button type="button" class="world-project-card" data-project-id="kings-field" data-world-project-preview="kings-field" aria-haspopup="dialog">
+                    <span class="world-project-card__top">
+                        <span class="world-project-card__icon" aria-hidden="true">🗡️</span>
+                        <span class="world-project-card__status">制作中</span>
+                    </span>
+                    <span class="world-project-card__title">王土之下</span>
+                    <span class="world-project-card__summary">精神复刻 1994《国王密令》：黑暗无缝地牢、笨重近战，死亡是唯一的教师。</span>
+                    <span class="world-project-card__action">查看计划 <span aria-hidden="true">→</span></span>
+                </button>
+                <!-- WORLD-PROJECTS:END -->
+                    </div>
+                    <section class="world-fallback-screen__notes" aria-labelledby="world-fallback-notes-title">
+                        <h2 id="world-fallback-notes-title">最近的开发笔记</h2>
+                        <!-- BLOG-LATEST:START -->
+                        <div class="cards-grid">
+                            <a href="dev-blog/posts/firework-master-dev-notes-1.html" class="card-y2k note-card" data-tags="game-design firework-master">
+                                <div class="note-card-top">
+                                    <span class="note-card-date">2026-07-19</span>
+                                    <div class="note-card-tags"><span class="tag-badge">game-design</span><span class="tag-badge">firework-master</span></div>
+                                </div>
+                                <h3 class="card-title">烟花大师开发笔记 #1：评分公式怎么定</h3>
+                                <p class="card-desc">第一篇开发笔记：烟花大师的评分公式为什么用连续值匹配，以及调参时踩过的坑。</p>
+                                <div class="card-link"><span>阅读</span><span class="card-arrow" aria-hidden="true">&gt;</span></div>
+                            </a>
+                        </div>
+                        <!-- BLOG-LATEST:END -->
+                    </section>
+                    <a href="/dev-blog/index.html" class="world-fallback-screen__journal">📖 查看开发笔记</a>
+                    <p class="world-fallback-screen__return">要返回世界，请重新加载首页。</p>
                 </div>
-                <div class="about-text animate-on-scroll">
-                    <p>
-                        我是 QRC-Eye，一个还在寻找自己表达方式的创作者。
-                    </p>
-                    <p>
-                        这个站点是我的想法草稿本：把脑子里的东西快速做成可交互的原型，看看哪些会长成作品，哪些只是画着玩。
-                    </p>
-                    <p>
-                        朋友偶尔会一起来玩。
-                    </p>
-                </div>
-            </div>
+            </section>
         </section>
     </main>
 
-    <footer class="site-footer">
-        <p class="footer-logo">QRC-Eye</p>
-        <a href="https://beian.miit.gov.cn/" target="_blank" class="footer-beian">
-            粤ICP备2024189519号-1
-        </a>
-    </footer>
+    <noscript>
+        <style>
+            #world-fallback { display: grid !important; }
+            .world-hud__controls, .world-hud__journal { display: none !important; }
+        </style>
+    </noscript>
 
-    <button id="sfx-toggle" class="sfx-toggle" aria-pressed="false" aria-label="开启或关闭音效">SOUND: OFF</button>
+    <script type="module">
+        const host = document.querySelector('#world-host');
+        const status = document.querySelector('#world-status');
+        const fallback = document.querySelector('#world-fallback');
 
-    <script src="assets/y2k/sfx.js" defer></script>
-    <script src="assets/y2k/fx.js" defer></script>
-    <script src="assets/y2k/hero3d.js" defer></script>
+        function enablePlannedProjectFallback() {
+            document.addEventListener('click', (event) => {
+                if (!(event.target instanceof Element)) return;
+                const trigger = event.target.closest('[data-world-project-preview]');
+                if (!trigger || document.querySelector('.qrc-world-dialog')) return;
+
+                const card = trigger.closest('.world-project-card');
+                const dialog = document.createElement('dialog');
+                dialog.className = 'qrc-world-dialog';
+                dialog.setAttribute('aria-labelledby', 'qrc-world-fallback-dialog-title');
+                dialog.setAttribute('aria-describedby', 'qrc-world-fallback-dialog-summary');
+                const content = document.createElement('section');
+                content.className = 'qrc-world-dialog__card';
+                const top = document.createElement('div');
+                top.className = 'qrc-world-dialog__top';
+                const state = document.createElement('span');
+                state.className = 'qrc-world-dialog__status';
+                state.textContent = card.querySelector('.world-project-card__status').textContent;
+                const close = document.createElement('button');
+                close.type = 'button';
+                close.className = 'qrc-world-dialog__close';
+                close.setAttribute('aria-label', '关闭项目介绍');
+                close.textContent = '关闭';
+                close.addEventListener('click', () => dialog.close());
+                top.append(state, close);
+                const title = document.createElement('h2');
+                title.id = 'qrc-world-fallback-dialog-title';
+                title.textContent = card.querySelector('.world-project-card__title').textContent;
+                const summary = document.createElement('p');
+                summary.id = 'qrc-world-fallback-dialog-summary';
+                summary.textContent = card.querySelector('.world-project-card__summary').textContent;
+                content.append(top, title, summary);
+                dialog.append(content);
+                dialog.addEventListener('click', (clickEvent) => {
+                    if (clickEvent.target === dialog) dialog.close();
+                });
+                dialog.addEventListener('close', () => {
+                    dialog.remove();
+                    if (trigger.isConnected) trigger.focus();
+                }, { once: true });
+                document.body.append(dialog);
+                dialog.showModal();
+                close.focus();
+            });
+        }
+
+        function showWorldFallback() {
+            status.textContent = '小镇暂不可用，下方作品入口仍可正常使用。';
+            host.dataset.worldError = 'true';
+            fallback.hidden = false;
+            enablePlannedProjectFallback();
+        }
+
+        host.addEventListener('qrc-world:ready', () => {
+            status.textContent = '像素小镇已就绪。';
+            host.dataset.worldReady = 'true';
+        });
+        host.addEventListener('qrc-world:error', showWorldFallback);
+
+        import('/assets/world/runtime/world.js')
+            .then(({ mountWorld }) => {
+                const width = Math.max(320, window.innerWidth);
+                const height = Math.max(240, window.innerHeight);
+                const game = mountWorld(host, { width, height, fitMapToViewport: true });
+                window.addEventListener('resize', () => {
+                    game.scale.resize(Math.max(320, window.innerWidth), Math.max(240, window.innerHeight));
+                }, { passive: true });
+            })
+            .catch(showWorldFallback);
+    </script>
 </body>
 </html>

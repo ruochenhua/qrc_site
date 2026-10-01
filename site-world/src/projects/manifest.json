@@ -1,0 +1,70 @@
+[
+  {
+    "id": "about",
+    "kind": "profile",
+    "icon": "🧰",
+    "title": "开发者工作室",
+    "status": "profile",
+    "summary": "这里收集独立原型、开发笔记和正在形成的点子。可以从工作台开始，也可以直接浏览项目列表。",
+    "mapAnchor": "about-studio",
+    "spriteKey": "workshop",
+    "hitArea": { "x": 8, "y": 6, "width": 80, "height": 68 },
+    "interaction": { "type": "panel" }
+  },
+  {
+    "id": "cybertravel",
+    "kind": "project",
+    "icon": "🚲",
+    "title": "CyberTravel",
+    "status": "prototype",
+    "summary": "在川藏线上当骑行网红，看看能走多远。",
+    "cardAction": "试玩",
+    "href": "/cybertravel/index.html",
+    "mapAnchor": "cybertravel-station",
+    "spriteKey": "travel-station",
+    "hitArea": { "x": 8, "y": 6, "width": 80, "height": 68 },
+    "interaction": { "type": "panel" }
+  },
+  {
+    "id": "firework-master",
+    "kind": "project",
+    "icon": "🎆",
+    "title": "烟花大师",
+    "status": "prototype",
+    "summary": "收集配方、编排节目单，在夜空中绽放属于你的烟花秀。",
+    "cardAction": "试玩",
+    "href": "/firework-master/index.html",
+    "mapAnchor": "firework-stage",
+    "spriteKey": "firework-stage",
+    "hitArea": { "x": 8, "y": 6, "width": 80, "height": 68 },
+    "featureActivityId": "mini-fireworks",
+    "interaction": { "type": "panel" }
+  },
+  {
+    "id": "cyber-money-tree",
+    "kind": "project",
+    "icon": "🌳",
+    "title": "赛博发财树",
+    "status": "community",
+    "summary": "给大家一起养的树浇水，收下一张叶笺，再给下一位留一句祝福。",
+    "cardAction": "去浇水",
+    "href": "/cyber-money-tree/index.html",
+    "mapAnchor": "money-tree-greenhouse",
+    "spriteKey": "money-tree",
+    "hitArea": { "x": 8, "y": 6, "width": 80, "height": 68 },
+    "interaction": { "type": "panel" }
+  },
+  {
+    "id": "kings-field",
+    "kind": "project",
+    "icon": "🗡️",
+    "title": "王土之下",
+    "status": "in-progress",
+    "summary": "精神复刻 1994《国王密令》：黑暗无缝地牢、笨重近战，死亡是唯一的教师。",
+    "cardAction": "查看计划",
+    "mapAnchor": "kings-field-ruins",
+    "spriteKey": "ruin-gate",
+    "hitArea": { "x": 8, "y": 6, "width": 80, "height": 68 },
+    "interaction": { "type": "panel" }
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "name": "qrc-eye-world",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "art:generate": "node scripts/generate-world-art.mjs",
+    "validate:projects": "node scripts/validate-projects.mjs",
+    "sync:homepage": "node scripts/generate-homepage-projects.mjs",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:production": "playwright test --config playwright.production.config.mjs",
+    "build": "npm run art:generate && npm run sync:homepage && npm run validate:projects && vite build && node scripts/copy-phaser-license.mjs",
+    "verify:dist": "npm run validate:projects && node scripts/verify-dist.mjs",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "phaser": "4.2.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.1",
+    "vitest": "5.0.3"
+  }
+}
