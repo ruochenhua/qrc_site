@@ -1,0 +1,29 @@
+{
+  "name": "qrc-cyber-money-tree",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "QRC-Eye 赛博发财树：多人共享浇水与像素叶笺",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "predev": "npm run build && wrangler d1 migrations apply qrc-cyber-money-tree --local",
+    "dev": "wrangler dev",
+    "db:migrate:local": "wrangler d1 migrations apply qrc-cyber-money-tree --local",
+    "test:unit": "vitest run test/unit",
+    "test:integration": "vitest run test/integration",
+    "pretest": "npm run build",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:e2e": "npm run build && npm run db:migrate:local && playwright test",
+    "deploy": "npm run build && wrangler deploy"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.2.8",
+    "@playwright/test": "^1.63.0",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.141.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20260925.1": true
+  }
+}

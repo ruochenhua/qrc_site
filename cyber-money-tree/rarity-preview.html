@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>叶笺稀有度边框预览</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { padding: 32px 24px 52px; }
+    .preview { max-width: 1120px; margin: 0 auto; }
+    .preview-heading { margin-bottom: 26px; text-align: center; }
+    .preview-heading h1 { margin: 0 0 10px; font-size: clamp(1.8rem, 4vw, 2.7rem); letter-spacing: -0.05em; }
+    .preview-heading p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+    .rarity-showcase { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; align-items: start; }
+    .rarity-sample { min-width: 0; }
+    .rarity-sample h2 { margin: 0 0 10px; font-size: 0.95rem; text-align: center; }
+    .rarity-sample .poster-card { width: min(100%, 300px); margin: 0 auto; }
+    .rarity-sample .poster-copy p { font-size: 1.45rem; }
+    .rarity-sample .rarity-note { margin: 12px 0 0; color: var(--muted); font-size: 0.74rem; line-height: 1.6; text-align: center; }
+    @media (max-width: 700px) {
+      .rarity-showcase { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+      .rarity-sample .poster-card { width: min(78%, 300px); }
+    }
+  </style>
+</head>
+<body>
+  <main class="preview">
+    <header class="preview-heading">
+      <h1>同一张叶笺，不同稀有度</h1>
+      <p>同一张海报插画叠加三种共享卡框和独立像素徽章。</p>
+    </header>
+    <section class="rarity-showcase" aria-label="三档稀有度卡面预览">
+      <article class="rarity-sample">
+        <h2>普通</h2>
+        <div class="poster-card rarity-common">
+          <img src="assets/scenes/office-sun.png" alt="晒到太阳海报">
+          <span class="leaf-meta">第 42 滴水</span>
+          <div class="poster-copy"><span class="poster-kicker">给路过的树友</span><p>今天也要记得喝水，给自己一点时间。</p><span class="poster-signature">第 42 滴水 · 一份心意</span></div>
+          <img class="rarity-frame" src="assets/rarity/frame-common.svg" alt="" aria-hidden="true">
+          <img class="rarity-icon" src="assets/rarity/icons/icon-common.png" alt="" aria-hidden="true" style="left:86.667%;top:2.667%;width:9.167%;height:7.333%">
+          <span class="rarity-badge">普通</span>
+        </div>
+        <p class="rarity-note">叶绿细框 · 芽苗徽章</p>
+      </article>
+      <article class="rarity-sample">
+        <h2>稀有</h2>
+        <div class="poster-card rarity-rare">
+          <img src="assets/scenes/office-sun.png" alt="晒到太阳海报">
+          <span class="leaf-meta">第 42 滴水</span>
+          <div class="poster-copy"><span class="poster-kicker">给路过的树友</span><p>今天也要记得喝水，给自己一点时间。</p><span class="poster-signature">第 42 滴水 · 一份心意</span></div>
+          <img class="rarity-frame" src="assets/rarity/frame-rare.svg" alt="" aria-hidden="true">
+          <img class="rarity-icon" src="assets/rarity/icons/icon-rare.png" alt="" aria-hidden="true" style="left:86.528%;top:2.556%;width:9.444%;height:7.556%">
+          <span class="rarity-badge">稀有</span>
+        </div>
+        <p class="rarity-note">蓝色叠框 · 冰晶徽章</p>
+      </article>
+      <article class="rarity-sample">
+        <h2>传说</h2>
+        <div class="poster-card rarity-legendary">
+          <img src="assets/scenes/office-sun.png" alt="晒到太阳海报">
+          <span class="leaf-meta">第 42 滴水</span>
+          <div class="poster-copy"><span class="poster-kicker">给路过的树友</span><p>今天也要记得喝水，给自己一点时间。</p><span class="poster-signature">第 42 滴水 · 一份心意</span></div>
+          <img class="rarity-frame" src="assets/rarity/frame-legendary.svg" alt="" aria-hidden="true">
+          <img class="rarity-icon" src="assets/rarity/icons/icon-legendary.png" alt="" aria-hidden="true" style="left:86.389%;top:2.444%;width:9.722%;height:7.778%">
+          <span class="rarity-badge">传说</span>
+        </div>
+        <p class="rarity-note">暖金饰框 · 冠冕徽章 · 金色流光</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

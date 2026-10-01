@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f1dc">
+  <meta name="description" content="给大家一起养的赛博发财树浇一杯水，收下一张陌生人的叶笺，再给下一位留下一份好运。">
+  <title>赛博发财树 · 给今天浇点好运</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./client/app.js"></script>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="back-link" href="https://www.qrc-eye.com/" aria-label="返回 QRC-Eye 首页">
+        <span aria-hidden="true">←</span> QRC-EYE
+      </a>
+      <a class="wordmark" href="#top" aria-label="赛博发财树首页">共同栽培中<span>✳</span></a>
+      <div class="topbar-tools">
+        <button id="sound-toggle" class="sound-toggle" type="button" aria-pressed="true" aria-label="音效开关" title="音效开关">🔊</button>
+        <div class="connection" id="connection-status" aria-live="polite">
+          <span class="connection-dot" aria-hidden="true"></span>
+          <span id="connection-label">正在连线</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <nav class="game-menu" aria-label="树下功能">
+        <span class="game-menu-label">树下菜单</span>
+        <button id="collection-open" class="game-menu-item" type="button" aria-haspopup="dialog" aria-controls="collection-dialog">
+          <span class="game-menu-icon collection-menu-icon" aria-hidden="true">▤</span>
+          <span class="game-menu-copy"><strong>我的叶笺册</strong><small><span id="my-leaf-count">0</span> 张已收藏</small></span>
+          <span class="game-menu-arrow" aria-hidden="true">↗</span>
+        </button>
+        <a class="game-menu-item" href="#achievement-section">
+          <span class="game-menu-icon achievement-menu-icon" aria-hidden="true">✦</span>
+          <span class="game-menu-copy"><strong>成就图鉴</strong><small><span id="menu-achievement-count">0</span> 项已点亮</small></span>
+          <span class="game-menu-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="game-menu-item" href="#community-section">
+          <span class="game-menu-icon wall-menu-icon" aria-hidden="true">♡</span>
+          <span class="game-menu-copy"><strong>树下叶笺墙</strong><small><span id="menu-leaf-count">0</span> 封公开来信</small></span>
+          <span class="game-menu-arrow" aria-hidden="true">↗</span>
+        </a>
+      </nav>
+
+      <section class="hero-layout" aria-labelledby="page-title">
+        <div class="intro-column">
+          <p class="eyebrow"><span class="eyebrow-sun" aria-hidden="true">✳</span> QRC-EYE COMMUNITY GARDEN</p>
+          <h1 id="page-title" aria-label="赛博发财树">赛博<br><span>发财树</span></h1>
+          <p class="intro-copy">给大家一起养的树浇一杯水。<br>收下一句陌生人的祝福，也留一句给下一位。</p>
+
+          <div class="stats-card" aria-label="浇水统计">
+            <div>
+              <span class="stats-label">全站累计浇水</span>
+              <strong id="total-waterings" class="stats-total">—</strong>
+              <span class="stats-suffix">滴水落在树上</span>
+            </div>
+            <span class="stats-divider" aria-hidden="true"></span>
+            <div class="personal-stat">
+              <span class="stats-label">这个浏览器</span>
+              <strong id="personal-waterings">0</strong>
+              <span class="stats-suffix">次来照料</span>
+            </div>
+          </div>
+
+          <section class="growth-card" aria-label="发财树成长进度">
+            <div class="growth-heading">
+              <span class="level-chip" id="stage-level">LEVEL 01</span>
+              <span class="growth-name" id="stage-name">工位绿芽</span>
+            </div>
+            <p id="stage-description" class="growth-description">窗边办公桌上的小盆发财树。</p>
+            <div class="progress-track" role="progressbar" aria-label="到下一成长阶段的进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="growth-progress">
+              <span id="growth-progress-fill"></span>
+            </div>
+            <div class="progress-caption">
+              <span id="progress-copy">第一滴水就能让新叶醒来</span>
+              <span id="next-milestone">下一阶段</span>
+            </div>
+            <p class="milestone-line" id="milestone-line" data-complete="false">距「<span id="milestone-label">新海报主题</span>」还差 <strong id="milestone-remaining">–</strong> 滴</p>
+          </section>
+          <p class="intro-footnote"><span aria-hidden="true">☀</span> 每一滴水，都会让大家的树更茂盛一点。</p>
+        </div>
+
+        <div class="world-column">
+          <div class="scene-frame" id="scene-frame" data-scene="office">
+            <img id="world-scene" src="./assets/scenes/office-sun.png" alt="工位绿芽：窗边办公桌上的小盆发财树。">
+            <div class="scene-topline">
+              <span class="scene-location" id="scene-location"><span aria-hidden="true">⌂</span> 一间阳光办公室</span>
+              <span class="scene-level" id="scene-level">01 / 10</span>
+            </div>
+            <div class="scene-caption">
+              <span class="scene-caption-dot" aria-hidden="true"></span>
+              <span id="scene-caption-text">窗台今天的阳光刚刚好</span>
+            </div>
+            <div id="water-reward" class="water-reward" aria-live="polite" aria-atomic="true"></div>
+            <div class="water-action-wrap">
+              <span class="water-nudge" aria-hidden="true">点一下，给它浇水</span>
+              <button id="water-button" class="water-button" type="button" disabled>
+                <svg class="watering-can" viewBox="0 0 48 40" aria-hidden="true" focusable="false">
+                  <path d="M10 13h22a5 5 0 0 1 5 5v13H12a5 5 0 0 1-5-5v-8a5 5 0 0 1 3-5Z" fill="currentColor"/>
+                  <path d="M37 18h5l4 5-9 2M14 13V8h12v5M16 31v5m15-5v5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M7 21 2 18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M41 31c0 2-2 4-4 4s-4-2-4-4 4-7 4-7 4 5 4 7Z" fill="#5ca8f7"/>
+                </svg>
+                <span id="water-button-label">浇一杯水</span>
+                <span class="button-sparkle" aria-hidden="true">✦</span>
+              </button>
+            </div>
+            <span id="water-splash" class="water-splash" aria-hidden="true">✦</span>
+            <div class="soil-overlay" id="soil-overlay" aria-hidden="true"></div>
+            <div class="ambient-layer" aria-hidden="true">
+              <span class="ambient-dot" style="--ax: 12%; --fall: 430px; --dur: 27s; --delay: -6s;"></span>
+              <span class="ambient-leaf" style="--ax: 34%; --fall: 520px; --dur: 24s; --delay: -14s;"></span>
+              <span class="ambient-dot" style="--ax: 55%; --fall: 470px; --dur: 30s; --delay: -21s;"></span>
+              <span class="ambient-leaf" style="--ax: 72%; --fall: 400px; --dur: 22s; --delay: -3s;"></span>
+              <span class="ambient-dot" style="--ax: 88%; --fall: 540px; --dur: 26s; --delay: -11s;"></span>
+            </div>
+            <span id="combo-float" class="combo-float" aria-hidden="true"></span>
+          </div>
+          <p id="presence-line" class="presence-line">🌱 正在看看谁在线上…</p>
+          <p id="announcement" class="announcement" role="status" aria-live="polite">正在和远方的树友连线…</p>
+        </div>
+      </section>
+
+      <section id="incoming-letter" class="incoming-section" role="region" aria-label="收到一张来信" hidden>
+        <div class="section-heading compact-heading">
+          <div>
+            <p class="eyebrow">A LEAF FROM SOMEONE</p>
+            <h2>树上掉下来一张叶笺</h2>
+            <p class="section-subtitle">这是树友留给路过之人的来信。点“收下”会放进你的叶笺册；也可以保存海报。</p>
+          </div>
+          <span class="step-mark">01 <i>/ 02</i></span>
+        </div>
+        <div class="letter-reveal">
+            <div id="incoming-card-slot" class="incoming-card-slot"></div>
+            <div class="letter-actions">
+            <p>叶笺册只保存你主动收下的来信，送出的祝福会挂在树下叶笺墙。</p>
+            <button id="collect-button" class="button button-primary" type="button">收下这张叶笺</button>
+            <button id="incoming-open-collection" class="text-button collection-shortcut" type="button" hidden>打开我的叶笺册 →</button>
+            <button id="save-incoming-button" class="text-button" type="button">保存这张海报 ↓</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="leaf-composer" class="composer-section" role="region" aria-label="给下一位留一张" hidden>
+        <div class="section-heading compact-heading">
+          <div>
+            <p class="eyebrow">PASS IT ON</p>
+            <h2>给下一位留一张</h2>
+            <p class="section-subtitle">选一张海报，再拼一句安全短语。送出后会挂到公共叶笺墙，留给下一位树友。</p>
+          </div>
+          <span class="step-mark">02 <i>/ 02</i></span>
+        </div>
+        <div class="composer-grid">
+          <div class="composer-controls">
+            <fieldset class="poster-fieldset">
+              <legend><span class="field-number">A</span> 选张海报底图</legend>
+              <div class="poster-choices" id="poster-choices"></div>
+            </fieldset>
+            <fieldset class="phrase-fieldset">
+              <legend><span class="field-number">B</span> 拼一句话</legend>
+              <label class="select-label" for="phrase-subject">句子开头</label>
+              <select id="phrase-subject" aria-label="短句对象"></select>
+              <label class="select-label" for="phrase-ending">接下来</label>
+              <select id="phrase-ending" aria-label="短句结尾"></select>
+            </fieldset>
+            <button id="publish-button" class="button button-primary publish-button" type="button" disabled>送给下一位 <span aria-hidden="true">→</span></button>
+            <p id="publish-status" class="publish-status" role="status" aria-live="polite"></p>
+          </div>
+          <div class="preview-column">
+            <span class="preview-label">你的叶笺预览</span>
+            <article id="phrase-preview-card" class="poster-card poster-preview">
+              <img id="preview-image" src="./assets/scenes/office-sun.png" alt="当前选择的叶笺海报">
+              <span class="poster-stamp" aria-hidden="true">✳</span>
+              <div class="poster-copy">
+                <span class="poster-kicker">给路过的树友</span>
+                <p id="phrase-preview" data-testid="phrase-preview">路过的你，请记得喝口水。</p>
+                <span class="poster-signature">一滴水 · 一份心意</span>
+              </div>
+            </article>
+            <button id="save-preview-button" class="text-button" type="button">保存这张海报 ↓</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="achievement-section" class="achievement-section" aria-labelledby="achievement-title">
+        <div class="section-heading achievement-heading">
+          <div>
+            <p class="eyebrow">SHARED TREE ACHIEVEMENTS</p>
+            <h2 id="achievement-title">树下成就图鉴</h2>
+            <p class="section-subtitle">全站一起完成，点亮专属叶笺；部分卡面仍在制作中。</p>
+          </div>
+          <div class="achievement-summary">
+            <strong id="achievement-count">0</strong>
+            <span>张已点亮</span>
+          </div>
+        </div>
+        <p id="achievement-secret-note" class="achievement-secret-note" hidden></p>
+        <div id="achievement-groups" class="achievement-groups" aria-live="polite"></div>
+      </section>
+
+      <section id="community-section" class="community-section" aria-labelledby="leaf-wall-title">
+        <div class="section-heading wall-heading">
+          <div>
+            <p class="eyebrow">NOTES UNDER THE TREE</p>
+            <h2 id="leaf-wall-title">树下的叶笺墙</h2>
+            <p class="section-subtitle">每次遇见最多 10 张公开祝福；收下的来信会单独保存在你的叶笺册。</p>
+          </div>
+          <span class="wall-count"><strong id="leaf-count">0</strong> 张来信</span>
+        </div>
+        <div id="leaf-wall" class="leaf-wall" aria-live="polite"></div>
+        <div class="wall-toolbar">
+          <span id="wall-page-status" aria-live="polite">正在寻找树友的叶笺…</span>
+          <button id="wall-refresh-button" class="wall-refresh-button" type="button" disabled>换一批叶笺 ↻</button>
+        </div>
+      </section>
+
+      <dialog id="collection-dialog" class="collection-dialog" aria-labelledby="collection-title">
+        <div class="collection-dialog-heading">
+          <div>
+            <p class="eyebrow">YOUR LITTLE ALBUM</p>
+            <h2 id="collection-title">我的叶笺册</h2>
+            <p id="collection-description" class="collection-description">这里是你亲手收下的来信，仅保存在当前设备。可以打开、下载或移出收藏。</p>
+          </div>
+          <button id="collection-close" class="collection-close" type="button" aria-label="关闭叶笺册">×</button>
+        </div>
+        <div class="collection-tools">
+          <div class="collection-filters" role="group" aria-label="按稀有度筛选">
+            <button type="button" class="collection-filter" data-rarity-filter="all" aria-pressed="true">全部</button>
+            <button type="button" class="collection-filter" data-rarity-filter="rare" aria-pressed="false">稀有</button>
+            <button type="button" class="collection-filter" data-rarity-filter="legendary" aria-pressed="false">传说</button>
+          </div>
+          <span id="collection-count" class="collection-count">0 张收下的来信</span>
+        </div>
+        <div id="collection-wall" class="collection-wall">
+          <p class="empty-collection">还没有收下的叶笺。浇水收到来信后，点“收下”即可收藏。</p>
+        </div>
+      </dialog>
+
+      <footer class="site-footer">
+        <span>一棵树，许多路过的人。</span>
+        <a href="https://www.qrc-eye.com/">回到 QRC-Eye ↗</a>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
