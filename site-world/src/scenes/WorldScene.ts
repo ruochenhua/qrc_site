@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import mapUrl from '../../maps/workshop-town.json?url';
-import landmarksUrl from '../../art/landmarks.png?url';
+import guildMapUrl from '../../art/guild-town-dusk.webp?url';
 import playerUrl from '../../art/player.png?url';
 import tilesUrl from '../../art/world-tiles.png?url';
 import projectManifest from '../projects/manifest.json';
@@ -47,7 +47,7 @@ export class WorldScene extends Phaser.Scene {
   private facing: Facing = 'down';
   private nearbyId: string | null = null;
   private hoveredId: string | null = null;
-  private hint?: Phaser.GameObjects.Text;
+  private hoverHighlight?: Phaser.GameObjects.Graphics;
   private reducedMotion = false;
   private preloadFailed = false;
 
@@ -62,8 +62,8 @@ export class WorldScene extends Phaser.Scene {
     });
     this.load.tilemapTiledJSON('workshop-town', mapUrl);
     this.load.image('world-tiles', tilesUrl);
+    this.load.image('guild-town-dusk', guildMapUrl);
     this.load.spritesheet('player', playerUrl, { frameWidth: 16, frameHeight: 24 });
-    this.load.spritesheet('landmarks', landmarksUrl, { frameWidth: 96, frameHeight: 80 });
   }
 
   create(): void {
@@ -105,6 +105,13 @@ export class WorldScene extends Phaser.Scene {
     blockers.setDepth(2);
     map.setCollisionByProperty({ solid: true }, true, false, ground);
     map.setCollisionByProperty({ solid: true }, true, false, blockers);
+    ground.setVisible(false);
+    details.setVisible(false);
+    blockers.setVisible(false);
+    this.add.image(0, 0, 'guild-town-dusk')
+      .setOrigin(0, 0)
+      .setDisplaySize(map.widthInPixels, map.heightInPixels)
+      .setDepth(-1);
 
     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     const spawn = map.getObjectLayer('Objects')?.objects.find((object) => object.type === 'player-spawn');
@@ -155,15 +162,7 @@ export class WorldScene extends Phaser.Scene {
       this.escapeKey = keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC, false);
     }
     this.game.canvas?.setAttribute('tabindex', '0');
-    this.game.canvas?.setAttribute('aria-label', '俯视角像素小镇。使用 WASD 或方向键移动，E 或 Enter 互动。');
-
-    this.hint = this.add.text(0, 0, '', {
-      fontFamily: 'monospace',
-      fontSize: '8px',
-      color: '#fff2c7',
-      backgroundColor: '#203b3c',
-      padding: { x: 5, y: 3 },
-    }).setOrigin(0.5, 1).setDepth(100_000).setVisible(false);
+    this.game.canvas?.setAttribute('aria-label', '黄昏中的俯视角像素公会地图。使用 WASD 或方向键移动，E 或 Enter 互动。');
 
     const camera = this.cameras.main;
     camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -183,7 +182,7 @@ export class WorldScene extends Phaser.Scene {
       });
     }
     camera.startFollow(this.player, true, this.reducedMotion ? 1 : 0.14, this.reducedMotion ? 1 : 0.14);
-    camera.setBackgroundColor('#355547');
+    camera.setBackgroundColor('#282a40');
 
     this.dispatch('ready', {
       width: map.widthInPixels,
@@ -224,16 +223,9 @@ export class WorldScene extends Phaser.Scene {
       && Phaser.Math.Distance.Between(player.x, player.y + 10, nearestPoint.x, nearestPoint.y) <= INTERACTION_DISTANCE
       ? nearestPoint
       : undefined;
-    const selected = this.points.find((point) => point.id === this.hoveredId) ?? nearby;
     if (nearby?.id !== this.nearbyId) {
       this.nearbyId = nearby?.id ?? null;
       this.dispatch('nearby', this.nearbyId ? { id: nearby?.id, label: nearby?.label } : { id: null });
-    }
-    if (selected && this.hint) {
-      this.hint.setText(`E 查看 · ${selected.label}`);
-      this.hint.setPosition(selected.x, selected.y - 76).setVisible(true);
-    } else if (this.hint) {
-      this.hint.setVisible(false);
     }
 
     const activate = inputAllowed && (
@@ -274,27 +266,120 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private createLandmarks(objects: Phaser.Types.Tilemaps.TiledObject[]): void {
+    this.hoverHighlight = this.add.graphics().setDepth(100_000).setVisible(false);
     for (const rawObject of objects) {
-      if (rawObject.type !== 'project-anchor' && rawObject.type !== 'scenery') continue;
+      if (rawObject.type !== 'project-anchor') continue;
       const object = rawObject as unknown as WorldMapObject;
       const id = String(readTiledProperty(object, 'projectId') ?? rawObject.name);
       const project = projectsById.get(id);
-      if (rawObject.type === 'project-anchor' && !project) continue;
-      const frame = project ? spriteRegistry[project.spriteKey as keyof typeof spriteRegistry] : Number(readTiledProperty(object, 'spriteFrame') ?? 0);
+      if (!project) continue;
       const label = project?.title ?? String(readTiledProperty(object, 'label') ?? rawObject.name);
       const x = rawObject.x ?? 0;
       const y = rawObject.y ?? 0;
-      const image = this.add.image(x, y, 'landmarks', frame)
+      const hitArea = project.hitArea ?? { x: 8, y: 6, width: 176, height: 132 };
+      const zoneWidth = hitArea.width + 16;
+      const zoneHeight = hitArea.height + 12;
+      this.createInteractionMarker(x, y - 54);
+      const zone = this.add.zone(x, y, zoneWidth, zoneHeight)
         .setOrigin(0.5, 1)
-        .setDepth(y);
-      if (rawObject.type !== 'project-anchor') continue;
-      const hitArea = project?.hitArea ?? { x: 8, y: 6, width: 80, height: 68 };
-      image.setInteractive(new Phaser.Geom.Rectangle(hitArea.x, hitArea.y, hitArea.width, hitArea.height), Phaser.Geom.Rectangle.Contains);
-      image.on('pointerover', () => { this.hoveredId = id; });
-      image.on('pointerout', () => { if (this.hoveredId === id) this.hoveredId = null; });
-      image.on('pointerdown', () => this.dispatch('select', { id, label, source: 'pointer' }));
+        .setDepth(y)
+        .setInteractive(new Phaser.Geom.Rectangle(hitArea.x, hitArea.y, hitArea.width, hitArea.height), Phaser.Geom.Rectangle.Contains);
+      zone.on('pointerover', (_pointer: Phaser.Input.Pointer) => {
+        this.hoveredId = id;
+        this.drawProjectHighlight(x, y, hitArea);
+        this.dispatchHover(id, _pointer);
+      });
+      zone.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+        if (this.hoveredId === id) this.dispatchHover(id, pointer);
+      });
+      zone.on('pointerout', () => {
+        if (this.hoveredId === id) {
+          this.hoveredId = null;
+          this.hoverHighlight?.setVisible(false);
+          this.dispatch('hover', { id: null });
+        }
+      });
+      zone.on('pointerdown', () => {
+        // Phaser can still receive scene pointer events while a native modal is
+        // visually on top of the canvas. Never let modal controls activate a
+        // project hotspot underneath them.
+        if (document.querySelector('.qrc-world-dialog[open]')) return;
+        this.dispatch('select', { id, label, source: 'pointer' });
+      });
       this.points.push({ id, label, x, y });
     }
+  }
+
+  private drawProjectHighlight(
+    x: number,
+    y: number,
+    hitArea: { x: number; y: number; width: number; height: number },
+  ): void {
+    const highlight = this.hoverHighlight;
+    if (!highlight) return;
+
+    const zoneLeft = x - (hitArea.width + 16) / 2;
+    const zoneTop = y - (hitArea.height + 12);
+    const left = zoneLeft + hitArea.x - 4;
+    const top = zoneTop + hitArea.y - 4;
+    const width = hitArea.width + 8;
+    const height = hitArea.height + 8;
+    const corner = 10;
+    highlight.clear();
+    highlight.fillStyle(0xedb867, 0.08).fillRect(left, top, width, height);
+    highlight.lineStyle(1, 0xffd894, 0.9).strokeRect(left, top, width, height);
+    highlight.fillStyle(0xffd894, 1);
+    highlight.fillRect(left - 1, top - 1, corner, 2);
+    highlight.fillRect(left - 1, top - 1, 2, corner);
+    highlight.fillRect(left + width - corner + 1, top - 1, corner, 2);
+    highlight.fillRect(left + width - 1, top - 1, 2, corner);
+    highlight.fillRect(left - 1, top + height - 1, corner, 2);
+    highlight.fillRect(left - 1, top + height - corner + 1, 2, corner);
+    highlight.fillRect(left + width - corner + 1, top + height - 1, corner, 2);
+    highlight.fillRect(left + width - 1, top + height - corner + 1, 2, corner);
+    highlight.setVisible(true);
+  }
+
+  private createInteractionMarker(x: number, y: number): void {
+    const marker = this.add.container(x, y).setDepth(100_001);
+    const glow = this.add.circle(0, 0, 8, 0xf0b861, 0.22)
+      .setStrokeStyle(1, 0xffd894, 0.65);
+    const sparkle = this.add.graphics();
+    sparkle.fillStyle(0xffd17b, 1)
+      .fillRect(-1, -6, 2, 12)
+      .fillRect(-6, -1, 12, 2)
+      .fillStyle(0xfff4d1, 1)
+      .fillRect(-1, -3, 2, 6)
+      .fillRect(-3, -1, 6, 2);
+    marker.add([glow, sparkle]);
+    const phaseDelay = this.points.length * 120;
+    if (!this.reducedMotion) {
+      marker.setAlpha(0.68).setScale(0.97);
+      this.tweens.add({
+        targets: marker,
+        alpha: { from: 0.68, to: 0.86 },
+        scaleX: { from: 0.97, to: 1.04 },
+        scaleY: { from: 0.97, to: 1.04 },
+        duration: 460,
+        hold: 140,
+        repeatDelay: 780,
+        delay: phaseDelay,
+        repeat: -1,
+        yoyo: true,
+        ease: 'Cubic.easeOut',
+      });
+    } else {
+      marker.setAlpha(0.76);
+    }
+  }
+
+  private dispatchHover(id: string, pointer: Phaser.Input.Pointer): void {
+    const event = pointer.event as MouseEvent | undefined;
+    this.dispatch('hover', {
+      id,
+      clientX: event?.clientX,
+      clientY: event?.clientY,
+    });
   }
 
   private findNearestPoint(x: number, y: number): PointOfInterest | undefined {

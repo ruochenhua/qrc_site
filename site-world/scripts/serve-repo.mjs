@@ -15,6 +15,7 @@ const mimeTypes = new Map([
   ['.json', 'application/json; charset=utf-8'],
   ['.png', 'image/png'],
   ['.txt', 'text/plain; charset=utf-8'],
+  ['.webp', 'image/webp'],
 ]);
 
 const server = createServer(async (request, response) => {

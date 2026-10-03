@@ -8,7 +8,7 @@
     "summary": "这里收集独立原型、开发笔记和正在形成的点子。可以从工作台开始，也可以直接浏览项目列表。",
     "mapAnchor": "about-studio",
     "spriteKey": "workshop",
-    "hitArea": { "x": 8, "y": 6, "width": 80, "height": 68 },
+    "hitArea": { "x": 8, "y": 6, "width": 176, "height": 132 },
     "interaction": { "type": "panel" }
   },
   {
@@ -22,7 +22,7 @@
     "href": "/cybertravel/index.html",
     "mapAnchor": "cybertravel-station",
     "spriteKey": "travel-station",
-    "hitArea": { "x": 8, "y": 6, "width": 80, "height": 68 },
+    "hitArea": { "x": 8, "y": 6, "width": 176, "height": 132 },
     "interaction": { "type": "panel" }
   },
   {
@@ -36,7 +36,7 @@
     "href": "/firework-master/index.html",
     "mapAnchor": "firework-stage",
     "spriteKey": "firework-stage",
-    "hitArea": { "x": 8, "y": 6, "width": 80, "height": 68 },
+    "hitArea": { "x": 8, "y": 6, "width": 176, "height": 132 },
     "featureActivityId": "mini-fireworks",
     "interaction": { "type": "panel" }
   },
@@ -51,7 +51,7 @@
     "href": "/cyber-money-tree/index.html",
     "mapAnchor": "money-tree-greenhouse",
     "spriteKey": "money-tree",
-    "hitArea": { "x": 8, "y": 6, "width": 80, "height": 68 },
+    "hitArea": { "x": 8, "y": 6, "width": 176, "height": 132 },
     "interaction": { "type": "panel" }
   },
   {
@@ -64,7 +64,7 @@
     "cardAction": "查看计划",
     "mapAnchor": "kings-field-ruins",
     "spriteKey": "ruin-gate",
-    "hitArea": { "x": 8, "y": 6, "width": 80, "height": 68 },
+    "hitArea": { "x": 8, "y": 6, "width": 176, "height": 132 },
     "interaction": { "type": "panel" }
   }
 ]

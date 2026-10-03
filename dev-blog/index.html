@@ -3,44 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>实验笔记 | QRC-Eye</title>
+    <title>公会日志 | QRC-Eye</title>
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
-    <meta name="description" content="QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。">
-    <meta name="keywords" content="实验笔记, 原型, QRC-Eye, 想法, 开发">
+    <meta name="description" content="QRC-Eye 冒险者公会的开发日志，记录游戏原型、设计思考与创作过程。">
+    <meta name="keywords" content="公会日志, 开发笔记, 原型, QRC-Eye, 游戏设计">
     <meta name="author" content="QRC-Eye">
     <meta name="robots" content="index, follow">
-    <meta property="og:title" content="实验笔记 | QRC-Eye">
-    <meta property="og:description" content="QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。">
+    <meta property="og:title" content="公会日志 | QRC-Eye">
+    <meta property="og:description" content="QRC-Eye 冒险者公会的开发日志，记录游戏原型、设计思考与创作过程。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.qrc-eye.com/dev-blog/">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="实验笔记 | QRC-Eye">
-    <meta name="twitter:description" content="QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/y2k/theme.css">
-    <link rel="alternate" type="application/rss+xml" title="QRC-Eye 实验笔记 RSS" href="https://www.qrc-eye.com/dev-blog/feed.xml">
+    <meta name="twitter:title" content="公会日志 | QRC-Eye">
+    <meta name="twitter:description" content="QRC-Eye 冒险者公会的开发日志，记录游戏原型、设计思考与创作过程。">
+    <link rel="stylesheet" href="../assets/world/guild-pages.css">
+    <link rel="alternate" type="application/rss+xml" title="QRC-Eye 公会日志 RSS" href="https://www.qrc-eye.com/dev-blog/feed.xml">
 </head>
-<body>
+<body class="guild-document">
+    <nav class="guild-nav" aria-label="公会导航">
+        <div class="guild-nav__inner">
+            <a href="../index.html" class="guild-brand" aria-label="QRC-Eye 冒险者公会首页">
+                <span class="guild-brand__seal" aria-hidden="true">Q</span>
+                <span>QRC-Eye<small>冒险者公会</small></span>
+            </a>
+            <div class="guild-nav__links">
+                <a href="../index.html" class="guild-nav__link">返回世界</a>
+                <a href="index.html" class="guild-nav__link" aria-current="page">公会日志</a>
+            </div>
+        </div>
+    </nav>
     <main class="notes-main">
-        <nav class="notes-nav">
-            <a href="../index.html" class="notes-back">← Back to Home</a>
-        </nav>
-        <h1 class="notes-title chrome-text" data-glitch>Notes.</h1>
-        <p class="notes-sub">记录想法从草稿到原型的过程</p>
+        <header class="notes-heading">
+            <p class="guild-eyebrow">QRC-EYE · 冒险者公会档案</p>
+            <h1 class="notes-title">公会日志</h1>
+            <p class="notes-sub">记录原型从草稿到成形的过程，也收录途中留下的设计思考。</p>
+        </header>
 
         <div id="tag-filter" role="group" aria-label="按标签筛选">
-            <button type="button" class="tag-filter-btn active" data-tag="all">全部</button>
-            <button type="button" class="tag-filter-btn" data-tag="firework-master">firework-master</button>
-            <button type="button" class="tag-filter-btn" data-tag="game-design">game-design</button>
+            <button type="button" class="tag-filter-btn active" data-tag="all" aria-pressed="true">全部</button>
+            <button type="button" class="tag-filter-btn" data-tag="firework-master" aria-pressed="false">烟花大师</button>
+            <button type="button" class="tag-filter-btn" data-tag="game-design" aria-pressed="false">游戏设计</button>
         </div>
         <div class="notes-grid">
             <a href="posts/firework-master-dev-notes-1.html" class="card-y2k note-card" data-tags="game-design firework-master">
             <div class="note-card-top">
                 <span class="note-card-date">2026-07-19</span>
-                <div class="note-card-tags"><span class="tag-badge">game-design</span><span class="tag-badge">firework-master</span></div>
+                <div class="note-card-tags"><span class="tag-badge">游戏设计</span><span class="tag-badge">烟花大师</span></div>
             </div>
             <h3 class="card-title">烟花大师开发笔记 #1：评分公式怎么定</h3>
             <p class="card-desc">第一篇开发笔记：烟花大师的评分公式为什么用连续值匹配，以及调参时踩过的坑。</p>
@@ -50,11 +59,9 @@
             </div>
         </a>
         </div>
+        <footer class="guild-footer"><a href="../index.html">← 回到地图继续探索</a></footer>
     </main>
 
-    <button id="sfx-toggle" class="sfx-toggle" aria-pressed="false" aria-label="开启或关闭音效">SOUND: OFF</button>
-
-    <script src="../assets/y2k/sfx.js" defer></script>
-    <script src="../assets/y2k/fx.js" defer></script>
+    <script src="../assets/world/guild-blog.js" defer></script>
 </body>
 </html>

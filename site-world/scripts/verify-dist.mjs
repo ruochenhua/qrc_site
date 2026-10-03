@@ -37,10 +37,10 @@ if (files.some((file) => file.endsWith('.map'))) {
   throw new Error('Source maps are not allowed in the committed runtime directory.');
 }
 
-const rasterAssets = files.filter((file) => /^assets\/.*\.png$/i.test(file));
+const rasterAssets = files.filter((file) => /^assets\/.*\.(png|webp)$/i.test(file));
 const mapAssets = files.filter((file) => /^assets\/.*\.json$/i.test(file));
 if (rasterAssets.length < 3 || mapAssets.length < 1) {
-  throw new Error(`Expected three PNG atlases and one map JSON, found ${rasterAssets.length} PNG and ${mapAssets.length} JSON files.`);
+  throw new Error(`Expected three raster assets and one map JSON, found ${rasterAssets.length} images and ${mapAssets.length} JSON files.`);
 }
 const entry = await readFile(entryPath, 'utf8');
 const expectedAssets = [...rasterAssets, ...mapAssets];
@@ -49,10 +49,10 @@ if (missingAssetReferences.length > 0) {
   throw new Error(`World entry does not reference expected runtime assets: ${missingAssetReferences.join(', ')}`);
 }
 const jsGzipBytes = gzipSync(await readFile(entryPath)).byteLength;
-const pngBytes = (await Promise.all(rasterAssets.map(async (asset) => (await stat(path.join(runtimeDir, asset))).size)))
+const rasterBytes = (await Promise.all(rasterAssets.map(async (asset) => (await stat(path.join(runtimeDir, asset))).size)))
   .reduce((total, size) => total + size, 0);
 if (jsGzipBytes > 500 * 1024) throw new Error(`World entry gzip size exceeds 500 KiB: ${jsGzipBytes} bytes.`);
-if (pngBytes > 1024 * 1024) throw new Error(`Initial PNG atlas size exceeds 1 MiB: ${pngBytes} bytes.`);
+if (rasterBytes > 1024 * 1024) throw new Error(`Initial raster asset size exceeds 1 MiB: ${rasterBytes} bytes.`);
 const activityChunk = files.find((file) => /^chunks\/mini-fireworks-.*\.js$/.test(file));
 if (!activityChunk) throw new Error('The registered mini-fireworks activity must be emitted as a deferred chunk.');
 if (!entry.includes(activityChunk)) throw new Error('The world entry does not reference the deferred firework activity chunk.');
@@ -72,4 +72,4 @@ if (!notices.includes('Phaser 4.2.0 (MIT)') || !notices.includes('Permission is 
   throw new Error('Third-party notice does not contain the expected Phaser version and license text.');
 }
 
-console.log(`Verified ${files.length} runtime files: ${rasterAssets.length} PNG atlases (${pngBytes} bytes), ${mapAssets.length} map JSON, a deferred firework chunk, and a ${Math.round(jsGzipBytes / 1024)} KiB gzip entry.`);
+console.log(`Verified ${files.length} runtime files: ${rasterAssets.length} raster assets (${rasterBytes} bytes), ${mapAssets.length} map JSON, a deferred firework chunk, and a ${Math.round(jsGzipBytes / 1024)} KiB gzip entry.`);

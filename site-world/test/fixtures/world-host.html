@@ -36,6 +36,9 @@
         host.dataset.nearbyId = event.detail.id ?? '';
         host.dataset.nearbyLabel = event.detail.label ?? '';
       });
+      host.addEventListener('qrc-world:hover', (event) => {
+        host.dataset.hoveredProject = event.detail.id ?? '';
+      });
       host.addEventListener('qrc-world:select', (event) => {
         host.dataset.selectedId = event.detail.id;
         host.dataset.selectSource = event.detail.source;

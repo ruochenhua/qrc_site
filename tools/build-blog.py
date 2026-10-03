@@ -34,6 +34,10 @@ DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 TAG_RE = SLUG_RE
 REQUIRED_FIELDS = ("title", "date", "description")
 TOC_MIN_H2 = 3
+TAG_LABELS = {
+    "firework-master": "烟花大师",
+    "game-design": "游戏设计",
+}
 
 HOME_START_MARK = "<!-- BLOG-LATEST:START -->"
 HOME_END_MARK = "<!-- BLOG-LATEST:END -->"
@@ -191,7 +195,8 @@ def render_markdown(body):
 def render_tag_badges(tags):
     """Render the tag badge row for a post (empty string when no tags)."""
     return "".join(
-        f'<span class="tag-badge">{html_lib.escape(tag)}</span>' for tag in tags
+        f'<span class="tag-badge">{html_lib.escape(TAG_LABELS.get(tag, tag.replace("-", " ")))}</span>'
+        for tag in tags
     )
 
 
@@ -200,44 +205,47 @@ POST_PAGE_TEMPLATE = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title} | QRC-Eye Notes</title>
+    <title>{title} | QRC-Eye 公会日志</title>
     <link rel="icon" href="../../favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../../favicon.ico" type="image/x-icon">
     <meta name="description" content="{description}">
     <meta name="author" content="QRC-Eye">
-    <meta property="og:title" content="{title} | QRC-Eye Notes">
+    <meta property="og:title" content="{title} | QRC-Eye 公会日志">
     <meta property="og:description" content="{description}">
     <meta property="og:type" content="article">
     <meta property="og:url" content="{post_url}">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="{title} | QRC-Eye Notes">
+    <meta name="twitter:title" content="{title} | QRC-Eye 公会日志">
     <meta name="twitter:description" content="{description}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/y2k/theme.css">
-    <link rel="alternate" type="application/rss+xml" title="QRC-Eye 实验笔记 RSS" href="https://www.qrc-eye.com/dev-blog/feed.xml">
+    <link rel="stylesheet" href="../../assets/world/guild-pages.css">
+    <link rel="alternate" type="application/rss+xml" title="QRC-Eye 公会日志 RSS" href="https://www.qrc-eye.com/dev-blog/feed.xml">
 </head>
-<body>
-    <nav class="nav-y2k" aria-label="文章导航">
-        <div class="nav-inner">
-            <a href="../index.html" class="notes-back">← 返回列表</a>
-            <div class="nav-logo">QRC<span class="neon">.</span>EYE</div>
+<body class="guild-document">
+    <nav class="guild-nav" aria-label="公会导航">
+        <div class="guild-nav__inner">
+            <a href="../../index.html" class="guild-brand" aria-label="QRC-Eye 冒险者公会首页">
+                <span class="guild-brand__seal" aria-hidden="true">Q</span>
+                <span>QRC-Eye<small>冒险者公会</small></span>
+            </a>
+            <div class="guild-nav__links">
+                <a href="../../index.html" class="guild-nav__link">返回世界</a>
+                <a href="../index.html" class="guild-nav__link" aria-current="page">公会日志</a>
+            </div>
         </div>
     </nav>
-    <article>
+    <main class="post-main">
+        <a href="../index.html" class="guild-back">← 返回日志列表</a>
+        <article class="journal-entry">
         <header class="post-header">
-            <h1 class="post-title" data-glitch>{title}</h1>
-            <div class="post-date">PUBLISHED ON {date_iso}</div>
+            <p class="post-header__eyebrow">冒险者公会 · 工作室手记</p>
+            <h1 class="post-title">{title}</h1>
+            <div class="post-meta"><time datetime="{date_iso}">{date_iso}</time><span>开发记录</span></div>
             <div class="post-tags">{tag_badges}</div>
         </header>
         {content_block}
-    </article>
-
-    <button id="sfx-toggle" class="sfx-toggle" aria-pressed="false" aria-label="开启或关闭音效">SOUND: OFF</button>
-
-    <script src="../../assets/y2k/sfx.js" defer></script>
-    <script src="../../assets/y2k/fx.js" defer></script>
+        </article>
+        <footer class="guild-footer"><a href="../../index.html">返回地图继续探索</a></footer>
+    </main>
 </body>
 </html>
 """
@@ -246,7 +254,7 @@ POST_PAGE_TEMPLATE = """<!DOCTYPE html>
 def render_post_page(post):
     """Render one post to dev-blog/posts/<slug>.html. Returns the path written."""
     body_html, toc_html, h2_count = render_markdown(post["body"])
-    body_block = '<div class="post-body prose-y2k">\n' + body_html + "        </div>"
+    body_block = '<div class="post-body guild-prose">\n' + body_html + "        </div>"
     if h2_count >= TOC_MIN_H2:
         toc_block = (
             '<aside class="post-toc" aria-label="文章目录">\n'
@@ -256,7 +264,7 @@ def render_post_page(post):
             + "\n            </aside>"
         )
         content_block = (
-            '<div class="post-layout">\n            '
+            '<div class="post-layout post-layout--with-toc">\n            '
             + toc_block
             + "\n            "
             + body_block
@@ -293,50 +301,57 @@ LIST_PAGE_TEMPLATE = """<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>实验笔记 | QRC-Eye</title>
+    <title>公会日志 | QRC-Eye</title>
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="../favicon.ico" type="image/x-icon">
-    <meta name="description" content="QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。">
-    <meta name="keywords" content="实验笔记, 原型, QRC-Eye, 想法, 开发">
+    <meta name="description" content="QRC-Eye 冒险者公会的开发日志，记录游戏原型、设计思考与创作过程。">
+    <meta name="keywords" content="公会日志, 开发笔记, 原型, QRC-Eye, 游戏设计">
     <meta name="author" content="QRC-Eye">
     <meta name="robots" content="index, follow">
-    <meta property="og:title" content="实验笔记 | QRC-Eye">
-    <meta property="og:description" content="QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。">
+    <meta property="og:title" content="公会日志 | QRC-Eye">
+    <meta property="og:description" content="QRC-Eye 冒险者公会的开发日志，记录游戏原型、设计思考与创作过程。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.qrc-eye.com/dev-blog/">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="实验笔记 | QRC-Eye">
-    <meta name="twitter:description" content="QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/y2k/theme.css">
-    <link rel="alternate" type="application/rss+xml" title="QRC-Eye 实验笔记 RSS" href="https://www.qrc-eye.com/dev-blog/feed.xml">
+    <meta name="twitter:title" content="公会日志 | QRC-Eye">
+    <meta name="twitter:description" content="QRC-Eye 冒险者公会的开发日志，记录游戏原型、设计思考与创作过程。">
+    <link rel="stylesheet" href="../assets/world/guild-pages.css">
+    <link rel="alternate" type="application/rss+xml" title="QRC-Eye 公会日志 RSS" href="https://www.qrc-eye.com/dev-blog/feed.xml">
 </head>
-<body>
+<body class="guild-document">
+    <nav class="guild-nav" aria-label="公会导航">
+        <div class="guild-nav__inner">
+            <a href="../index.html" class="guild-brand" aria-label="QRC-Eye 冒险者公会首页">
+                <span class="guild-brand__seal" aria-hidden="true">Q</span>
+                <span>QRC-Eye<small>冒险者公会</small></span>
+            </a>
+            <div class="guild-nav__links">
+                <a href="../index.html" class="guild-nav__link">返回世界</a>
+                <a href="index.html" class="guild-nav__link" aria-current="page">公会日志</a>
+            </div>
+        </div>
+    </nav>
     <main class="notes-main">
-        <nav class="notes-nav">
-            <a href="../index.html" class="notes-back">← Back to Home</a>
-        </nav>
-        <h1 class="notes-title chrome-text" data-glitch>Notes.</h1>
-        <p class="notes-sub">记录想法从草稿到原型的过程</p>
+        <header class="notes-heading">
+            <p class="guild-eyebrow">QRC-EYE · 冒险者公会档案</p>
+            <h1 class="notes-title">公会日志</h1>
+            <p class="notes-sub">记录原型从草稿到成形的过程，也收录途中留下的设计思考。</p>
+        </header>
 
         {list_block}
+        <footer class="guild-footer"><a href="../index.html">← 回到地图继续探索</a></footer>
     </main>
 
-    <button id="sfx-toggle" class="sfx-toggle" aria-pressed="false" aria-label="开启或关闭音效">SOUND: OFF</button>
-
-    <script src="../assets/y2k/sfx.js" defer></script>
-    <script src="../assets/y2k/fx.js" defer></script>
+    <script src="../assets/world/guild-blog.js" defer></script>
 </body>
 </html>
 """
 
 EMPTY_LIST_BLOCK = (
-    '<div class="card-y2k note-empty">\n'
-    '            <span class="card-emoji">📝</span>\n'
-    "            <p>还没有实验笔记。</p>\n"
-    '            <p class="note-empty-sub">等有想法值得记录的时候，会放在这里。</p>\n'
+    '<div class="note-empty">\n'
+    '            <span class="guild-eyebrow">档案室暂时安静</span>\n'
+    "            <p>还没有新的公会日志。</p>\n"
+    '            <p class="note-empty-sub">有新的想法或原型进展时，会在这里留下记录。</p>\n'
     "        </div>"
 )
 
@@ -352,12 +367,12 @@ def collect_tags(posts):
 def render_tag_filter(tags):
     """The tag filter bar: an 'all' button plus one button per tag."""
     buttons = [
-        '<button type="button" class="tag-filter-btn active" data-tag="all">全部</button>'
+        '<button type="button" class="tag-filter-btn active" data-tag="all" aria-pressed="true">全部</button>'
     ]
     for tag in tags:
         buttons.append(
-            f'<button type="button" class="tag-filter-btn" data-tag="{html_lib.escape(tag)}">'
-            f"{html_lib.escape(tag)}</button>"
+            f'<button type="button" class="tag-filter-btn" data-tag="{html_lib.escape(tag)}" aria-pressed="false">'
+            f"{html_lib.escape(TAG_LABELS.get(tag, tag.replace('-', ' ')))}</button>"
         )
     return (
         '<div id="tag-filter" role="group" aria-label="按标签筛选">\n            '
@@ -410,9 +425,9 @@ def render_list_page(posts):
 FEED_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>QRC-Eye 实验笔记</title>
+    <title>QRC-Eye 公会日志</title>
     <link>{blog_url}</link>
-    <description>QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。</description>
+    <description>QRC-Eye 冒险者公会的开发日志，记录游戏原型、设计思考与创作过程。</description>
     <language>zh-CN</language>
 {items}
   </channel>

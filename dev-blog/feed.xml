@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>QRC-Eye 实验笔记</title>
+    <title>QRC-Eye 公会日志</title>
     <link>https://www.qrc-eye.com/dev-blog/</link>
-    <description>QRC-Eye 的实验笔记，记录想法从草稿到原型的过程。</description>
+    <description>QRC-Eye 冒险者公会的开发日志，记录游戏原型、设计思考与创作过程。</description>
     <language>zh-CN</language>
     <item>
       <title>烟花大师开发笔记 #1：评分公式怎么定</title>

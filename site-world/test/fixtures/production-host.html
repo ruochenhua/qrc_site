@@ -10,7 +10,7 @@
     <main>
       <h1>生产场景测试页</h1>
       <p id="scene-status" role="status">正在载入场景</p>
-      <div id="world-host" aria-hidden="true"></div>
+      <div id="world-host" aria-hidden="true" data-world-debug="true"></div>
       <section aria-label="静态项目入口">
         <h2>全部项目</h2>
         <a href="/cybertravel/index.html" id="project-link">CyberTravel</a>
@@ -24,6 +24,12 @@
         status.textContent = '生产场景已载入';
         host.dataset.worldReady = 'true';
         host.dataset.anchorCount = String(event.detail.anchorCount);
+      });
+      host.addEventListener('qrc-world:hover', (event) => {
+        host.dataset.hoveredProject = event.detail.id ?? '';
+      });
+      host.addEventListener('qrc-world:select', (event) => {
+        host.dataset.selectedProject = event.detail.id ?? '';
       });
       host.addEventListener('qrc-world:error', () => {
         status.textContent = '生产场景资源暂不可用，请使用下方项目入口';

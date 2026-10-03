@@ -16,7 +16,7 @@ test('loads the built same-origin runtime and keeps a real project link', async 
   await expect(page.getByRole('status')).toHaveText('生产场景已载入');
   await expect(page.getByRole('link', { name: 'CyberTravel' })).toHaveAttribute('href', '/cybertravel/index.html');
   expect(externalRequests).toEqual([]);
-  expect(worldAssets.filter((url) => url.endsWith('.png'))).toHaveLength(3);
+  expect(worldAssets.filter((url) => /\.(png|webp)$/.test(url))).toHaveLength(3);
   expect(worldAssets.filter((url) => url.endsWith('.json'))).toHaveLength(1);
   expect(activityRequests).toEqual([]);
 
@@ -24,13 +24,34 @@ test('loads the built same-origin runtime and keeps a real project link', async 
   const bounds = await host.boundingBox();
   if (!bounds) throw new Error('World host has no layout box.');
   const scale = bounds.width / 640;
-  await page.mouse.click(bounds.x + 96 * scale, bounds.y + 152 * scale);
+  const cameraX = Number(await host.getAttribute('data-camera-x'));
+  const cameraY = Number(await host.getAttribute('data-camera-y'));
+  const travelX = bounds.x + (195 - cameraX) * scale;
+  const travelY = bounds.y + (168 - cameraY) * scale;
+  await page.mouse.move(travelX, travelY);
+  const hovercard = page.getByRole('tooltip');
+  await expect(host).toHaveAttribute('data-hovered-project', 'cybertravel');
+  await expect(hovercard).toContainText('在川藏线上当骑行网红，看看能走多远。');
+  await page.mouse.click(travelX, travelY);
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByRole('heading', { name: 'CyberTravel' })).toBeVisible();
   await expect(dialog.getByRole('link', { name: '试玩项目' })).toHaveAttribute('href', '/cybertravel/index.html');
   await dialog.getByRole('button', { name: '关闭项目介绍' }).click();
+  await expect(dialog).toBeHidden();
+  await page.locator('canvas').scrollIntoViewIfNeeded();
 
-  await page.mouse.click(bounds.x + 544 * scale, bounds.y + 48 * scale);
+  const fireworkBounds = await host.boundingBox();
+  if (!fireworkBounds) throw new Error('World host has no layout box after closing the project card.');
+  const fireworkScale = fireworkBounds.width / 640;
+  const fireworkCameraX = Number(await host.getAttribute('data-camera-x'));
+  const fireworkCameraY = Number(await host.getAttribute('data-camera-y'));
+  const fireworkX = fireworkBounds.x + (648 - fireworkCameraX) * fireworkScale;
+  const fireworkY = fireworkBounds.y + (172 - fireworkCameraY) * fireworkScale;
+  await page.mouse.move(fireworkX, fireworkY);
+  await expect(host).toHaveAttribute('data-hovered-project', 'firework-master');
+  await expect(hovercard).toContainText('收集配方、编排节目单，在夜空中绽放属于你的烟花秀。');
+  await page.mouse.click(fireworkX, fireworkY);
+  await expect(host).toHaveAttribute('data-selected-project', 'firework-master');
   await expect(dialog.getByRole('heading', { name: '烟花大师' })).toBeVisible();
   expect(activityRequests).toEqual([]);
   await dialog.getByRole('button', { name: '试放一枚烟花' }).click();

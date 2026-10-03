@@ -3,9 +3,11 @@ import '../styles/world.css';
 import { WorldScene } from '../scenes/WorldScene';
 import { normalizeWorldOptions, type WorldOptions } from './world-options';
 import { attachProjectDialog } from '../ui/project-dialog';
+import { attachProjectHovercard } from '../ui/project-hovercard';
 
 const mountedGames = new WeakMap<HTMLElement, Phaser.Game>();
 const mountedProjectDialogs = new WeakMap<HTMLElement, () => void>();
+const mountedProjectHovercards = new WeakMap<HTMLElement, () => void>();
 
 export function mountWorld(host: HTMLElement, options: WorldOptions = {}): Phaser.Game {
   const existing = mountedGames.get(host);
@@ -16,13 +18,14 @@ export function mountWorld(host: HTMLElement, options: WorldOptions = {}): Phase
   const viewport = normalizeWorldOptions(options);
   if (viewport.fitMapToViewport) host.dataset.worldFitMap = 'true';
   const detachProjectDialog = attachProjectDialog(host);
+  const detachProjectHovercard = attachProjectHovercard(host);
   try {
     const game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: host,
       width: viewport.width,
       height: viewport.height,
-      backgroundColor: '#355547',
+      backgroundColor: '#282a40',
       scene: [WorldScene],
       scale: {
         mode: Phaser.Scale.FIT,
@@ -46,9 +49,11 @@ export function mountWorld(host: HTMLElement, options: WorldOptions = {}): Phase
 
     mountedGames.set(host, game);
     mountedProjectDialogs.set(host, detachProjectDialog);
+    mountedProjectHovercards.set(host, detachProjectHovercard);
     return game;
   } catch (error) {
     detachProjectDialog();
+    detachProjectHovercard();
     delete host.dataset.worldFitMap;
     host.classList.remove('qrc-world-host');
     throw error;
@@ -58,7 +63,9 @@ export function mountWorld(host: HTMLElement, options: WorldOptions = {}): Phase
 export function unmountWorld(host: HTMLElement): void {
   const game = mountedGames.get(host);
   mountedProjectDialogs.get(host)?.();
+  mountedProjectHovercards.get(host)?.();
   mountedProjectDialogs.delete(host);
+  mountedProjectHovercards.delete(host);
   if (!game) return;
 
   game.destroy(true);

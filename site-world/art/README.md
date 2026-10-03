@@ -1,32 +1,31 @@
-# 像素世界素材约定
+# 公会小镇像素素材约定
 
-## 画面标尺
+## 画面标尺和透视
 
-- 地图采用 Tiled orthogonal JSON；每格 16×16 px；第一张地图 48×32 格。
-- 玩家图集为 48×96 px，每帧 16×24 px。按 down、left、right、up 排行，每行三个步行动作帧；停步帧取中间帧。
-- 地点图集为 96×560 px，每个地点一帧（96×80 px）。对象坐标表示贴图脚底中心，建筑以画面顶部向下绘制。
-- 所有轮廓、窗格、地面纹样按整数像素绘制，不使用半透明阴影、抗锯齿或亚像素坐标；人物和地点帧四周留透明边缘。
-- 光源默认来自左上方：亮面放在左上，最暗轮廓和投影落在右下/脚底。通用深色轮廓为 `#253b3b`。
+- 世界地图为 Tiled `orthogonal` 正交投影，每格 16×16 px；游戏逻辑范围 48×32 格，即 768×512 世界像素。
+- `guild-town-dusk.webp` 是 1536×1024 的 2×场景底图，在游戏坐标中缩放到 768×512。底图按用户选定的公会美术图和正交地图图制作，包含五处可交互地点与庭院环境。
+- 建筑、树木、家具和人物共享同一个 2D 俯视坐标平面：不随远近缩放，不混入等距菱形地砖，也不把不同焦段拼成一张场景图。
+- 人物图集为 48×96 px，每帧 16×24 px；按 down、left、right、up 排行，每行三个步行动作帧。
+- Tiled 的 `Ground`、`Details`、`Blockers` 图层为底图提供对应的行走空间与不可见碰撞；项目锚点以地图世界像素记录，透明交互区覆盖画中的地点。
+- 2D 角色沿用整数像素动画。地图底图使用 crisp nearest-neighbor 缩放，保留图像生成后的像素簇边缘。
 
-## 色板
+## 傍晚公会色板
 
-生成器中的 30 个不透明色票覆盖夜蓝绿轮廓、草地、土路、石材、木料、玻璃、暖灯、肤色和少量砖红，另有一个透明色。每个单体尽量限定在 4–6 色，避免高饱和荧光色成为主色。色票的精确 RGB 值集中维护在 `scripts/generate-world-art.mjs` 的 `palette` 对象。
+石板蓝紫和墨色用于阴影，灰橄榄绿用于草地与树叶，旧木、铜红和羊皮纸用于公会建筑，琥珀色窗火和玫瑰暮色提供暖光。角色与程序生成图集的颜色集中维护在 `scripts/generate-world-art.mjs` 的 `palette`。
 
-## Tiled 图层和属性
+## 地图层和碰撞
 
 | 图层 | 类型 | 用途 |
 |---|---|---|
-| `Ground` | Tile Layer | 草地、石路、木栈道和水面；tile 属性 `solid: true` 的格子不可行走。 |
-| `Details` | Tile Layer | 地面上的小装饰；此版本保留空层以稳定地图 schema。 |
-| `Blockers` | Tile Layer | 围栏、石块、树篱等可见障碍；读取 Tile Set 的 `solid: true` 属性生成 Arcade 碰撞。 |
-| `Objects` | Object Layer | 唯一 `player-spawn`、`project-anchor` 地点和纯装饰 `scenery`；项目锚点的 `projectId` 与注册表 ID 对应。 |
+| `Ground` | Tile Layer | 兼容的地面网格；当前视觉由场景底图提供。 |
+| `Details` | Tile Layer | 预留的额外地表细节层。 |
+| `Blockers` | Tile Layer | 建筑、中央喷泉与地图边缘的隐藏碰撞；Tile 属性 `solid: true` 会生成 Arcade 碰撞。 |
+| `Objects` | Object Layer | 唯一 `player-spawn` 与五个 `project-anchor`。 |
 
-地图边界由 Phaser 世界 bounds 阻挡；对象坐标必须落在地图尺寸内。项目物件的可点区域由代码中的 `hitArea` 定义，与地砖碰撞属性分离。
+项目锚点像素坐标与 E2E 交互夹具共用；改动前需要同步更新交互测试。素材表达只影响外观，建筑的点击热区继续由项目 manifest 定义。
 
-## 资源生成与更新
+## 生成
 
-运行 `npm run art:generate`（在 `site-world/` 内）会确定性地生成三张 RGBA PNG、Aseprite-compatible JSON Hash 动画帧资料和 `maps/workshop-town.json`。像素源图目前由 `scripts/generate-world-art.mjs` 中的整数像素绘制函数维护；生成后的 PNG/JSON 是构建输入，改画时更新生成器并重新运行命令，不直接编辑生成产物。项目卡片也由 `src/projects/manifest.json` 生成：更新项目记录后运行 `npm run sync:homepage`，生成器只替换根 `index.html` 的 `WORLD-PROJECTS` 标记区间。
+在 `site-world/` 中运行 `npm run art:generate` 会确定性生成碰撞图集、玩家动画元数据和 `maps/workshop-town.json`。黄昏公会底图作为独立 WebP 资源存放在本目录，不会被图集生成器覆盖。项目名称与入口仍由 `src/projects/manifest.json` 管理。
 
-动画命名为 `player-walk-{down|left|right|up}`。JSON `meta.frameTags` 用三帧 ping-pong 描述方向行；游戏运行时重复中间帧，避免停步瞬间视觉跳变。地点 sprite key 及其 atlas frame 对应关系集中登记在 `src/projects/sprite-registry.json`。
-
-生产构建把图集和 Tiled JSON 作为独立的同源 hashed 文件写入 `assets/world/runtime/assets/`。`verify:dist` 检查其引用、PNG 总量和入口 JS gzip 预算。
+动画命名为 `player-walk-{down|left|right|up}`，运行时使用三帧 ping-pong。生产构建把图集和地图作为独立同源资源复制到 runtime 目录；`verify:dist` 会检查资源引用和体积预算。

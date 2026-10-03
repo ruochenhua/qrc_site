@@ -38,6 +38,7 @@ QRC-Eye 个人创作者主页 + 想法试验场。静态站点，GitHub Pages �
 | **烟花表演渲染** | 使用 Canvas 2D 粒子系统实时呈现烟花升空、爆炸、拖尾、二次爆炸等效果，带有随机性和物理拟真 |
 | **保底事件** | 收益稳定、难度极低的可重复事件，确保玩家即使资金紧张也能持续获得少量资金，避免游戏卡死或硬性失败 |
 | **Firework Master MVP** | 《烟花大师》最小可玩版本：5 等级、自由组件组装、系统配方示例、玩家蓝图保存、15 个事件、Canvas 粒子表演、双货币成长、localStorage 存档。部署在 `/firework-master/`
+| **赛博发财树 / Cyber Money Tree** | 多人共享浇水的社区小项目：累计浇水推动十级像素发财树成长；访客收取并收藏他人叶笺，再从预设海报与短语组合祝福。前端位于 `/cyber-money-tree/`，Cloudflare Worker + D1 提供共享计数与 API |
 | **王土之下 / Below the King's Field** | 第一人称地牢探索 HTML5 游戏，《King's Field》(1994) 精神复刻：黑暗压抑氛围、笨重近战、敌人遭遇、物品拾取、死亡重来。单文件 Canvas 光线投射渲染，部署在 `/kings-field/` |
 | **OpenSpec** | 配置驱动的变更管理流程 |
 | **MVP** | 单文件 HTML5 游戏，最小可玩版本 |
@@ -66,6 +67,12 @@ qrcsite/
 │   ├── openspec/       # 变更管理
 │   └── doc/            # 设计文档
 ├── firework-master/    # 游戏目录（单文件 index.html 为主，已注入 y2k shell）
+├── cyber-money-tree/   # 多人共享浇水与叶笺项目（Cloudflare Worker + D1）
+│   ├── src/worker.js   # 树状态、浇水编号和叶笺 API
+│   ├── client/         # 页面流程、浏览器身份、收藏册和海报导出
+│   ├── shared/         # 十级成长与安全短句目录
+│   ├── migrations/     # D1 初始结构和树主赠礼
+│   └── test/           # Worker 单元/API 集成/Playwright E2E 测试
 ├── kings-field/        # 游戏目录（规划中/未落地；落地后需注入 y2k shell）
 ├── tools/
 │   ├── build-blog.py   # dev-blog 静态生成器（运行：.venv/bin/python tools/build-blog.py）
@@ -82,7 +89,7 @@ qrcsite/
 
 ## 架构约束
 
-- 纯静态站点，无后端
+- 主站与大多数子项目保持纯静态；`cyber-money-tree/` 是共享状态需求下的独立例外，使用 Cloudflare Worker + D1，并支持单目录本地开发和测试
 - GitHub Pages 自动部署
 - 游戏数据通过 Git 版本管理
 

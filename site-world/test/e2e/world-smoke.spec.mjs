@@ -10,28 +10,29 @@ test('mounts the Phaser canvas without hiding static project links', async ({ pa
   await expect(page.locator('#world-host')).toHaveAttribute('data-anchor-count', '5');
 });
 
-test('moves with normalized keyboard input and does not pass through the fence', async ({ page }) => {
+test('moves with normalized keyboard input and does not pass through the fountain rim', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/test/fixtures/world-host.html');
   const host = page.locator('#world-host');
   await expect(host).toHaveAttribute('data-world-ready', 'true');
   const startX = Number(await host.getAttribute('data-player-x'));
+  const startY = Number(await host.getAttribute('data-player-y'));
   const idleFrame = await host.getAttribute('data-player-frame');
 
   await page.locator('canvas').click();
-  await page.keyboard.down('d');
+  await page.keyboard.down('s');
+  await expect.poll(() => host.getAttribute('data-player-frame')).not.toBe(idleFrame);
   await page.waitForTimeout(800);
-  await page.keyboard.up('d');
-  const blockedX = Number(await host.getAttribute('data-player-x'));
-  expect(blockedX).toBeGreaterThan(startX);
-  expect(blockedX).toBeLessThan(420);
-  expect(await host.getAttribute('data-player-frame')).not.toBe(idleFrame);
+  await page.keyboard.up('s');
+  const blockedY = Number(await host.getAttribute('data-player-y'));
+  expect(blockedY).toBeGreaterThan(startY);
+  expect(blockedY).toBeLessThan(280);
 
   await page.keyboard.down('a');
   await page.waitForTimeout(350);
   await page.keyboard.up('a');
   await expect(host).toHaveAttribute('data-player-facing', 'left');
-  expect(Number(await host.getAttribute('data-player-x'))).toBeLessThan(blockedX);
+  expect(Number(await host.getAttribute('data-player-x'))).toBeLessThan(startX);
 
   await page.keyboard.down('ArrowUp');
   await page.waitForTimeout(120);
@@ -50,7 +51,7 @@ test('clicking a project object emits exactly one selection event', async ({ pag
   const scale = bounds.width / 640;
   const scrollX = Number(await host.getAttribute('data-camera-x'));
   const scrollY = Number(await host.getAttribute('data-camera-y'));
-  await page.mouse.click(bounds.x + (160 - scrollX) * scale, bounds.y + (224 - scrollY) * scale);
+  await page.mouse.click(bounds.x + (195 - scrollX) * scale, bounds.y + (168 - scrollY) * scale);
   await expect(host).toHaveAttribute('data-selected-id', 'cybertravel');
   await expect(host).toHaveAttribute('data-select-source', 'pointer');
   await expect(host).toHaveAttribute('data-select-count', '1');
@@ -63,6 +64,33 @@ test('clicking a project object emits exactly one selection event', async ({ pag
   await expect(page.locator('canvas')).toBeFocused();
 });
 
+test('hovering a project shows its introduction in a crisp card and clears on exit', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/test/fixtures/world-host.html');
+  const host = page.locator('#world-host');
+  await expect(host).toHaveAttribute('data-world-ready', 'true');
+  const bounds = await host.boundingBox();
+  if (!bounds) throw new Error('World host has no layout box.');
+  const scale = bounds.width / 640;
+  const scrollX = Number(await host.getAttribute('data-camera-x'));
+  const scrollY = Number(await host.getAttribute('data-camera-y'));
+
+  await page.mouse.move(bounds.x + (195 - scrollX) * scale, bounds.y + (168 - scrollY) * scale);
+
+  const card = page.getByRole('tooltip');
+  await expect(host).toHaveAttribute('data-hovered-project', 'cybertravel');
+  await expect(card).toBeVisible();
+  await expect(card).toContainText('CyberTravel');
+  await expect(card).toContainText('在川藏线上当骑行网红，看看能走多远。');
+  await expect(card).toContainText('点击查看详情');
+  expect(await card.evaluate((element) => getComputedStyle(element).fontSize)).toBe('14px');
+  expect(await card.evaluate((element) => getComputedStyle(element).fontFamily)).not.toContain('monospace');
+
+  await page.mouse.move(bounds.x + 350 * scale, bounds.y + 300 * scale);
+  await expect(host).toHaveAttribute('data-hovered-project', '');
+  await expect(card).toBeHidden();
+});
+
 test('shows a panel-only planned project without a broken play link', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/test/fixtures/world-host.html');
@@ -73,7 +101,7 @@ test('shows a panel-only planned project without a broken play link', async ({ p
   const scale = bounds.width / 640;
   const scrollX = Number(await host.getAttribute('data-camera-x'));
   const scrollY = Number(await host.getAttribute('data-camera-y'));
-  await page.mouse.click(bounds.x + (608 - scrollX) * scale, bounds.y + (376 - scrollY) * scale);
+  await page.mouse.click(bounds.x + (648 - scrollX) * scale, bounds.y + (392 - scrollY) * scale);
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByRole('heading', { name: '王土之下' })).toBeVisible();
   await expect(dialog.getByText('制作中')).toBeVisible();
@@ -95,7 +123,7 @@ test('loads the firework activity only after its preview button is activated', a
   const scale = bounds.width / 640;
   const scrollX = Number(await host.getAttribute('data-camera-x'));
   const scrollY = Number(await host.getAttribute('data-camera-y'));
-  await page.mouse.click(bounds.x + (608 - scrollX) * scale, bounds.y + (120 - scrollY) * scale);
+  await page.mouse.click(bounds.x + (648 - scrollX) * scale, bounds.y + (172 - scrollY) * scale);
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByRole('heading', { name: '烟花大师' })).toBeVisible();
   expect(activityRequests).toEqual([]);
@@ -115,7 +143,7 @@ test('E interacts with a nearby place and form focus does not move the player', 
   await expect(host).toHaveAttribute('data-world-ready', 'true');
   await page.locator('canvas').click();
   await page.keyboard.down('a');
-  await page.waitForTimeout(1600);
+  await page.waitForTimeout(2300);
   await page.keyboard.up('a');
   await expect(host).toHaveAttribute('data-nearby-id', 'cybertravel');
   await page.keyboard.down('e');
@@ -156,7 +184,7 @@ test('touching a project object uses the same pointer interaction path', async (
   const scale = bounds.width / 640;
   const scrollX = Number(await host.getAttribute('data-camera-x'));
   const scrollY = Number(await host.getAttribute('data-camera-y'));
-  await page.touchscreen.tap(bounds.x + (160 - scrollX) * scale, bounds.y + (224 - scrollY) * scale);
+  await page.touchscreen.tap(bounds.x + (128 - scrollX) * scale, bounds.y + (168 - scrollY) * scale);
   await expect(host).toHaveAttribute('data-selected-id', 'cybertravel');
   await expect(host).toHaveAttribute('data-select-source', 'pointer');
   await expect(host).toHaveAttribute('data-select-count', '1');

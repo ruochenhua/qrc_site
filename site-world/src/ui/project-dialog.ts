@@ -141,8 +141,13 @@ export function attachProjectDialog(host: HTMLElement): () => void {
   const restoreFocus = () => {
     cleanActivity();
     currentProject = null;
-    if (returnFocus?.isConnected) returnFocus.focus();
+    const focusTarget = returnFocus;
     returnFocus = null;
+    // Let the browser finish closing the native dialog before restoring focus;
+    // otherwise its built-in restoration can immediately move focus back to body.
+    if (focusTarget?.isConnected) requestAnimationFrame(() => {
+      if (focusTarget.isConnected) focusTarget.focus();
+    });
   };
   const onBackdrop = (event: MouseEvent) => { if (event.target === dialog) dialog.close(); };
   dialog.addEventListener('close', restoreFocus);

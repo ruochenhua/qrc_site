@@ -9,6 +9,14 @@ test('integrates the live pixel town with the accessible portfolio homepage', as
 
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto('/');
+  await expect(page.getByRole('status')).toHaveText('公会地图已就绪。');
+
+  const guide = page.getByRole('dialog', { name: /欢迎来到黄昏公会/ });
+  if (await guide.isVisible()) {
+    await guide.getByRole('button', { name: '明白了，开始探索' }).click();
+    await expect(guide).toBeHidden();
+  }
+  await page.locator('#world-host canvas').focus();
 
   await expect(page.locator('#world')).toBeVisible();
   await expect(page.locator('#world-host canvas')).toBeVisible();
@@ -17,7 +25,7 @@ test('integrates the live pixel town with the accessible portfolio homepage', as
   expect(bounds?.width).toBe(1440);
   expect(bounds?.height).toBe(1000);
   await expect(page.getByRole('link', { name: /CyberTravel/ })).toHaveCount(0);
-  await expect(page.getByRole('link', { name: /开发笔记/ })).toHaveAttribute('href', '/dev-blog/index.html');
+  await expect(page.getByRole('link', { name: /公会日志/ })).toHaveAttribute('href', '/dev-blog/index.html');
   await expect(page.locator('#world-fallback .world-project-card')).toHaveCount(4);
   await page.locator('#world-host').evaluate((host) => {
     host.dispatchEvent(new CustomEvent('qrc-world:select', { detail: { id: 'cybertravel' } }));
@@ -55,7 +63,7 @@ test('keeps semantic portfolio content available with JavaScript disabled', asyn
   await expect(page.locator('#world-fallback')).toBeVisible();
   await expect(page.getByText(/互动场景需要启用 JavaScript/)).toBeVisible();
   await expect(page.getByRole('link', { name: /CyberTravel/ })).toHaveAttribute('href', '/cybertravel/index.html');
-  await expect(page.getByRole('link', { name: /查看开发笔记/ })).toHaveAttribute('href', '/dev-blog/index.html');
+  await expect(page.getByRole('link', { name: /查看公会日志/ })).toHaveAttribute('href', '/dev-blog/index.html');
   await expect(page.locator('#world-host canvas')).toHaveCount(0);
   await context.close();
 });
@@ -84,5 +92,5 @@ test('fits narrow mobile screens and keeps the full-screen world usable', async 
   await expect(page.locator('#world-fallback')).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 
-  await expect(page.getByRole('link', { name: /开发笔记/ })).toHaveAttribute('href', '/dev-blog/index.html');
+  await expect(page.getByRole('link', { name: /公会日志/ })).toHaveAttribute('href', '/dev-blog/index.html');
 });

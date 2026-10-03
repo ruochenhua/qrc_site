@@ -46,7 +46,7 @@ describe('project manifest and world anchors', () => {
     if (travel) {
       travel.spriteKey = 'missing-sprite';
       travel.mapAnchor = 'wrong-place';
-      travel.hitArea.width = 100;
+      travel.hitArea.width = 200;
     }
     if (fireworks) fireworks.featureActivityId = 'not-registered' as ProjectManifestEntry['featureActivityId'];
     if (tree) tree.id = 'cybertravel';

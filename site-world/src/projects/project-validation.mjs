@@ -40,8 +40,8 @@ export function validateProjectWorld(manifest, anchors, spriteRegistry, activity
     const hit = project.hitArea;
     if (!hit || ![hit.x, hit.y, hit.width, hit.height].every(Number.isFinite)
       || hit.x < 0 || hit.y < 0 || hit.width <= 0 || hit.height <= 0
-      || hit.x + hit.width > 96 || hit.y + hit.height > 80) {
-      errors.push(`${label}: hit area must fit within the 96 by 80 pixel landmark frame.`);
+      || hit.x + hit.width > 192 || hit.y + hit.height > 144) {
+      errors.push(`${label}: hit area must fit within the 192 by 144 pixel project hotspot.`);
     }
 
     const needsPage = project.kind === 'project' && ['prototype', 'community'].includes(project.status);
